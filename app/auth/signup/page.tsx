@@ -65,7 +65,7 @@ const SignUp = () => {
                 Sign up as Parent
               </h3>
               <p className="text-sm text-[#4B5563] mb-4">
-                Create a safe and inspiring space to document your child’s growth and achievements.
+                Create a safe and inspiring space to document your child&apos;s growth and achievements.
               </p>
               <button className="bg-[#2F5FFF] text-white font-medium text-sm px-4 py-2 rounded hover:bg-[#204fd4]">
                 CONTINUE AS PARENT

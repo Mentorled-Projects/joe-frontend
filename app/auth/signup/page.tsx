@@ -18,7 +18,7 @@ const SignUp = () => {
             className="mb-10"
           />
           <p className="text-xl font-medium leading-relaxed">
-            Celebrate milestones and empower your children's journey.
+            Celebrate milestones and empower your children&apos;s journey.
           </p>
         </div>
         <div className="relative">

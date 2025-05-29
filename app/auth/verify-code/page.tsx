@@ -3,36 +3,61 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import axios from "axios"
+import { useRouter } from "next/navigation"
 
 const VerificationPage = () => {
   const [code, setCode] = useState("")
   const [error, setError] = useState("")
-  const [timer, setTimer] = useState(179) // 2:59 in seconds
+  const [timer, setTimer] = useState(179) 
+ const [phone, setPhone] = useState("") 
 
+  const router = useRouter()
+
+  
   useEffect(() => {
-    const countdown = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0))
-    }, 1000)
-    return () => clearInterval(countdown)
-  }, [])
+  const storedPhone = localStorage.getItem("phoneNumber")
+  if (storedPhone) {
+    setPhone(storedPhone)
+  }
+
+  const countdown = setInterval(() => {
+    setTimer((prev) => (prev > 0 ? prev - 1 : 0))
+  }, 1000)
+
+  return () => clearInterval(countdown)
+}, [])
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+
+  const codeRegex = /^\d{6}$/
+  if (!codeRegex.test(code)) {
+    setError("Invalid code")
+    return
+  }
+
+  try {
+    const response = await axios.post(
+      "http://167.71.131.143:3000/api/v1/auth/verify-otp",
+      {
+        phoneNumber: phone,
+        otp: code,
+      }
+    )
+
+    console.log("OTP verified:", response.data)
+    router.push("/dashboard")
+  } catch (err: any) {
+    console.error("OTP verification failed:", err)
+    setError("Invalid OTP or phone number")
+  }
+}
 
   const formatTime = (seconds: number) => {
     const min = Math.floor(seconds / 60)
     const sec = seconds % 60
     return `${min}:${sec < 10 ? "0" + sec : sec}`
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const codeRegex = /^\d{6}$/
-    if (!codeRegex.test(code)) {
-      setError("Invalid code")
-      return
-    }
-
-    setError("")
-    console.log("Code is valid. Proceed to verify with API...")
   }
 
   return (
@@ -52,7 +77,7 @@ const VerificationPage = () => {
         <h2 className="text-xl font-bold mb-2">Enter verification code</h2>
         <p className="text-sm text-gray-600 mb-4">
           Enter the 6-digit code sent to <br />
-          <span className="font-medium">+44 7911 123456</span>
+          <span className="font-medium">{phone}</span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">

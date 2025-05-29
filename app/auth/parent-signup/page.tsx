@@ -6,6 +6,8 @@ import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
 import Image from "next/image"
 import React from "react"
 import { useRouter } from "next/navigation"
+import axios from "axios"
+
 
 const ParentSignUpPage = () => {
   const [phone, setPhone] = useState("")
@@ -19,6 +21,8 @@ const ParentSignUpPage = () => {
     special: false,
   })
 
+  const router = useRouter()
+
   useEffect(() => {
     setCriteria({
       length: password.length >= 8,
@@ -28,12 +32,12 @@ const ParentSignUpPage = () => {
     })
   }, [password])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
 
   const phoneRegex = /^[0-9]{10,11}$/
   if (!phoneRegex.test(phone)) {
-    setErrors("Please enter a valid UK phone number.")
+    setErrors("Please enter a valid phone number.")
     return
   }
 
@@ -44,12 +48,25 @@ const ParentSignUpPage = () => {
   }
 
   setErrors("")
-  console.log("Form is valid. Proceed.")
-  router.push("/auth/verify-code")
+  try {
+    const fullPhone = "+234" + phone
+    const response = await axios.post(
+      "http://167.71.131.143:3000/api/v1/auth/register-guardian",
+      {
+        phoneNumber: fullPhone,
+        password,
+      }
+    )
+
+    localStorage.setItem("phoneNumber", fullPhone)
+
+    console.log("Registration successful:", response.data)
+    router.push("/auth/verify-code")
+  } catch (err: any) {
+    console.error("Registration failed:", err)
+    setErrors("Registration failed. Please try a different phone number.")
+  }
 }
-
-
-  const router = useRouter()
 
   return (
     <main className="flex flex-col md:flex-row min-h-screen bg-[#F5F5F5]">
@@ -101,7 +118,7 @@ const ParentSignUpPage = () => {
               <label className="block text-sm font-medium mb-1">Phone number</label>
               <div className="flex gap-2">
                 <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
-                  +44 (UK)
+                  +234 (NIG)
                 </div>
                 <input
                   type="tel"
@@ -113,7 +130,6 @@ const ParentSignUpPage = () => {
               </div>
             </div>
 
-          
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
               <div className="relative">
@@ -132,8 +148,6 @@ const ParentSignUpPage = () => {
                   {showPassword ? <IoEyeOffOutline size={20} /> : <IoEyeOutline size={20} />}
                 </button>
               </div>
-
-             
               <ul className="text-sm mt-3 space-y-1 text-gray-700">
                 <li className={criteria.length ? "text-green-600" : "text-gray-400"}>
                   At least 8 characters
@@ -152,11 +166,8 @@ const ParentSignUpPage = () => {
 
             {errors && <p className="text-red-500 text-sm">{errors}</p>}
 
-            
             <button
               type="submit"
-              
-              
               className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4]"
             >
               SIGN UP

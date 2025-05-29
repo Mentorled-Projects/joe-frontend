@@ -1,6 +1,8 @@
 "use client"
 
 import Image from "next/image"
+import axios from "axios"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import React, { useState } from "react"
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
@@ -13,25 +15,40 @@ const SignInPage = () => {
   const [error, setError] = useState("")
   const [showForgotPassword, setShowForgotPassword] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
 
-    const phoneRegex = /^[0-9]{10,11}$/
-
-    if (!phoneRegex.test(phone)) {
-      setError("Please enter a valid UK phone number.")
-      return
-    }
-
-    if (!password) {
-      setError("Please enter your password.")
-      return
-    }
-
-    setError("")
-    console.log("Form valid. Proceeding...")
+  const phoneRegex = /^[0-9]{10,11}$/
+  if (!phoneRegex.test(phone)) {
+    setError("Please enter a valid UK phone number.")
+    return
   }
 
+  if (!password) {
+    setError("Please enter your password.")
+    return
+  }
+
+  setError("")
+
+  try {
+    const response = await axios.post("http://167.71.131.143:3000/api/v1/auth/login", {
+      phoneNumber: `+234${phone}`,
+      password,
+    })
+
+    console.log("Login successful:", response.data)
+
+    localStorage.setItem("token", response.data.token)
+
+    router.push("/dashboard")
+  } catch (err: any) {
+    console.error("Login failed:", err)
+    setError("Invalid credentials. Please try again.")
+  }
+}
+
+const router = useRouter()
   return (
     <>
       {showForgotPassword && (
@@ -77,7 +94,7 @@ const SignInPage = () => {
                 <label className="block text-sm font-medium mb-1">Phone number</label>
                 <div className="flex gap-2">
                   <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
-                    +44 (UK)
+                    +234 (NIG)
                   </div>
                   <input
                     type="tel"

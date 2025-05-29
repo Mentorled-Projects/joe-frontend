@@ -3,13 +3,36 @@
 import Image from "next/image"
 import Link from "next/link"
 import React, { useState } from "react"
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false)
+  const [phone, setPhone] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const phoneRegex = /^[0-9]{10,11}$/
+
+    if (!phoneRegex.test(phone)) {
+      setError("Please enter a valid UK phone number.")
+      return
+    }
+
+    if (!password) {
+      setError("Please enter your password.")
+      return
+    }
+
+    setError("")
+    // API call 
+    console.log("Form valid. Proceeding...")
+  }
 
   return (
     <main className="flex min-h-screen bg-[#F5F5F5]">
-     
       <div className="w-[502px] h-screen bg-[#2F5FFF] text-white flex flex-col justify-between px-10 py-12">
         <div>
           <Image
@@ -21,60 +44,74 @@ const SignInPage = () => {
           />
           <p className="text-xl font-medium">Welcome to Peenly 👋</p>
         </div>
-        <div className="relative">
+        <div className="relative h-[280px]">
           <Image
             src="/assets/images/kids-apple.svg"
             alt="Kids"
             width={380}
             height={260}
-            className="rounded-[40px] object-cover"
+            className="rounded-[40px] object-cover absolute -top-34"
+          />
+          <Image
+            src="/assets/images/pencil-1.svg"
+            alt="Pencil"
+            width={24}
+            height={24}
+            className="absolute top-0 left-0"
           />
         </div>
       </div>
 
-      {/* Form */}
-      <div className="flex flex-1 justify-center items-center px-6">
-        <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-md">
+      <div className="flex flex-1 justify-center items-center px-6 pt-[60px]">
+        <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[652px] h-[auto]">
           <h2 className="text-2xl font-bold text-[#0B2C49] mb-6">Sign in</h2>
 
-          <form className="space-y-5">
-            {/* Phone input */}
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium mb-1">Phone number</label>
-              <div className="flex border rounded px-2 py-2 items-center">
-                <select className="text-sm border-none outline-none bg-transparent pr-2">
-                  <option>+234 (NG)</option>
-                  <option>+44 (UK)</option>
-                  <option>+1 (US)</option>
-                </select>
+              <div className="flex gap-2">
+                <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
+                  +44 (UK)
+                </div>
                 <input
                   type="tel"
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value)
+                    if (error) setError("")
+                  }}
                   placeholder="Enter your number"
-                  className="flex-1 outline-none text-sm bg-transparent"
+                  className="flex-1 px-4 py-2 text-sm border border-[#D1D5DB] rounded outline-none"
                 />
               </div>
             </div>
 
-            {/* Password input */}
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    if (error) setError("")
+                  }}
                   placeholder="********"
-                  className="w-full border rounded px-3 py-2 text-sm pr-10"
+                  className="w-full border border-[#D1D5DB] rounded px-4 py-2 text-sm pr-10 outline-none"
                 />
-                <button
-                  type="button"
-                  className="absolute right-3 top-2.5 text-sm text-gray-400"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  👁️
-                </button>
+               <button
+  type="button"
+  className="absolute right-3 top-2.5 text-gray-500"
+  onClick={() => setShowPassword(!showPassword)}
+>
+  {showPassword ? <IoEyeOffOutline size={20} /> : <IoEyeOutline size={20} />}
+</button>
+
               </div>
             </div>
 
-            {/* Submit Button */}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
             <button
               type="submit"
               className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4]"
@@ -82,18 +119,16 @@ const SignInPage = () => {
               SIGN IN
             </button>
 
-            {/* Options */}
             <div className="flex justify-between items-center text-sm mt-2">
               <label className="flex items-center gap-2">
                 <input type="checkbox" className="accent-[#2F5FFF]" />
                 Keep me signed in
               </label>
               <Link href="#" className="text-[#2F5FFF] hover:underline">
-                Forgot password ?
+                Forgot password?
               </Link>
             </div>
 
-            {/* Footer */}
             <p className="text-sm text-center mt-6">
               New to Peenly?{" "}
               <Link href="/auth/signup" className="text-[#2F5FFF] font-medium hover:underline">

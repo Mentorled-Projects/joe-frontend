@@ -7,8 +7,8 @@ import React from "react"
 const SignUp = () => {
   return (
     <main className="flex min-h-screen bg-[#F5F5F5]">
-    
-      <div className="w-[502px] h-screen bg-[#2F5FFF] text-white flex flex-col justify-between px-10 py-12">
+     
+      <div className="w-[502px] h-screen bg-[#2F5FFF] text-white flex flex-col justify-between px-10 py-12 relative">
         <div>
           <Image
             src="/assets/icons/Logo-white.svg"
@@ -21,15 +21,16 @@ const SignUp = () => {
             Celebrate milestones and empower your children&apos;s journey.
           </p>
         </div>
-        <div className="relative">
+
+        
+        <div className="relative h-[280px]">
           <Image
             src="/assets/images/kids-apple.svg"
             alt="Kids"
             width={380}
             height={260}
-            className="rounded-[40px] object-cover"
+            className="rounded-[40px] object-cover absolute -top-24"
           />
-          
           <Image
             src="/assets/images/pencil-1.svg"
             alt="Pencil"
@@ -40,7 +41,7 @@ const SignUp = () => {
         </div>
       </div>
 
-      
+    
       <div className="flex flex-col justify-center items-center flex-1 px-6 md:px-12">
         <div className="text-center max-w-xl">
           <h1 className="text-2xl font-bold text-[#0B2C49] mb-2">
@@ -52,8 +53,7 @@ const SignUp = () => {
 
           {/* Role Options */}
           <div className="flex flex-col md:flex-row justify-center gap-8">
-            
-            <div className="bg-white p-6 rounded-lg shadow-md w-[300px] text-center">
+            <div className="bg-white p-6 rounded-lg shadow-md w-[400px] h-[308px] text-center">
               <Image
                 src="/assets/images/ParentChild.svg"
                 alt="Parent"
@@ -72,8 +72,7 @@ const SignUp = () => {
               </button>
             </div>
 
-           
-            <div className="bg-white p-6 rounded-lg shadow-md w-[300px] text-center">
+            <div className="bg-white p-6 rounded-lg shadow-md w-[400px] h-[308px] text-center">
               <Image
                 src="/assets/images/Professional.svg"
                 alt="Tutor"
@@ -93,7 +92,7 @@ const SignUp = () => {
             </div>
           </div>
 
-         
+        
           <p className="mt-8 text-sm text-[#4B5563]">
             Already have an account?{" "}
             <Link href="/auth/signin">

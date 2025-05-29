@@ -5,6 +5,7 @@ import Link from "next/link"
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
 import Image from "next/image"
 import React from "react"
+import { useRouter } from "next/navigation"
 
 const ParentSignUpPage = () => {
   const [phone, setPhone] = useState("")
@@ -28,22 +29,27 @@ const ParentSignUpPage = () => {
   }, [password])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const phoneRegex = /^[0-9]{10,11}$/
-    if (!phoneRegex.test(phone)) {
-      setErrors("Please enter a valid UK phone number.")
-      return
-    }
+  e.preventDefault()
 
-    const allValid = Object.values(criteria).every(Boolean)
-    if (!allValid) {
-      setErrors("Password does not meet all requirements.")
-      return
-    }
-
-    setErrors("")
-    console.log("Form is valid. Proceed.")
+  const phoneRegex = /^[0-9]{10,11}$/
+  if (!phoneRegex.test(phone)) {
+    setErrors("Please enter a valid UK phone number.")
+    return
   }
+
+  const allValid = Object.values(criteria).every(Boolean)
+  if (!allValid) {
+    setErrors("Password does not meet all requirements.")
+    return
+  }
+
+  setErrors("")
+  console.log("Form is valid. Proceed.")
+  router.push("/auth/verify-code")
+}
+
+
+  const router = useRouter()
 
   return (
     <main className="flex flex-col md:flex-row min-h-screen bg-[#F5F5F5]">
@@ -149,6 +155,8 @@ const ParentSignUpPage = () => {
             
             <button
               type="submit"
+              
+              
               className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4]"
             >
               SIGN UP

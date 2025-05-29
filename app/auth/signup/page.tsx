@@ -1,10 +1,14 @@
 "use client"
+import { useRouter } from "next/navigation"
 
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
 
+
+
 const SignUp = () => {
+    const router = useRouter()
   return (
     <main className="flex min-h-screen bg-[#F5F5F5]">
      
@@ -67,7 +71,9 @@ const SignUp = () => {
               <p className="text-sm text-[#4B5563] mb-4">
                 Create a safe and inspiring space to document your child&apos;s growth and achievements.
               </p>
-              <button className="bg-[#2F5FFF] text-white font-medium text-sm px-4 py-2 rounded hover:bg-[#204fd4]">
+              <button 
+              onClick={() => router.push("/auth/parent-signup")}
+              className="bg-[#2F5FFF] text-white font-medium text-sm px-4 py-2 rounded hover:bg-[#204fd4]">
                 CONTINUE AS PARENT
               </button>
             </div>

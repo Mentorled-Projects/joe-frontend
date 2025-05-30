@@ -48,7 +48,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     console.log("OTP verified:", response.data)
     router.push("/dashboard")
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("OTP verification failed:", err)
     setError("Invalid OTP or phone number")
   }

@@ -62,7 +62,7 @@ const ParentSignUpPage = () => {
 
     console.log("Registration successful:", response.data)
     router.push("/auth/verify-code")
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Registration failed:", err)
     setErrors("Registration failed. Please try a different phone number.")
   }

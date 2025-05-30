@@ -20,7 +20,7 @@ const SignInPage = () => {
 
   const phoneRegex = /^[0-9]{10,11}$/
   if (!phoneRegex.test(phone)) {
-    setError("Please enter a valid UK phone number.")
+    setError("Please enter a valid phone number.")
     return
   }
 
@@ -42,7 +42,7 @@ const SignInPage = () => {
     localStorage.setItem("token", response.data.token)
 
     router.push("/dashboard")
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Login failed:", err)
     setError("Invalid credentials. Please try again.")
   }

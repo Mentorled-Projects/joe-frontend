@@ -22,7 +22,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <h1 className="text-2xl font-bold text-[#0B2C49] mb-2">Welcome to Peenly! </h1>
           <p className="text-[#4B5563]">
-            Youve successfully signed in. Start tracking your childs achievements and connect with tutors today.
+            You have successfully signed in. Start tracking your childs achievements and connect with tutors today.
           </p>
         </div>
       </section>

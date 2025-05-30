@@ -18,7 +18,7 @@ const features = [
   {
     title: "Learn",
     description:
-      "Access fun games, quizzes, and educational tools tailored to your child&apos;s level and passions.",
+      "Access fun games, quizzes, and educational tools tailored to your childs level and passions.",
     icon: "/assets/images/learn.svg",
   },
   {
@@ -37,7 +37,7 @@ const HowItWorks = () => {
           How Peenly Works
         </h2>
         <p className="text-[#4B5563] mb-16">
-          Empowering your child&apos;s growth in 4 joyful steps!
+          Empowering your childs growth in 4 joyful steps!
         </p>
 
        

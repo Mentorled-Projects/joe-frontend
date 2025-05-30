@@ -11,13 +11,13 @@ const HeroSection = () => {
       
         <div className="md:w-1/2 mb-10 md:mb-0 md:pr-10 -mt-28">
           <p className="text-[#F39F5F] font-medium mb-2">
-            Every Child&apos;s Journey, Celebrated 
+            Every Childs Journey, Celebrated 
           </p>
           <h1 className="text-4xl md:text-5xl font-bold text-[#0B2C49] mb-4 leading-tight">
-            Track Your Child&apos;s <br /> Achievements, Growth <br /> & Memories
+            Track Your Childs <br /> Achievements, Growth <br /> & Memories
           </h1>
           <p className="text-[#4B5563] text-base md:text-lg mb-6">
-            Peenly is a joyful, all-in-one platform that helps parents, tutors celebrate every milestone in a child&apos;s life.
+            Peenly is a joyful, all-in-one platform that helps parents, tutors celebrate every milestone in a childs life.
           </p>
 
           

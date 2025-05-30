@@ -51,7 +51,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
 
         <h2 className="text-2xl font-bold text-[#0B2C49] mb-2">Forgot Password</h2>
         <p className="text-sm text-gray-600 mb-5">
-          Enter your registered phone number and we&apos;ll send you a verification code
+          Enter your registered phone number and we will send you a verification code
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -59,7 +59,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
             <label className="block text-sm font-medium mb-1">Phone number</label>
             <div className="flex gap-2">
               <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
-                +44 (UK)
+                +234 (NIG)
               </div>
               <input
                 type="tel"

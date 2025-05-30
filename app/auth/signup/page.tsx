@@ -22,7 +22,7 @@ const SignUp = () => {
             className="mb-10"
           />
           <p className="text-xl font-medium leading-relaxed">
-            Celebrate milestones and empower your children&apos;s journey.
+            Celebrate milestones and empower your childrens journey.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ const SignUp = () => {
                 Sign up as Parent
               </h3>
               <p className="text-sm text-[#4B5563] mb-4">
-                Create a safe and inspiring space to document your child&apos;s growth and achievements.
+                Create a safe and inspiring space to document your childs growth and achievements.
               </p>
               <button 
               onClick={() => router.push("/auth/parent-signup")}

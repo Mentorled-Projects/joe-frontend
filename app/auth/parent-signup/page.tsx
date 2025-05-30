@@ -101,7 +101,7 @@ const ParentSignUpPage = () => {
           </div>
 
           <p className="text-xl font-medium mt-[170px] ">
-            Track your child&apos;s growth. 
+            Track your childs growth. 
             Celebrate every milestone
           </p>
         </div>
@@ -180,7 +180,7 @@ const ParentSignUpPage = () => {
               </label>
               <label className="flex items-start gap-2">
                 <input type="checkbox" className="accent-[#2F5FFF] mt-1" />
-                By continuing, you agree to Peenly&apos;s{" "}
+                By continuing, you agree to Peenlys{" "}
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
                   Terms of services
                 </Link>{" "}

@@ -62,7 +62,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   return (
     <main className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-start pt-12 px-4">
-      {/* Logo */}
+      
       <div className="mb-8">
         <Image
           src="/assets/icons/Logo.svg"

@@ -33,7 +33,12 @@ const SignInPage = () => {
 
   try {
     const response = await axios.post("http://167.71.131.143:3000/api/v1/auth/login", {
-      phoneNumber: `+234${phone}`,
+      phoneNumber: phone.startsWith("0")
+  ? `+234${phone.slice(1)}`
+  : phone.startsWith("234")
+  ? `+${phone}`
+  : `+234${phone}`,
+
       password,
     })
 

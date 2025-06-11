@@ -180,10 +180,10 @@ const ParentSignUpPage = () => {
               </label>
               <label className="flex items-start gap-2">
                 <input type="checkbox" className="accent-[#2F5FFF] mt-1" />
-                By continuing, you agree to Peenlys{" "}
+                By continuing, you agree to Peenlys{""}
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
-                  Terms of services
-                </Link>{" "}
+                Terms of services
+                </Link>{""}
                 and{" "}
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
                   policy

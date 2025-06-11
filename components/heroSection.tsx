@@ -6,22 +6,22 @@ import { FaPlay } from "react-icons/fa"
 
 const HeroSection = () => {
   return (
-    <section className="bg-[#F4EEE5] py-2">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center">
-      
-        <div className="md:w-1/2 mb-10 md:mb-0 md:pr-10 -mt-28">
-          <p className="text-[#F39F5F] font-medium mb-2">
-            Every Childs Journey, Celebrated 
+    <section className="bg-[#F4EEE5] py-10 md:py-20">
+      <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center justify-between gap-12">
+        {/* Left Section */}
+        <div className="w-full md:w-1/2 text-center md:text-left -mt-10 md:mt-0">
+          <p className="text-[#F39F5F] font-medium mb-2 text-sm sm:text-base">
+            Every Child’s Journey, Celebrated 
           </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#0B2C49] mb-4 leading-tight">
-            Track Your Childs <br /> Achievements, Growth <br /> & Memories
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0B2C49] mb-4 leading-tight">
+            Track Your Child’s <br /> Achievements, Growth <br /> & Memories
           </h1>
-          <p className="text-[#4B5563] text-base md:text-lg mb-6">
-            Peenly is a joyful, all-in-one platform that helps parents, tutors celebrate every milestone in a childs life.
+          <p className="text-[#4B5563] text-base sm:text-lg mb-6">
+            Peenly is a joyful, all-in-one platform that helps parents and tutors celebrate every milestone in a child’s life.
           </p>
 
-          
-          <div className="flex items-center gap-4 mb-4">
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mb-6">
             <button className="bg-[#F39F5F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#ec9c54] transition">
               Get Started Free
             </button>
@@ -31,9 +31,8 @@ const HeroSection = () => {
             </button>
           </div>
 
-          {/* Avatars */}
-          <div className="flex items-center space-x-2">
-           
+       
+          <div className="flex items-center justify-center md:justify-start flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map((i) => (
               <Image
                 key={i}
@@ -48,8 +47,8 @@ const HeroSection = () => {
           </div>
         </div>
 
-        
-        <div className="md:w-1/2 relative">
+        {/* Right Section */}
+        <div className="w-full md:w-1/2">
           <Image
             src="/assets/images/download 1.svg"
             alt="Excited child holding certificate"

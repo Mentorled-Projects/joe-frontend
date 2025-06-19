@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { IoClose } from "react-icons/io5"
 import axios from "axios"
-import VerifyOTPModal from "@/components/VerifyOTPModal" // Make sure this exists
+import VerifyOTPModal from "@/components/VerifyOTPModal"
 
 type Props = {
   onClose: () => void
@@ -20,7 +20,9 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
 
   useEffect(() => {
     setShow(true)
+  }, [])
 
+  useEffect(() => {
     if (resendCooldown > 0) {
       const interval = setInterval(() => {
         setResendCooldown((prev) => prev - 1)
@@ -38,10 +40,10 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
       if (response.status === 200) {
         setSuccessMessage("OTP has been sent to your phone.")
         setResendCooldown(30)
-        setShowVerifyModal(true)
+        localStorage.setItem("phoneNumber", `+234${phone}`)
       }
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.status === 400) {
+    } catch (_err: unknown) {
+      if (axios.isAxiosError(_err) && _err.response?.status === 400) {
         setError("Phone number not found.")
       } else {
         setError("Something went wrong. Please try again.")
@@ -61,7 +63,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
         setSuccessMessage("OTP resent successfully.")
         setResendCooldown(30)
       }
-    } catch (err: unknown) {
+    } catch {
       setError("Unable to resend. Please try again later.")
     }
   }
@@ -96,7 +98,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
           onClose={() => setShowVerifyModal(false)}
           onSuccess={() => {
             setShowVerifyModal(false)
-            // navigate to create new password screen
+            // will redirect to create new password page
           }}
         />
       )}
@@ -167,9 +169,16 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
               >
                 BACK
               </button>
+
+              {/* This button now opens the Verify OTP Modal manually */}
               <button
-                type="submit"
-                disabled={loading || !!successMessage}
+                type={successMessage ? "button" : "submit"}
+                disabled={loading}
+                onClick={() => {
+                  if (successMessage) {
+                    setShowVerifyModal(true)
+                  }
+                }}
                 className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4] disabled:opacity-50"
               >
                 {loading ? "Sending..." : successMessage ? "OTP SENT" : "NEXT"}

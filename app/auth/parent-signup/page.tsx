@@ -63,9 +63,15 @@ const ParentSignUpPage = () => {
     console.log("Registration successful:", response.data)
     router.push("/auth/verify-code")
   } catch (err: unknown) {
-    console.error("Registration failed:", err)
-    setErrors("Registration failed. Please try a different phone number.")
+  if (axios.isAxiosError(err)) {
+    console.error("Backend error message:", err.response?.data)
+    setErrors(err.response?.data?.message || "Registration failed. Please try a different phone number.")
+  } else {
+    console.error("Unexpected error:", err)
+    setErrors("Something went wrong. Please try again.")
   }
+}
+
 }
 
   return (

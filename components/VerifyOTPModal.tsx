@@ -40,7 +40,7 @@ const VerifyOTPModal: React.FC<Props> = ({ phone, onClose, onSuccess }) => {
         otp: code,
       })
 
-      onSuccess() // Proceed to Create Password screen
+      onSuccess() 
     } catch {
       setError("Please input correct code")
     } finally {

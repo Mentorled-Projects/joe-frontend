@@ -1,45 +1,45 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import axios from "axios"
-import { useRouter } from "next/navigation"
-import Confetti from "react-confetti"
-import useSound from "use-sound"
-import { useWindowSize } from "@react-hook/window-size"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Confetti from "react-confetti";
+import useSound from "use-sound";
+import { useWindowSize } from "@react-hook/window-size";
 
 const VerificationPage = () => {
-  const [code, setCode] = useState("")
-  const [error, setError] = useState("")
-  const [timer, setTimer] = useState(179)
-  const [phone, setPhone] = useState("")
-  const [showConfetti, setShowConfetti] = useState(false)
-  const [width, height] = useWindowSize()
-  const [playConfettiSound] = useSound("/assets/sounds/confetti.mp3",)
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [timer, setTimer] = useState(179);
+  const [phone, setPhone] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [width, height] = useWindowSize();
+  const [playConfettiSound] = useSound("/assets/sounds/confetti.mp3");
 
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    const storedPhone = localStorage.getItem("phoneNumber")
+    const storedPhone = localStorage.getItem("phoneNumber");
     if (storedPhone) {
-      setPhone(storedPhone)
+      setPhone(storedPhone);
     }
 
     const countdown = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0))
-    }, 1000)
+      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
 
-    return () => clearInterval(countdown)
-  }, [])
+    return () => clearInterval(countdown);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const codeRegex = /^\d{6}$/
+    const codeRegex = /^\d{6}$/;
     if (!codeRegex.test(code)) {
-      setError("Invalid code")
-      return
+      setError("Invalid code");
+      return;
     }
 
     try {
@@ -49,30 +49,33 @@ const VerificationPage = () => {
           phoneNumber: phone,
           otp: code,
         }
-      )
+      );
 
-      console.log("OTP verified:", response.data)
+      console.log("OTP verified:", response.data);
 
-     
-      setShowConfetti(true)
-      playConfettiSound()
+      setShowConfetti(true);
+      playConfettiSound();
 
-      
       setTimeout(() => {
-        setShowConfetti(false)
-        router.push("/dashboard")
-      }, 3000)
+        setShowConfetti(false);
+        router.push("/dashboard");
+      }, 3000);
     } catch (err: unknown) {
-      console.error("OTP verification failed:", err)
-      setError("Invalid OTP or phone number")
+      if (axios.isAxiosError(err)) {
+        console.error("Verify-OTP backend message:", err.response?.data);
+        setError(err.response?.data?.message || "Invalid OTP or phone number");
+      } else {
+        console.error("Unexpected error:", err);
+        setError("Something went wrong. Please try again.");
+      }
     }
-  }
+  };
 
   const formatTime = (seconds: number) => {
-    const min = Math.floor(seconds / 60)
-    const sec = seconds % 60
-    return `${min}:${sec < 10 ? "0" + sec : sec}`
-  }
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min}:${sec < 10 ? "0" + sec : sec}`;
+  };
 
   return (
     <main className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-start pt-12 px-4 relative overflow-hidden">
@@ -122,7 +125,8 @@ const VerificationPage = () => {
           </div>
 
           <p className="text-sm text-gray-500">
-            Code expires in <span className="font-semibold">{formatTime(timer)}</span>
+            Code expires in{" "}
+            <span className="font-semibold">{formatTime(timer)}</span>
           </p>
 
           <button
@@ -136,14 +140,18 @@ const VerificationPage = () => {
             <Link href="/auth/parent-signup" className="hover:underline">
               Change phone number
             </Link>
-            <button type="button" onClick={() => setTimer(179)} className="hover:underline">
+            <button
+              type="button"
+              onClick={() => setTimer(179)}
+              className="hover:underline"
+            >
               Resend code
             </button>
           </div>
         </form>
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default VerificationPage
+export default VerificationPage;

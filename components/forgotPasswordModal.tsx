@@ -1,93 +1,104 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { IoClose } from "react-icons/io5"
-import axios from "axios"
-import VerifyOTPModal from "@/components/VerifyOTPModal"
+import { useEffect, useState } from "react";
+import { IoClose } from "react-icons/io5";
+import axios from "axios";
+import VerifyOTPModal from "@/components/VerifyOTPModal";
 
 type Props = {
-  onClose: () => void
-}
+  onClose: () => void;
+};
 
 const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
-  const [phone, setPhone] = useState("")
-  const [error, setError] = useState("")
-  const [show, setShow] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState("")
-  const [resendCooldown, setResendCooldown] = useState(0)
-  const [showVerifyModal, setShowVerifyModal] = useState(false)
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   useEffect(() => {
-    setShow(true)
-  }, [])
+    setShow(true);
+  }, []);
 
   useEffect(() => {
     if (resendCooldown > 0) {
       const interval = setInterval(() => {
-        setResendCooldown((prev) => prev - 1)
-      }, 1000)
-      return () => clearInterval(interval)
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
     }
-  }, [resendCooldown])
+  }, [resendCooldown]);
 
   const sendOTP = async () => {
     try {
-      const response = await axios.post("http://167.71.131.143:3000/api/v1/auth/forgot-password", {
-        phoneNumber: `+234${phone}`,
-      })
+      const response = await axios.post(
+        "http://167.71.131.143:3000/api/v1/auth/forgot-password",
+        {
+          phoneNumber: `+234${phone}`,
+        }
+      );
 
       if (response.status === 200) {
-        setSuccessMessage("OTP has been sent to your phone.")
-        setResendCooldown(30)
-        localStorage.setItem("phoneNumber", `+234${phone}`)
+        setSuccessMessage("OTP has been sent to your phone.");
+        setResendCooldown(30);
+        localStorage.setItem("phoneNumber", `+234${phone}`);
       }
     } catch (_err: unknown) {
       if (axios.isAxiosError(_err) && _err.response?.status === 400) {
-        setError("Phone number not found.")
+        setError("Phone number not found.");
       } else {
-        setError("Something went wrong. Please try again.")
+        setError("Something went wrong. Please try again.");
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const resendOTP = async () => {
     try {
-      const response = await axios.post("http://167.71.131.143:3000/api/v1/auth/resend-forgot-password-otp", {
-        phoneNumber: `+234${phone}`,
-      })
+      const response = await axios.post(
+        "http://167.71.131.143:3000/api/v1/auth/resend-forgot-password-otp",
+        {
+          phoneNumber: `+234${phone}`,
+        }
+      );
 
       if (response.status === 200) {
-        setSuccessMessage("OTP resent successfully.")
-        setResendCooldown(30)
+        setSuccessMessage("OTP resent successfully.");
+        setResendCooldown(30);
       }
     } catch {
-      setError("Unable to resend. Please try again later.")
+      setError("Unable to resend. Please try again later.");
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const phoneRegex = /^[0-9]{10,11}$/
+    const phoneRegex = /^[0-9]{10,11}$/;
     if (!phoneRegex.test(phone)) {
-      setError("Please enter a valid Nigerian phone number.")
-      return
+      setError("Please enter a valid Nigerian phone number.");
+      return;
     }
 
-    setError("")
-    setSuccessMessage("")
-    setLoading(true)
+    setError("");
+    setSuccessMessage("");
+    setLoading(true);
 
-    await sendOTP()
-  }
+    await sendOTP();
+  };
+
+  const openVerifyModal = () => {
+    setShowVerifyModal(true);
+    handleClose();
+  };
 
   const handleClose = () => {
-    setShow(false)
-    setTimeout(() => onClose(), 300)
-  }
+    setShow(false);
+    setTimeout(() => onClose(), 300);
+  };
 
   return (
     <>
@@ -97,7 +108,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
           phone={phone}
           onClose={() => setShowVerifyModal(false)}
           onSuccess={() => {
-            setShowVerifyModal(false)
+            setShowVerifyModal(false);
             // will redirect to create new password page
           }}
         />
@@ -116,14 +127,19 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
             <IoClose />
           </button>
 
-          <h2 className="text-2xl font-bold text-[#0B2C49] mb-2">Forgot Password</h2>
+          <h2 className="text-2xl font-bold text-[#0B2C49] mb-2">
+            Forgot Password
+          </h2>
           <p className="text-sm text-gray-600 mb-5">
-            Enter your registered phone number and we will send you a verification code
+            Enter your registered phone number and we will send you a
+            verification code
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-1">Phone number</label>
+              <label className="block text-sm font-medium mb-1">
+                Phone number
+              </label>
               <div className="flex gap-2">
                 <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
                   +234 (NIG)
@@ -132,9 +148,9 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
                   type="tel"
                   value={phone}
                   onChange={(e) => {
-                    setPhone(e.target.value)
-                    setError("")
-                    setSuccessMessage("")
+                    setPhone(e.target.value);
+                    setError("");
+                    setSuccessMessage("");
                   }}
                   placeholder="8123456789"
                   disabled={!!successMessage}
@@ -142,7 +158,9 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
                 />
               </div>
               {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-              {successMessage && <p className="text-green-600 text-sm mt-1">{successMessage}</p>}
+              {successMessage && (
+                <p className="text-green-600 text-sm mt-1">{successMessage}</p>
+              )}
             </div>
 
             {successMessage && (
@@ -153,7 +171,9 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
                   onClick={resendOTP}
                   disabled={resendCooldown > 0}
                   className={`text-[#2F5FFF] font-medium underline ${
-                    resendCooldown > 0 ? "opacity-50 cursor-not-allowed" : "hover:text-[#204fd4]"
+                    resendCooldown > 0
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:text-[#204fd4]"
                   }`}
                 >
                   Resend OTP {resendCooldown > 0 ? `(${resendCooldown}s)` : ""}
@@ -170,15 +190,10 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
                 BACK
               </button>
 
-              {/* This button now opens the Verify OTP Modal manually */}
               <button
                 type={successMessage ? "button" : "submit"}
                 disabled={loading}
-                onClick={() => {
-                  if (successMessage) {
-                    setShowVerifyModal(true)
-                  }
-                }}
+                onClick={successMessage ? openVerifyModal : undefined}
                 className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4] disabled:opacity-50"
               >
                 {loading ? "Sending..." : successMessage ? "OTP SENT" : "NEXT"}
@@ -188,7 +203,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default ForgotPasswordModal
+export default ForgotPasswordModal;

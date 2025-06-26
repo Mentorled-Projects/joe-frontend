@@ -1,59 +1,62 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import axios from "axios"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import React, { useState } from "react"
-import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
-import ForgotPasswordModal from "@/components/forgotPasswordModal"
+import Image from "next/image";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import React, { useState } from "react";
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
+import ForgotPasswordModal from "@/components/forgotPasswordModal";
 
 const SignInPage = () => {
-  const [showPassword, setShowPassword] = useState(false)
-  const [phone, setPhone] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const phoneRegex = /^[0-9]{10,11}$/
-  if (!phoneRegex.test(phone)) {
-    setError("Please enter a valid phone number.")
-    return
-  }
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(phone)) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
 
-  if (!password) {
-    setError("Please enter your password.")
-    return
-  }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
 
-  setError("")
+    setError("");
 
-  try {
-    const response = await axios.post("http://167.71.131.143:3000/api/v1/auth/login", {
-      phoneNumber: phone.startsWith("0")
-  ? `+234${phone.slice(1)}`
-  : phone.startsWith("234")
-  ? `+${phone}`
-  : `+234${phone}`,
+    try {
+      const response = await axios.post(
+        "http://167.71.131.143:3000/api/v1/auth/login",
+        {
+          phoneNumber: phone.startsWith("0")
+            ? `+234${phone.slice(1)}`
+            : phone.startsWith("234")
+            ? `+${phone}`
+            : `+234${phone}`,
 
-      password,
-    })
+          password,
+        }
+      );
 
-    console.log("Login successful:", response.data)
+      console.log("Login successful:", response.data);
 
-    localStorage.setItem("token", response.data.token)
+      localStorage.setItem("token", response.data.token);
 
-    router.push("/dashboard")
-  } catch (err: unknown) {
-    console.error("Login failed:", err)
-    setError("Invalid credentials. Please try again.")
-  }
-}
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      console.error("Login failed:", err);
+      setError("Invalid credentials. Please try again.");
+    }
+  };
 
-const router = useRouter()
+  const router = useRouter();
   return (
     <>
       {showForgotPassword && (
@@ -96,7 +99,9 @@ const router = useRouter()
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
-                <label className="block text-sm font-medium mb-1">Phone number</label>
+                <label className="block text-sm font-medium mb-1">
+                  Phone number
+                </label>
                 <div className="flex gap-2">
                   <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
                     +234 (NIG)
@@ -105,8 +110,8 @@ const router = useRouter()
                     type="tel"
                     value={phone}
                     onChange={(e) => {
-                      setPhone(e.target.value)
-                      if (error) setError("")
+                      setPhone(e.target.value);
+                      if (error) setError("");
                     }}
                     placeholder="Enter your number"
                     className="flex-1 px-4 py-2 text-sm border border-[#D1D5DB] rounded outline-none"
@@ -115,14 +120,16 @@ const router = useRouter()
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Password</label>
+                <label className="block text-sm font-medium mb-1">
+                  Password
+                </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => {
-                      setPassword(e.target.value)
-                      if (error) setError("")
+                      setPassword(e.target.value);
+                      if (error) setError("");
                     }}
                     placeholder="********"
                     className="w-full border border-[#D1D5DB] rounded px-4 py-2 text-sm pr-10 outline-none"
@@ -132,7 +139,11 @@ const router = useRouter()
                     className="absolute right-3 top-2.5 text-gray-500"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <IoEyeOffOutline size={20} /> : <IoEyeOutline size={20} />}
+                    {showPassword ? (
+                      <IoEyeOffOutline size={20} />
+                    ) : (
+                      <IoEyeOutline size={20} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -162,7 +173,10 @@ const router = useRouter()
 
               <p className="text-sm text-center mt-6">
                 New to Peenly?{" "}
-                <Link href="/auth/signup" className="text-[#2F5FFF] font-medium hover:underline">
+                <Link
+                  href="/auth/signup"
+                  className="text-[#2F5FFF] font-medium hover:underline"
+                >
                   Sign up
                 </Link>
               </p>
@@ -171,7 +185,7 @@ const router = useRouter()
         </div>
       </main>
     </>
-  )
-}
+  );
+};
 
-export default SignInPage
+export default SignInPage;

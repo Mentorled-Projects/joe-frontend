@@ -92,7 +92,7 @@ const SignUp = () => {
                 your teaching strengths.
               </p>
               <button
-                onClick={() => router.push("/tutor/signin")}
+                onClick={() => router.push("/tutor/signup")}
                 className="bg-[#2F5FFF] text-white font-medium text-sm px-4 py-2 rounded hover:bg-[#204fd4] w-full"
               >
                 CONTINUE AS TUTOR
@@ -102,7 +102,7 @@ const SignUp = () => {
 
           <p className="mt-8 text-sm text-[#4B5563]">
             Already have an account?{" "}
-            <Link href="/auth/signin">
+            <Link href="/parent/signin">
               <span className="text-[#2F5FFF] font-medium hover:underline cursor-pointer">
                 Sign In
               </span>

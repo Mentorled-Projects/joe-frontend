@@ -1,27 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
-import Image from "next/image"
-import React from "react"
-import { useRouter } from "next/navigation"
-import axios from "axios"
-
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
+import Image from "next/image";
+import React from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const ParentSignUpPage = () => {
-  const [phone, setPhone] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState("")
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState("");
   const [criteria, setCriteria] = useState({
     length: false,
     uppercase: false,
     number: false,
     special: false,
-  })
+  });
 
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     setCriteria({
@@ -29,50 +28,52 @@ const ParentSignUpPage = () => {
       uppercase: /[A-Z]/.test(password),
       number: /[0-9]/.test(password),
       special: /[!@#$%^&*-]/.test(password),
-    })
-  }, [password])
+    });
+  }, [password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+    e.preventDefault();
 
-  const phoneRegex = /^[0-9]{10,11}$/
-  if (!phoneRegex.test(phone)) {
-    setErrors("Please enter a valid phone number.")
-    return
-  }
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(phone)) {
+      setErrors("Please enter a valid phone number.");
+      return;
+    }
 
-  const allValid = Object.values(criteria).every(Boolean)
-  if (!allValid) {
-    setErrors("Password does not meet all requirements.")
-    return
-  }
+    const allValid = Object.values(criteria).every(Boolean);
+    if (!allValid) {
+      setErrors("Password does not meet all requirements.");
+      return;
+    }
 
-  setErrors("")
-  try {
-    const fullPhone = "+234" + phone
-    const response = await axios.post(
-      "http://167.71.131.143:3000/api/v1/auth/register-guardian",
-      {
-        phoneNumber: fullPhone,
-        password,
+    setErrors("");
+    try {
+      const fullPhone = "+234" + phone;
+      const response = await axios.post(
+        "http://167.71.131.143:3000/api/v1/auth/register-guardian",
+        {
+          phoneNumber: fullPhone,
+          password,
+        }
+      );
+
+      localStorage.setItem("phoneNumber", fullPhone);
+
+      console.log("Registration successful:", response.data);
+      router.push("/auth/verify-code");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Backend error message:", err.response?.data);
+        setErrors(
+          err.response?.data?.message ||
+            "Registration failed. Please try a different phone number."
+        );
+      } else {
+        console.error("Unexpected error:", err);
+        setErrors("Something went wrong. Please try again.");
       }
-    )
-
-    localStorage.setItem("phoneNumber", fullPhone)
-
-    console.log("Registration successful:", response.data)
-    router.push("/auth/verify-code")
-  } catch (err: unknown) {
-  if (axios.isAxiosError(err)) {
-    console.error("Backend error message:", err.response?.data)
-    setErrors(err.response?.data?.message || "Registration failed. Please try a different phone number.")
-  } else {
-    console.error("Unexpected error:", err)
-    setErrors("Something went wrong. Please try again.")
-  }
-}
-
-}
+    }
+  };
 
   return (
     <main className="flex flex-col md:flex-row min-h-screen bg-[#F5F5F5]">
@@ -107,8 +108,7 @@ const ParentSignUpPage = () => {
           </div>
 
           <p className="text-xl font-medium mt-[170px] ">
-            Track your childs growth. 
-            Celebrate every milestone
+            Track your childs growth. Celebrate every milestone
           </p>
         </div>
       </div>
@@ -116,12 +116,15 @@ const ParentSignUpPage = () => {
       {/* Right Section */}
       <div className="flex flex-1 justify-center items-center px-4 sm:px-6 pt-[40px] sm:pt-[60px]">
         <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 w-full max-w-[600px] mx-auto">
-          <h2 className="text-2xl font-bold text-[#0B2C49] mb-6 text-center">Create Account</h2>
+          <h2 className="text-2xl font-bold text-[#0B2C49] mb-6 text-center">
+            Create Account
+          </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-           
             <div>
-              <label className="block text-sm font-medium mb-1">Phone number</label>
+              <label className="block text-sm font-medium mb-1">
+                Phone number
+              </label>
               <div className="flex gap-2">
                 <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
                   +234 (NIG)
@@ -151,20 +154,40 @@ const ParentSignUpPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-2.5 text-gray-500"
                 >
-                  {showPassword ? <IoEyeOffOutline size={20} /> : <IoEyeOutline size={20} />}
+                  {showPassword ? (
+                    <IoEyeOffOutline size={20} />
+                  ) : (
+                    <IoEyeOutline size={20} />
+                  )}
                 </button>
               </div>
               <ul className="text-sm mt-3 space-y-1 text-gray-700">
-                <li className={criteria.length ? "text-green-600" : "text-gray-400"}>
+                <li
+                  className={
+                    criteria.length ? "text-green-600" : "text-gray-400"
+                  }
+                >
                   At least 8 characters
                 </li>
-                <li className={criteria.uppercase ? "text-green-600" : "text-gray-400"}>
+                <li
+                  className={
+                    criteria.uppercase ? "text-green-600" : "text-gray-400"
+                  }
+                >
                   At least one uppercase letter
                 </li>
-                <li className={criteria.number ? "text-green-600" : "text-gray-400"}>
+                <li
+                  className={
+                    criteria.number ? "text-green-600" : "text-gray-400"
+                  }
+                >
                   At least one number
                 </li>
-                <li className={criteria.special ? "text-green-600" : "text-gray-400"}>
+                <li
+                  className={
+                    criteria.special ? "text-green-600" : "text-gray-400"
+                  }
+                >
                   At least one special character
                 </li>
               </ul>
@@ -188,8 +211,9 @@ const ParentSignUpPage = () => {
                 <input type="checkbox" className="accent-[#2F5FFF] mt-1" />
                 By continuing, you agree to Peenlys{""}
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
-                Terms of services
-                </Link>{""}
+                  Terms of services
+                </Link>
+                {""}
                 and{" "}
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
                   policy
@@ -199,7 +223,10 @@ const ParentSignUpPage = () => {
 
             <p className="text-sm text-center mt-6">
               Already on Peenly?{" "}
-              <Link href="/auth/signin" className="text-[#2F5FFF] font-medium hover:underline">
+              <Link
+                href="/auth/signin"
+                className="text-[#2F5FFF] font-medium hover:underline"
+              >
                 Sign In
               </Link>
             </p>
@@ -207,7 +234,7 @@ const ParentSignUpPage = () => {
         </div>
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default ParentSignUpPage
+export default ParentSignUpPage;

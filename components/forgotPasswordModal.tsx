@@ -193,7 +193,11 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
               <button
                 type={successMessage ? "button" : "submit"}
                 disabled={loading}
-                onClick={successMessage ? openVerifyModal : undefined}
+                onClick={() => {
+                  if (successMessage) {
+                    setShowVerifyModal(true);
+                  }
+                }}
                 className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4] disabled:opacity-50"
               >
                 {loading ? "Sending..." : successMessage ? "OTP SENT" : "NEXT"}

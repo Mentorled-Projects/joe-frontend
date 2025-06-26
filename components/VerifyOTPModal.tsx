@@ -1,58 +1,58 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { IoClose } from "react-icons/io5"
-import axios from "axios"
+import { useEffect, useState } from "react";
+import { IoClose } from "react-icons/io5";
+import axios from "axios";
 
 type Props = {
-  phone: string
-  onClose: () => void
-  onSuccess: () => void
-}
+  phone: string;
+  onClose: () => void;
+  onSuccess: () => void;
+};
 
 const VerifyOTPModal: React.FC<Props> = ({ phone, onClose, onSuccess }) => {
-  const [code, setCode] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [timer, setTimer] = useState(179)
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(179);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0))
-    }, 1000)
+      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const codeRegex = /^\d{6}$/
+    const codeRegex = /^\d{6}$/;
     if (!codeRegex.test(code)) {
-      setError("Please input correct code")
-      return
+      setError("Please input correct code");
+      return;
     }
 
     try {
-      setLoading(true)
-      await axios.post("http://167.71.131.143:3000/api/v1/auth/verify-otp", {
+      setLoading(true);
+      await axios.post("http://167.71.131.143:3000/api/v1/auth/resend-otp", {
         phoneNumber: `+234${phone}`,
         otp: code,
-      })
+      });
 
-      onSuccess() 
+      onSuccess();
     } catch {
-      setError("Please input correct code")
+      setError("Please input correct code");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const formatTime = (seconds: number) => {
-    const min = Math.floor(seconds / 60)
-    const sec = seconds % 60
-    return `${min}:${sec < 10 ? "0" + sec : sec}`
-  }
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min}:${sec < 10 ? "0" + sec : sec}`;
+  };
 
   return (
     <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
@@ -64,7 +64,9 @@ const VerifyOTPModal: React.FC<Props> = ({ phone, onClose, onSuccess }) => {
           <IoClose />
         </button>
 
-        <h2 className="text-xl font-bold text-center mb-2">Enter verification code</h2>
+        <h2 className="text-xl font-bold text-center mb-2">
+          Enter verification code
+        </h2>
         <p className="text-sm text-center text-gray-600 mb-5">
           Enter the 6-digit code sent to <br />
           <span className="font-medium">+234 {phone}</span>
@@ -77,8 +79,8 @@ const VerifyOTPModal: React.FC<Props> = ({ phone, onClose, onSuccess }) => {
               maxLength={6}
               value={code}
               onChange={(e) => {
-                setCode(e.target.value)
-                setError("")
+                setCode(e.target.value);
+                setError("");
               }}
               className={`w-full text-center text-lg font-medium px-4 py-3 rounded border outline-none transition ${
                 error
@@ -87,11 +89,14 @@ const VerifyOTPModal: React.FC<Props> = ({ phone, onClose, onSuccess }) => {
               }`}
               placeholder="______"
             />
-            {error && <p className="text-red-500 text-sm mt-1 text-center">{error}</p>}
+            {error && (
+              <p className="text-red-500 text-sm mt-1 text-center">{error}</p>
+            )}
           </div>
 
           <p className="text-sm text-center text-gray-500">
-            Code expires in <span className="font-semibold">{formatTime(timer)}</span>
+            Code expires in{" "}
+            <span className="font-semibold">{formatTime(timer)}</span>
           </p>
 
           <div className="flex justify-between gap-4 pt-2">
@@ -113,7 +118,7 @@ const VerifyOTPModal: React.FC<Props> = ({ phone, onClose, onSuccess }) => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VerifyOTPModal
+export default VerifyOTPModal;

@@ -4,15 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import Image from "next/image";
-import React from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-const ParentSignUpPage = () => {
+export default function ParentSignUpPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [error, setError] = useState("");
   const [criteria, setCriteria] = useState({
     length: false,
     uppercase: false,
@@ -22,6 +21,7 @@ const ParentSignUpPage = () => {
 
   const router = useRouter();
 
+  /* update password requirements */
   useEffect(() => {
     setCriteria({
       length: password.length >= 8,
@@ -34,60 +34,49 @@ const ParentSignUpPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const phoneRegex = /^[0-9]{10,11}$/;
-    if (!phoneRegex.test(phone)) {
-      setErrors("Please enter a valid phone number.");
+    if (!/^[0-9]{10,11}$/.test(phone)) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+    if (!Object.values(criteria).every(Boolean)) {
+      setError("Password does not meet all requirements.");
       return;
     }
 
-    const allValid = Object.values(criteria).every(Boolean);
-    if (!allValid) {
-      setErrors("Password does not meet all requirements.");
-      return;
-    }
+    setError("");
+    const fullPhone = "+234" + phone.replace(/^0/, "");
 
-    setErrors("");
     try {
-      const fullPhone = "+234" + phone;
-      const response = await axios.post(
+      await axios.post(
         "http://167.71.131.143:3000/api/v1/auth/register-guardian",
-        {
-          phoneNumber: fullPhone,
-          password,
-        }
+        { phoneNumber: fullPhone, password }
       );
 
       localStorage.setItem("phoneNumber", fullPhone);
-
-      console.log("Registration successful:", response.data);
-      router.push("/auth/verify-code");
+      router.push("/parent/verify-code"); // 👉 new route
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        console.error("Backend error message:", err.response?.data);
-        setErrors(
+        setError(
           err.response?.data?.message ||
             "Registration failed. Please try a different phone number."
         );
       } else {
-        console.error("Unexpected error:", err);
-        setErrors("Something went wrong. Please try again.");
+        setError("Something went wrong. Please try again.");
       }
     }
   };
 
   return (
     <main className="flex flex-col md:flex-row min-h-screen bg-[#F5F5F5]">
-      {/* Left Section */}
+      {/* LEFT PANEL */}
       <div className="hidden md:flex w-[502px] h-screen bg-[#2F5FFF] text-white flex-col justify-between px-10 py-12">
-        <div>
-          <Image
-            src="/assets/icons/Logo-white.svg"
-            alt="Peenly Logo"
-            width={120}
-            height={40}
-            className="mb-10"
-          />
-        </div>
+        <Image
+          src="/assets/icons/Logo-white.svg"
+          alt="Peenly Logo"
+          width={120}
+          height={40}
+          className="mb-10"
+        />
 
         <div>
           <div className="relative h-[280px]">
@@ -107,13 +96,13 @@ const ParentSignUpPage = () => {
             />
           </div>
 
-          <p className="text-xl font-medium mt-[170px] ">
-            Track your childs growth. Celebrate every milestone
+          <p className="text-xl font-medium mt-[170px]">
+            Track your child’s growth. Celebrate every milestone
           </p>
         </div>
       </div>
 
-      {/* Right Section */}
+      {/* RIGHT PANEL */}
       <div className="flex flex-1 justify-center items-center px-4 sm:px-6 pt-[40px] sm:pt-[60px]">
         <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 w-full max-w-[600px] mx-auto">
           <h2 className="text-2xl font-bold text-[#0B2C49] mb-6 text-center">
@@ -121,14 +110,15 @@ const ParentSignUpPage = () => {
           </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* PHONE */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Phone number
               </label>
               <div className="flex gap-2">
-                <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
+                <span className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
                   +234 (NIG)
-                </div>
+                </span>
                 <input
                   type="tel"
                   value={phone}
@@ -139,11 +129,12 @@ const ParentSignUpPage = () => {
               </div>
             </div>
 
+            {/* PASSWORD */}
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPwd ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="********"
@@ -151,10 +142,10 @@ const ParentSignUpPage = () => {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPwd(!showPwd)}
                   className="absolute right-3 top-2.5 text-gray-500"
                 >
-                  {showPassword ? (
+                  {showPwd ? (
                     <IoEyeOffOutline size={20} />
                   ) : (
                     <IoEyeOutline size={20} />
@@ -193,7 +184,7 @@ const ParentSignUpPage = () => {
               </ul>
             </div>
 
-            {errors && <p className="text-red-500 text-sm">{errors}</p>}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button
               type="submit"
@@ -209,12 +200,11 @@ const ParentSignUpPage = () => {
               </label>
               <label className="flex items-start gap-2">
                 <input type="checkbox" className="accent-[#2F5FFF] mt-1" />
-                By continuing, you agree to Peenlys{""}
+                By continuing, you agree to&nbsp;
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
-                  Terms of services
+                  Peenly’s Terms of services
                 </Link>
-                {""}
-                and{" "}
+                &nbsp;and&nbsp;
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
                   policy
                 </Link>
@@ -224,7 +214,7 @@ const ParentSignUpPage = () => {
             <p className="text-sm text-center mt-6">
               Already on Peenly?{" "}
               <Link
-                href="/auth/signin"
+                href="/parent/signin"
                 className="text-[#2F5FFF] font-medium hover:underline"
               >
                 Sign In
@@ -235,6 +225,4 @@ const ParentSignUpPage = () => {
       </div>
     </main>
   );
-};
-
-export default ParentSignUpPage;
+}

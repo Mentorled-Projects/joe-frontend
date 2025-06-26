@@ -59,7 +59,7 @@ const TutorSignUpPage = () => {
       );
 
       localStorage.setItem("phoneNumber", fullPhone);
-      router.push("/tutor/verify-code"); // ➜ tutor OTP screen
+      router.push("/tutor/verify-code");
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setErr(

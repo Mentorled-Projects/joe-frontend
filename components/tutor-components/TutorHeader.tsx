@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 const nav = [
   { href: "/tutor/profile", label: "Profile", icon: UserIcon },
   { href: "/tutor/messages", label: "Messages", icon: MessageIcon },
-  { href: "/tutor/notification", label: "Notification", icon: BellIcon },
+  { href: "/tutor/notifications", label: "Notification", icon: BellIcon },
 ];
 
 export default function TutorHeader() {
@@ -61,7 +61,6 @@ export default function TutorHeader() {
   );
 }
 
-/* ───────── SVG icon helpers (keeps bundle tiny) ───────── */
 function UserIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" {...props}>

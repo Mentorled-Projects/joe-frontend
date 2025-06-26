@@ -1,69 +1,58 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import React, { useState } from "react";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import ForgotPasswordModal from "@/components/forgotPasswordModal";
 
-const SignInPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
+export default function TutorSignInPage() {
+  const router = useRouter();
+
+  const [countryCode, setCountryCode] = useState("+234"); // default
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState("");
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const phoneRegex = /^[0-9]{10,11}$/;
-    if (!phoneRegex.test(phone)) {
+    if (!/^[0-9]{9,11}$/.test(phone)) {
       setError("Please enter a valid phone number.");
       return;
     }
-
     if (!password) {
       setError("Please enter your password.");
       return;
     }
 
     setError("");
+    const fullPhone = `${countryCode}${phone.replace(/^0/, "")}`;
 
     try {
-      const response = await axios.post(
+      const { data } = await axios.post(
         "http://167.71.131.143:3000/api/v1/auth/login",
-        {
-          phoneNumber: phone.startsWith("0")
-            ? `+234${phone.slice(1)}`
-            : phone.startsWith("234")
-            ? `+${phone}`
-            : `+234${phone}`,
-
-          password,
-        }
+        { phoneNumber: fullPhone, password }
       );
-
-      console.log("Login successful:", response.data);
-
-      localStorage.setItem("token", response.data.token);
-
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      console.error("Login failed:", err);
+      localStorage.setItem("token", data.token);
+      router.push("/tutor/profile");
+    } catch {
       setError("Invalid credentials. Please try again.");
     }
   };
 
-  const router = useRouter();
   return (
     <>
-      {showForgotPassword && (
-        <ForgotPasswordModal onClose={() => setShowForgotPassword(false)} />
+      {showForgot && (
+        <ForgotPasswordModal onClose={() => setShowForgot(false)} />
       )}
 
       <main className="flex min-h-screen bg-[#F5F5F5]">
+        {/* LEFT BLUE PANEL */}
         <div className="w-[502px] h-screen bg-[#2F5FFF] text-white flex flex-col justify-between px-10 py-12">
           <div>
             <Image
@@ -77,11 +66,11 @@ const SignInPage = () => {
           </div>
           <div className="relative h-[280px]">
             <Image
-              src="/assets/images/kids-apple.svg"
-              alt="Kids"
+              src="/assets/images/tutor-apple.svg"
+              alt="Tutor"
               width={380}
               height={260}
-              className="rounded-[40px] object-cover absolute -top-34"
+              className="rounded-[40px] object-cover absolute -top-32"
             />
             <Image
               src="/assets/images/pencil-1.svg"
@@ -93,19 +82,26 @@ const SignInPage = () => {
           </div>
         </div>
 
+        {/* RIGHT WHITE PANEL */}
         <div className="flex flex-1 justify-center items-center px-6 pt-[60px]">
-          <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[652px] h-auto">
+          <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[652px]">
             <h2 className="text-2xl font-bold text-[#0B2C49] mb-6">Sign in</h2>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
+              {/* PHONE */}
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Phone number
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
-                    +234 (NIG)
-                  </div>
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="px-4 py-2 text-sm border border-[#D1D5DB] rounded bg-white"
+                  >
+                    <option value="+234">+234&nbsp;(NIG)</option>
+                    <option value="+44">+44&nbsp;(UK)</option>
+                  </select>
                   <input
                     type="tel"
                     value={phone}
@@ -119,13 +115,14 @@ const SignInPage = () => {
                 </div>
               </div>
 
+              {/* PASSWORD */}
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Password
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPwd ? "text" : "password"}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -137,9 +134,9 @@ const SignInPage = () => {
                   <button
                     type="button"
                     className="absolute right-3 top-2.5 text-gray-500"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowPwd(!showPwd)}
                   >
-                    {showPassword ? (
+                    {showPwd ? (
                       <IoEyeOffOutline size={20} />
                     ) : (
                       <IoEyeOutline size={20} />
@@ -164,7 +161,7 @@ const SignInPage = () => {
                 </label>
                 <button
                   type="button"
-                  onClick={() => setShowForgotPassword(true)}
+                  onClick={() => setShowForgot(true)}
                   className="text-[#2F5FFF] hover:underline"
                 >
                   Forgot password?
@@ -174,7 +171,7 @@ const SignInPage = () => {
               <p className="text-sm text-center mt-6">
                 New to Peenly?{" "}
                 <Link
-                  href="/auth/signup"
+                  href="/tutor/signup"
                   className="text-[#2F5FFF] font-medium hover:underline"
                 >
                   Sign up
@@ -186,6 +183,4 @@ const SignInPage = () => {
       </main>
     </>
   );
-};
-
-export default SignInPage;
+}

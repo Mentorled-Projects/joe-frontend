@@ -1,3 +1,17 @@
 @import "tailwindcss";
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
+
+@layer components {
+  .input-field {
+    @apply w-full border border-gray-300 rounded-[10px] px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-blue-300;
+  }
+
+  .btn-primary {
+    @apply bg-[#2F5FFF] text-white px-5 py-2 rounded text-sm font-medium hover:bg-[#204fd4];
+  }
+
+  .btn-outline {
+    @apply border border-gray-400 text-gray-700 px-5 py-2 rounded text-sm hover:bg-gray-100;
+  }
+}

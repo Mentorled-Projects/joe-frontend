@@ -15,6 +15,8 @@ const SignInPage = () => {
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -40,23 +42,21 @@ const SignInPage = () => {
             : phone.startsWith("234")
             ? `+${phone}`
             : `+234${phone}`,
-
           password,
         }
       );
 
       console.log("Login successful:", response.data);
-
       localStorage.setItem("token", response.data.token);
 
-      router.push("/dashboard");
+      // ✅ Redirect to parent-profile page
+      router.push("/parent-profile");
     } catch (err: unknown) {
       console.error("Login failed:", err);
       setError("Invalid credentials. Please try again.");
     }
   };
 
-  const router = useRouter();
   return (
     <>
       {showForgotPassword && (

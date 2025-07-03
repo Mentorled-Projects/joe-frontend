@@ -1,5 +1,3 @@
-
-
 import Footer from "@/components/footer";
 import HeroSection from "@/components/heroSection";
 import HowItWorks from "@/components/howItWorks";
@@ -13,7 +11,7 @@ export default function Home() {
       <HeroSection />
       <HowItWorks />
       <WhyLovePeenly />
-      <Footer/>
+      <Footer />
     </main>
   );
 }

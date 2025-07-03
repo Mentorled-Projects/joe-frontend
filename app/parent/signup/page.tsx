@@ -97,7 +97,7 @@ export default function ParentSignUpPage() {
           </div>
 
           <p className="text-xl font-medium mt-[170px]">
-            Track your child’s growth. Celebrate every milestone
+            Track your child&apos;s growth. Celebrate every milestone
           </p>
         </div>
       </div>
@@ -110,7 +110,6 @@ export default function ParentSignUpPage() {
           </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* PHONE */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Phone number
@@ -129,7 +128,6 @@ export default function ParentSignUpPage() {
               </div>
             </div>
 
-            {/* PASSWORD */}
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
               <div className="relative">
@@ -202,7 +200,7 @@ export default function ParentSignUpPage() {
                 <input type="checkbox" className="accent-[#2F5FFF] mt-1" />
                 By continuing, you agree to&nbsp;
                 <Link href="#" className="text-[#2F5FFF] hover:underline">
-                  Peenly’s Terms of services
+                  Peenly&apos;s Terms of services
                 </Link>
                 &nbsp;and&nbsp;
                 <Link href="#" className="text-[#2F5FFF] hover:underline">

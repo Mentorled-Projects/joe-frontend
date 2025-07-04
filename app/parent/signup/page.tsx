@@ -21,7 +21,6 @@ export default function ParentSignUpPage() {
 
   const router = useRouter();
 
-  /* update password requirements */
   useEffect(() => {
     setCriteria({
       length: password.length >= 8,
@@ -47,13 +46,18 @@ export default function ParentSignUpPage() {
     const fullPhone = "+234" + phone.replace(/^0/, "");
 
     try {
-      await axios.post(
+      const res = await axios.post(
         "http://167.71.131.143:3000/api/v1/auth/register-guardian",
         { phoneNumber: fullPhone, password }
       );
 
-      localStorage.setItem("phoneNumber", fullPhone);
-      router.push("/parent/verify-code"); // 👉 new route
+      const token = res?.data?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("phoneNumber", fullPhone);
+      }
+
+      router.push("/parent/verify-code");
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(
@@ -68,7 +72,6 @@ export default function ParentSignUpPage() {
 
   return (
     <main className="flex flex-col md:flex-row min-h-screen bg-[#F5F5F5]">
-      {/* LEFT PANEL */}
       <div className="hidden md:flex w-[502px] h-screen bg-[#2F5FFF] text-white flex-col justify-between px-10 py-12">
         <Image
           src="/assets/icons/Logo-white.svg"

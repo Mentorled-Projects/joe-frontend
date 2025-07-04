@@ -33,23 +33,27 @@ const SignInPage = () => {
 
     setError("");
 
+    const formattedPhone = phone.startsWith("0")
+      ? `+234${phone.slice(1)}`
+      : phone.startsWith("234")
+      ? `+${phone}`
+      : `+234${phone}`;
+
     try {
       const response = await axios.post(
         "http://167.71.131.143:3000/api/v1/auth/login",
         {
-          phoneNumber: phone.startsWith("0")
-            ? `+234${phone.slice(1)}`
-            : phone.startsWith("234")
-            ? `+${phone}`
-            : `+234${phone}`,
+          phoneNumber: formattedPhone,
           password,
         }
       );
 
-      console.log("Login successful:", response.data);
-      localStorage.setItem("token", response.data.token);
+      const token = response?.data?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("phoneNumber", formattedPhone);
+      }
 
-      // ✅ Redirect to parent-profile page
       router.push("/parent-profile");
     } catch (err: unknown) {
       console.error("Login failed:", err);

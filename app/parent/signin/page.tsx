@@ -7,6 +7,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import ForgotPasswordModal from "@/components/forgotPasswordModal";
+import { useParentStore } from "@/stores/useParentStores";
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,7 @@ const SignInPage = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const router = useRouter();
+  const { setToken } = useParentStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +54,7 @@ const SignInPage = () => {
       if (token) {
         localStorage.setItem("token", token);
         localStorage.setItem("phoneNumber", formattedPhone);
+        setToken(token);
       }
 
       router.push("/parent-profile");

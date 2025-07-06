@@ -1,4 +1,3 @@
-/* /components/ParentProfileHeader.tsx */
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
@@ -10,7 +9,6 @@ const AVATAR_KEY = "parentAvatar";
 const BANNER_KEY = "parentBanner";
 
 export default function ParentProfileHeader() {
-  /* -------------------------------- state -------------------------------- */
   const [avatar, setAvatar] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
 
@@ -20,19 +18,16 @@ export default function ParentProfileHeader() {
   );
   const [file, setFile] = useState<File | null>(null);
 
-  /* --------------------------- demo/static props -------------------------- */
   const name = "Catherine";
   const accountType = "Parent Account";
   const location = "Manchester, UK";
-  const verified = false; // change to true when KYC succeeds
+  const verified = false;
 
-  /* --------------------------- load stored images ------------------------- */
   useEffect(() => {
     setAvatar(localStorage.getItem(AVATAR_KEY));
     setBanner(localStorage.getItem(BANNER_KEY));
   }, []);
 
-  /* --------------------------- helpers ----------------------------------- */
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f && f.size < 5 * 1024 * 1024) setFile(f);
@@ -57,11 +52,9 @@ export default function ParentProfileHeader() {
     reader.readAsDataURL(file);
   };
 
-  /* -------------------------------- render -------------------------------- */
   return (
     <>
       <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8">
-        {/* ---------------------------- Banner ---------------------------- */}
         <div className="relative h-48 rounded-t-lg overflow-hidden">
           {banner ? (
             <Image src={banner} alt="banner" fill className="object-cover" />
@@ -81,7 +74,6 @@ export default function ParentProfileHeader() {
             <MdCloudUpload size={20} />
           </button>
 
-          {/* ---------------------- avatar & edit button ---------------------- */}
           <div className="absolute -bottom-[70px] left-8 flex items-center gap-4">
             <div className="relative">
               {avatar ? (
@@ -111,7 +103,6 @@ export default function ParentProfileHeader() {
           </div>
         </div>
 
-        {/* ------------------------ details row ------------------------- */}
         <div className="pt-16 pb-6 px-8 flex flex-col md:flex-row md:items-center md:justify-between">
           {/* left column */}
           <div>
@@ -119,9 +110,7 @@ export default function ParentProfileHeader() {
               Welcome {name} <span>👋</span>
             </h1>
 
-            {/* meta badges */}
             <div className="flex flex-wrap items-center gap-6 mt-3 text-sm">
-              {/* account type */}
               <span className="flex items-center gap-1 text-gray-700">
                 <svg
                   className="w-4 h-4"
@@ -170,14 +159,12 @@ export default function ParentProfileHeader() {
             </div>
           </div>
 
-          {/* right column */}
           <button className="mt-6 md:mt-0 bg-[#2F5FFF] hover:bg-[#1d46ff] text-white px-6 py-2 rounded">
             Complete Profile
           </button>
         </div>
       </section>
 
-      {/* ---------------------------- modal ---------------------------- */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50">
           <div className="bg-white rounded-xl w-full max-w-xl p-8 relative">

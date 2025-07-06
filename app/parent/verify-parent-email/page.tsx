@@ -1,118 +1,92 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useParentStore } from "@/stores/useParentStores";
 
-export default function VerifyParentEmailPage() {
-  const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
-  const [timer, setTimer] = useState(179);
-  const [email, setEmail] = useState("");
-
+export default function VerifyParentEmail() {
   const router = useRouter();
+  const { profile } = useParentStore();
+  const email = profile?.email || "";
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Get saved email + start timer
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("parentProfile") || "{}");
-    if (stored.email) setEmail(stored.email);
-
-    const id = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const formatTime = (s: number) =>
-    `${Math.floor(s / 60)}:${s % 60 < 10 ? "0" : ""}${s % 60}`;
-
-  const handleVerify = async () => {
-    if (!/^\d{6}$/.test(otp)) {
-      setError("Enter a valid 6-digit OTP");
-      return;
-    }
+  const sendOTP = async () => {
+    setIsLoading(true);
+    setError("");
 
     try {
-      await axios.post("http://167.71.131.143:3000/api/v1/auth/verify-email", {
-        email,
-        otp,
-      });
+      const res = await fetch(
+        "http://167.71.131.143:3000/api/v1/auth/send-email-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
-      router.push("/parent/parent-profile");
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Invalid OTP or email");
-      } else {
-        setError("Something went wrong. Please try again.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Something went wrong");
+        setIsLoading(false);
+        return;
       }
+
+      setTimeout(() => {
+        router.push("/parent/verify-parent-email-otp");
+      }, 1000);
+    } catch {
+      setError("Network error. Please try again.");
+      setIsLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#F5F5F5] flex flex-col items-center pt-12 px-4">
-      {/* Logo */}
-      <Image
-        src="/assets/icons/Logo.svg"
-        alt="Peenly Logo"
-        width={120}
-        height={40}
-        className="mb-8"
-      />
+    <div className="bg-[#F5F5F5] min-h-screen flex flex-col">
+      <header className="h-14 flex items-center px-6 bg-white shadow-sm sticky top-0 z-10">
+        <Image
+          src="/assets/icons/Logo.svg"
+          alt="Peenly"
+          width={100}
+          height={32}
+        />
+      </header>
 
-      {/* Card */}
-      <div className="bg-white rounded-xl shadow-md w-full max-w-md px-6 py-8 text-center">
-        <h2 className="text-xl font-bold mb-2">Verify Your Email</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Enter the 6-digit code sent to
-          <br />
-          <span className="font-medium">{email}</span>
-        </p>
+      <main className="flex-1 flex justify-center items-center px-4 py-16">
+        <div className="bg-white w-full max-w-xl rounded-xl shadow p-10 text-center">
+          <h2 className="text-[22px] font-semibold mb-4">Verify Your Email</h2>
+          <p className="mb-2 text-gray-700">
+            Check your inbox for a verification code sent to:
+          </p>
+          <p className="font-medium text-[#2F5FFF] break-words mb-4">{email}</p>
+          <p className="text-sm text-gray-500 mb-6">
+            Can’t find the email? Please check your <strong>spam folder</strong>
+            .
+          </p>
 
-        {/* OTP input */}
-        <div>
-          <input
-            type="text"
-            maxLength={6}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="______"
-            className={`w-full text-center text-lg font-medium px-4 py-3 rounded border outline-none transition ${
-              error
-                ? "border-red-500 bg-red-50"
-                : "border-gray-300 bg-gray-100 focus:ring-2 focus:ring-blue-300"
-            }`}
-          />
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-        </div>
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-        <p className="text-sm text-gray-500 mt-2">
-          Code expires in{" "}
-          <span className="font-semibold">{formatTime(timer)}</span>
-        </p>
-
-        <button
-          onClick={handleVerify}
-          className="btn-primary w-full mt-4"
-          disabled={otp.length !== 6}
-        >
-          {otp.length !== 6 ? "Verify" : "Verify"}
-        </button>
-
-        <div className="flex justify-between text-sm text-[#2F5FFF] mt-3">
-          <Link href="/parent/register-parent-data" className="hover:underline">
-            Change email
-          </Link>
           <button
-            type="button"
-            onClick={() => setTimer(179)}
-            className="hover:underline"
+            onClick={sendOTP}
+            disabled={isLoading}
+            className="btn-primary w-full"
           >
-            Resend code
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-1">
+                <span className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.2s]" />
+                <span className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0s]" />
+                <span className="w-2 h-2 bg-[#dbeafe] rounded-full animate-bounce [animation-delay:0.2s]" />
+              </div>
+            ) : (
+              "Verify Email"
+            )}
           </button>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

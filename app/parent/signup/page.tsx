@@ -46,16 +46,15 @@ export default function ParentSignUpPage() {
     const fullPhone = "+234" + phone.replace(/^0/, "");
 
     try {
-      const res = await axios.post(
+      await axios.post(
         "http://167.71.131.143:3000/api/v1/auth/register-guardian",
-        { phoneNumber: fullPhone, password }
+        {
+          phoneNumber: fullPhone,
+          password,
+        }
       );
 
-      const token = res?.data?.token;
-      if (token) {
-        localStorage.setItem("token", token);
-        localStorage.setItem("phoneNumber", fullPhone);
-      }
+      localStorage.setItem("phoneNumber", fullPhone);
 
       router.push("/parent/verify-code");
     } catch (err: unknown) {
@@ -80,7 +79,6 @@ export default function ParentSignUpPage() {
           height={40}
           className="mb-10"
         />
-
         <div>
           <div className="relative h-[280px]">
             <Image
@@ -98,7 +96,6 @@ export default function ParentSignUpPage() {
               className="absolute top-22 left-0"
             />
           </div>
-
           <p className="text-xl font-medium mt-[170px]">
             Track your child&apos;s growth. Celebrate every milestone
           </p>

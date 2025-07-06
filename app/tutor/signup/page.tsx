@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 const TutorSignUpPage = () => {
-  /* ───────────────────────── STATE ───────────────────────── */
   const [countryCode, setCountryCode] = useState("+234"); // default: Nigeria
   const [phone, setPhone] = useState("");
   const [password, setPwd] = useState("");
@@ -24,7 +23,6 @@ const TutorSignUpPage = () => {
 
   const router = useRouter();
 
-  /* ───── Password checklist updates ───── */
   useEffect(() => {
     setCriteria({
       length: password.length >= 8,
@@ -34,7 +32,6 @@ const TutorSignUpPage = () => {
     });
   }, [password]);
 
-  /* ───────────────────────── SUBMIT ───────────────────────── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

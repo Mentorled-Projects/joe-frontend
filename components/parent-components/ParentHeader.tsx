@@ -3,25 +3,46 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useParentStore } from "@/stores/useParentStores";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const nav = [
-  { href: "/parent/home", label: "Home", icon: HomeIcon },
-  { href: "/parent/hire", label: "Hire a Tutor", icon: BookIcon },
-  {
-    href: "/parent/recommendations",
-    label: "Recommendations",
-    icon: UsersIcon,
-  },
-  { href: "/parent/messages", label: "Messages", icon: MessageIcon },
   { href: "/parent/parent-profile", label: "Profile", icon: UserIcon },
+  { href: "/parent/messages", label: "Messages", icon: MessageIcon },
+  {
+    href: "/parent/recommendations/movies",
+    label: "Movie Recommendations",
+    icon: FilmIcon,
+  },
+  { href: "/parent/HireTutor", label: "Hire a Tutor", icon: BookIcon },
+
+  {
+    href: "/parent/recommendations/books",
+    label: "Book Recommendations",
+    icon: BookOpenIcon,
+  },
 ];
 
 export default function ParentHeader() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { profile, setProfile, setToken } = useParentStore();
+  const profilePic = profile?.image || "/assets/images/avatar.png";
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("phoneNumber");
+    setProfile({});
+    setToken("");
+    router.push("/auth/signin");
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-      <div className="mx-auto max-w-7xl flex items-center h-16 px-6">
+      <div className="mx-auto max-w-7xl flex items-center justify-between h-17 px-6">
         <Link href="/">
           <Image
             src="/assets/icons/Logo.svg"
@@ -33,7 +54,7 @@ export default function ParentHeader() {
           />
         </Link>
 
-        <nav className="ml-auto flex items-center space-x-10">
+        <nav className="flex items-center space-x-10">
           {nav.map(({ href, label, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
@@ -61,33 +82,46 @@ export default function ParentHeader() {
           })}
         </nav>
 
-        {/* Right Icons (Notifications, Profile Pic) */}
-        <div className="ml-6 flex items-center space-x-4">
+        <div className="relative flex items-center space-x-4">
           <BellIcon className="w-5 h-5 text-gray-600 hover:text-[#2F5FFF] cursor-pointer" />
-          <div className="w-8 h-8 rounded-full overflow-hidden">
-            <Image
-              src="/assets/images/avatar.png"
-              alt="Profile"
-              width={32}
-              height={32}
-              className="rounded-full object-cover"
-            />
+          <div className="relative">
+            <button
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="flex items-center space-x-2"
+            >
+              <div className="w-8 h-8 rounded-full overflow-hidden">
+                <Image
+                  src={profilePic}
+                  alt="Profile"
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                />
+              </div>
+              <svg
+                className="w-4 h-4 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-36 bg-white border rounded shadow-md z-50">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </header>
-  );
-}
-
-function HomeIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" {...props}>
-      <path
-        d="M3 10L12 3l9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-    </svg>
   );
 }
 
@@ -107,25 +141,22 @@ function BookIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-
-function UsersIcon(props: React.SVGProps<SVGSVGElement>) {
+function BookOpenIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" {...props}>
       <path
-        d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+        d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2V3Z"
         stroke="currentColor"
         strokeWidth="2"
-      />
-      <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M23 21v-2a4 4 0 0 0-3-3.87"
-        stroke="currentColor"
-        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
-        d="M16 3.13a4 4 0 0 1 0 7.75"
+        d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7V3Z"
         stroke="currentColor"
         strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -138,6 +169,74 @@ function MessageIcon(props: React.SVGProps<SVGSVGElement>) {
         d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.1a8.5 8.5 0 0 1 8.2 8.5Z"
         stroke="currentColor"
         strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function FilmIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" {...props}>
+      <rect
+        x="2"
+        y="2"
+        width="20"
+        height="20"
+        rx="2.18"
+        ry="2.18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 2v20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 2v20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 12h20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 7h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 17h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 7h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 17h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

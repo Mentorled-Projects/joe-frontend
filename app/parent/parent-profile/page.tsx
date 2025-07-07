@@ -7,7 +7,7 @@ import ParentProgressCard from "@/components/parent-components/ParentProgressCar
 
 export default function ProfilePage() {
   return (
-    <div className="bg-[#F5F5F5] min-h-screen">
+    <div className="bg-[#F5F5F5] min-h-screen pt-15">
       <ParentProfileHeader />
       <ParentProgressCard progressStep={1} />
     </div>

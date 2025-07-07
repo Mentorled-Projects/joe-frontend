@@ -13,6 +13,8 @@ interface ParentProfile {
   gender?: string;
   language?: string;
   dateOfBirth?: string;
+  avatar?: string | null; 
+  banner?: string | null; 
 }
 
 interface ParentState {
@@ -21,13 +23,17 @@ interface ParentState {
   setToken: (token: string) => void;
   setProfile: (profile: Partial<ParentProfile>) => void;
   resetParentState: () => void;
+  isProfileCompleted: () => boolean;
 }
 
 export const useParentStore = create<ParentState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: "",
-      profile: {},
+      profile: {
+        avatar: null,
+        banner: null,
+      },
       setToken: (token) => set({ token }),
       setProfile: (profile) =>
         set((state) => ({
@@ -38,6 +44,19 @@ export const useParentStore = create<ParentState>()(
           token: "",
           profile: {},
         }),
+      isProfileCompleted: () => {
+        const { profile } = get();
+        return (
+          !!profile.firstName &&
+          !!profile.lastName &&
+          !!profile.email &&
+          !!profile.country &&
+          !!profile.city &&
+          !!profile.dateOfBirth &&
+          !!profile.relationship &&
+          !!profile.religion
+        );
+      },
     }),
     {
       name: "parent-store",

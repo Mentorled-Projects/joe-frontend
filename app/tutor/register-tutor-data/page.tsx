@@ -12,7 +12,6 @@ export default function TutorRegisterPage() {
   const [step, setStep] = useState<Step>(1);
   const [showDone, setShowDone] = useState(false);
 
-  /* ─────────── form state ─────────── */
   const [firstName, setFirst] = useState("");
   const [lastName, setLast] = useState("");
   const [email, setEmail] = useState("");

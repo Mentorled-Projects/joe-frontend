@@ -2,8 +2,10 @@
 
 import { useState, useEffect, ChangeEvent } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { MdCloudUpload, MdEdit } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
+import { useParentStore } from "@/stores/useParentStores";
 
 const AVATAR_KEY = "parentAvatar";
 const BANNER_KEY = "parentBanner";
@@ -18,9 +20,13 @@ export default function ParentProfileHeader() {
   );
   const [file, setFile] = useState<File | null>(null);
 
-  const name = "Catherine";
+  const { profile, isProfileCompleted } = useParentStore();
+  const name = profile?.firstName || "Parent";
   const accountType = "Parent Account";
-  const location = "Manchester, UK";
+  const location =
+    profile?.city && profile?.country
+      ? `${profile.city}, ${profile.country}`
+      : "Location not set";
   const verified = false;
 
   useEffect(() => {
@@ -30,7 +36,12 @@ export default function ParentProfileHeader() {
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f && f.size < 5 * 1024 * 1024) setFile(f);
+    if (f && f.size < 5 * 1024 * 1024) {
+      setFile(f);
+    } else if (f) {
+      alert("File size exceeds 5 MB limit. Please choose a smaller image.");
+      setFile(null);
+    }
   };
 
   const saveImage = () => {
@@ -38,7 +49,6 @@ export default function ParentProfileHeader() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const dataUrl = reader.result as string;
-
       if (uploadTarget === "avatar") {
         setAvatar(dataUrl);
         localStorage.setItem(AVATAR_KEY, dataUrl);
@@ -55,37 +65,36 @@ export default function ParentProfileHeader() {
   return (
     <>
       <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8">
-        <div className="relative h-48 rounded-t-lg overflow-hidden">
+        <div className="relative h-48 rounded-t-lg">
           {banner ? (
             <Image src={banner} alt="banner" fill className="object-cover" />
           ) : (
             <div className="h-full w-full bg-[#c7d4ff]" />
           )}
 
-          {/* upload button top-right */}
           <button
             onClick={() => {
               setUploadTarget("banner");
               setShowModal(true);
             }}
-            className="absolute top-4 right-4 bg-white/70 hover:bg-white p-2 rounded-full shadow"
-            title="Click to upload image"
+            className="absolute top-4 right-4 bg-white/70 hover:bg-white p-2 rounded-full shadow z-10 transition-colors duration-200"
+            title="Click to upload banner image"
           >
             <MdCloudUpload size={20} />
           </button>
 
-          <div className="absolute -bottom-[70px] left-8 flex items-center gap-4">
-            <div className="relative">
+          <div className="absolute -bottom-[70px] left-8 flex items-center gap-4 z-20">
+            <div className="relative w-[140px] h-[140px] rounded-full overflow-hidden border-4 border-white flex items-center justify-center">
               {avatar ? (
                 <Image
                   src={avatar}
                   alt="avatar"
                   width={140}
                   height={140}
-                  className="rounded-full object-cover border-4 border-white"
+                  className="object-cover w-full h-full object-center"
                 />
               ) : (
-                <div className="w-[140px] h-[140px] rounded-full bg-gray-200 flex items-center justify-center text-4xl border-4 border-white">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-4xl text-gray-600">
                   👤
                 </div>
               )}
@@ -96,15 +105,14 @@ export default function ParentProfileHeader() {
                 setUploadTarget("avatar");
                 setShowModal(true);
               }}
-              className="flex items-center gap-1 border border-black text-black text-sm px-3 py-1 rounded bg-white hover:bg-gray-100"
+              className="flex items-center gap-1 border border-black text-black text-sm px-3 py-1 rounded bg-white hover:bg-gray-100 shadow-sm transition-colors duration-200"
             >
-              <MdEdit size={14} /> Edit profile
+              <MdEdit size={14} /> Edit picture
             </button>
           </div>
         </div>
 
-        <div className="pt-16 pb-6 px-8 flex flex-col md:flex-row md:items-center md:justify-between">
-          {/* left column */}
+        <div className="pt-20 pb-6 px-8 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               Welcome {name} <span>👋</span>
@@ -124,8 +132,6 @@ export default function ParentProfileHeader() {
                 </svg>
                 {accountType}
               </span>
-
-              {/* location */}
               <span className="flex items-center gap-1 text-gray-700">
                 <svg
                   className="w-4 h-4"
@@ -139,8 +145,6 @@ export default function ParentProfileHeader() {
                 </svg>
                 {location}
               </span>
-
-              {/* verification */}
               <span
                 className={`flex items-center gap-1 ${
                   verified ? "text-black" : "text-red-600"
@@ -159,17 +163,24 @@ export default function ParentProfileHeader() {
             </div>
           </div>
 
-          <button className="mt-6 md:mt-0 bg-[#2F5FFF] hover:bg-[#1d46ff] text-white px-6 py-2 rounded">
-            Complete Profile
-          </button>
+          <Link
+            href={
+              isProfileCompleted()
+                ? "/parent/verify-parent-account"
+                : "/register-parent-data"
+            }
+            className="mt-6 md:mt-0 bg-[#2F5FFF] hover:bg-[#1d46ff] text-white px-6 py-2 rounded shadow-md transition-colors duration-200"
+          >
+            {isProfileCompleted() ? "Verify Account" : "Complete Profile"}
+          </Link>
         </div>
       </section>
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50">
-          <div className="bg-white rounded-xl w-full max-w-xl p-8 relative">
+          <div className="bg-white rounded-xl w-full max-w-xl p-8 relative shadow-lg">
             <button
-              className="absolute right-4 top-4 text-gray-500 hover:text-black"
+              className="absolute right-4 top-4 text-gray-500 hover:text-black transition-colors duration-200"
               onClick={() => {
                 setShowModal(false);
                 setFile(null);
@@ -180,7 +191,7 @@ export default function ParentProfileHeader() {
 
             <h2 className="text-2xl font-semibold mb-6">Upload Photo</h2>
 
-            <label className="w-full h-60 flex flex-col items-center justify-center border-2 border-dashed border-[#c084fc] rounded-lg bg-[#f5f3ff] cursor-pointer">
+            <label className="w-full h-60 flex flex-col items-center justify-center border-2 border-dashed border-[#c084fc] rounded-lg bg-[#f5f3ff] cursor-pointer hover:bg-[#ede9fe] transition-colors duration-200">
               <input
                 type="file"
                 accept="image/*"
@@ -188,7 +199,7 @@ export default function ParentProfileHeader() {
                 onChange={onFileChange}
               />
               <MdCloudUpload size={48} className="text-gray-600 mb-4" />
-              <p className="text-gray-700">
+              <p className="text-gray-700 text-center">
                 Click to upload or drag and drop <br />
                 <span className="text-xs text-gray-500">
                   PNG or JPG (max 5 MB)
@@ -196,11 +207,9 @@ export default function ParentProfileHeader() {
               </p>
             </label>
 
-            {/* action buttons */}
             <div className="mt-6 flex justify-between items-center">
-              {/* remove current */}
               <button
-                className="text-sm text-red-500 hover:underline"
+                className="text-sm text-red-500 hover:underline transition-colors duration-200"
                 onClick={() => {
                   if (uploadTarget === "avatar") {
                     setAvatar(null);
@@ -218,7 +227,7 @@ export default function ParentProfileHeader() {
 
               <div className="flex gap-4">
                 <button
-                  className="btn-outline"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                   onClick={() => {
                     setShowModal(false);
                     setFile(null);
@@ -226,8 +235,9 @@ export default function ParentProfileHeader() {
                 >
                   Cancel
                 </button>
+
                 <button
-                  className="btn-primary disabled:opacity-50"
+                  className="px-4 py-2 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!file}
                   onClick={saveImage}
                 >

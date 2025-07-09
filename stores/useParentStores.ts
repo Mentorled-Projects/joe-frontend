@@ -15,6 +15,7 @@ interface ParentProfile {
   dateOfBirth?: string;
   avatar?: string | null; 
   banner?: string | null; 
+  verificationDocumentType?: string | null;
 }
 
 interface ParentState {
@@ -33,6 +34,7 @@ export const useParentStore = create<ParentState>()(
       profile: {
         avatar: null,
         banner: null,
+        verificationDocumentType: null,
       },
       setToken: (token) => set({ token }),
       setProfile: (profile) =>

@@ -15,6 +15,7 @@ const SignInPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [countryCode, setCountryCode] = useState("+234"); // Default to Nigeria
 
   const router = useRouter();
   const { setToken } = useParentStore();
@@ -36,10 +37,10 @@ const SignInPage = () => {
     setError("");
 
     const formattedPhone = phone.startsWith("0")
-      ? `+234${phone.slice(1)}`
-      : phone.startsWith("234")
+      ? `${countryCode}${phone.slice(1)}`
+      : phone.startsWith(countryCode.replace("+", ""))
       ? `+${phone}`
-      : `+234${phone}`;
+      : `${countryCode}${phone}`;
 
     try {
       const response = await axios.post(
@@ -110,9 +111,14 @@ const SignInPage = () => {
                   Phone number
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex items-center text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white">
-                    +234 (NIG)
-                  </div>
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="text-sm px-4 py-2 rounded border border-[#D1D5DB] bg-white"
+                  >
+                    <option value="+234">+234 (NIG)</option>
+                    <option value="+44">+44 (UK)</option>
+                  </select>
                   <input
                     type="tel"
                     value={phone}

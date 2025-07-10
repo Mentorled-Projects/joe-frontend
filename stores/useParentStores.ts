@@ -13,16 +13,31 @@ interface ParentProfile {
   gender?: string;
   language?: string;
   dateOfBirth?: string;
-  avatar?: string | null; 
-  banner?: string | null; 
+  avatar?: string | null;
+  banner?: string | null;
   verificationDocumentType?: string | null;
+}
+
+interface ChildProfile {
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  dob?: string;
+  schoolName?: string;
+  schoolClass?: string;
+  interests?: string;
+  sports?: string;
+  middleName?: string;
+  favoriteSubjects?: string;
 }
 
 interface ParentState {
   token: string;
   profile: ParentProfile;
+  childProfile: ChildProfile;
   setToken: (token: string) => void;
   setProfile: (profile: Partial<ParentProfile>) => void;
+  setChildProfile: (profile: Partial<ChildProfile>) => void;
   resetParentState: () => void;
   isProfileCompleted: () => boolean;
 }
@@ -36,15 +51,21 @@ export const useParentStore = create<ParentState>()(
         banner: null,
         verificationDocumentType: null,
       },
+      childProfile: {},
       setToken: (token) => set({ token }),
       setProfile: (profile) =>
         set((state) => ({
           profile: { ...state.profile, ...profile },
         })),
+      setChildProfile: (childProfile) =>
+        set((state) => ({
+          childProfile: { ...state.childProfile, ...childProfile },
+        })),
       resetParentState: () =>
         set({
           token: "",
           profile: {},
+          childProfile: {},
         }),
       isProfileCompleted: () => {
         const { profile } = get();

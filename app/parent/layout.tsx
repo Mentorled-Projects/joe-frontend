@@ -18,6 +18,7 @@ export default function ParentLayout({ children }: { children: ReactNode }) {
     "/parent/verify-parent-email",
     "/parent/verify-parent-email-otp",
     "/parent/verify-parent-account",
+    "/parent/add-child-profile",
   ];
 
   const shouldShowHeader = !hideHeaderRoutes.includes(pathname);

@@ -1,0 +1,466 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { useParentStore } from "@/stores/useParentStores";
+import { useChildStore } from "@/stores/useChildStores";
+
+function FormGroup({
+  label,
+  type = "text",
+  value,
+  setValue,
+  error,
+  placeholder,
+  optional = false,
+}: {
+  label: string;
+  type?: string;
+  value: string;
+  setValue: (v: string) => void;
+  error?: string;
+  placeholder?: string;
+  optional?: boolean;
+}) {
+  return (
+    <div>
+      <label className="block text-[16px] font-medium mb-2">
+        {label}{" "}
+        {optional && <span className="text-gray-500 text-sm">(optional)</span>}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="input-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2F5FFF]"
+        placeholder={placeholder}
+      />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
+  );
+}
+
+function SelectGroup({
+  label,
+  value,
+  setValue,
+  options,
+  error,
+  placeholder = "Select",
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+  options: string[];
+  error?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-[16px] font-medium mb-2">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="input-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2F5FFF]"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
+  );
+}
+
+function FooterButtons({
+  backAction,
+  nextText,
+  nextAction,
+  showBackButton = true,
+}: {
+  backAction: () => void;
+  nextText: string;
+  nextAction: () => void;
+  showBackButton?: boolean;
+}) {
+  return (
+    <div className="flex justify-end space-x-4 mt-10">
+      {showBackButton && (
+        <button
+          className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+          onClick={backAction}
+        >
+          Back
+        </button>
+      )}
+      <button
+        className="px-6 py-2 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200"
+        onClick={nextAction}
+      >
+        {nextText}
+      </button>
+    </div>
+  );
+}
+
+function Circle({ active, done }: { active?: boolean; done?: boolean }) {
+  return (
+    <div
+      className={`w-9 h-9 rounded-full flex items-center justify-center ${
+        done
+          ? "bg-[#2F5FFF]"
+          : active
+          ? "border-2 border-[#2F5FFF] bg-white"
+          : "bg-gray-400/40"
+      }`}
+    >
+      {done && (
+        <svg className="w-9 h-9 text-white p-[5px]" viewBox="0 0 20 20">
+          <path
+            fill="currentColor"
+            d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8z"
+          />
+        </svg>
+      )}
+    </div>
+  );
+}
+
+function Line() {
+  return <div className="w-px h-16 bg-gray-300 mx-auto" />;
+}
+
+export default function AddChildProfilePage() {
+  const router = useRouter();
+  const { childProfile, setChildProfile } = useChildStore();
+  const { token } = useParentStore();
+
+  const [step, setStep] = useState(1);
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState(false);
+
+  const [form, setForm] = useState({
+    firstName: childProfile.firstName || "",
+    lastName: childProfile.lastName || "",
+    middleName: childProfile.middleName || "",
+    gender: childProfile.gender || "",
+    dob: childProfile.dateOfBirth || "",
+    schoolName: childProfile.schoolName || "",
+    // Ensure schoolClass is always a string
+    schoolClass:
+      typeof childProfile.Class === "string" ? childProfile.Class : "",
+    favoriteSubjects:
+      typeof childProfile.favoriteSubjects === "string"
+        ? childProfile.favoriteSubjects
+        : "",
+    interests:
+      typeof childProfile.interests === "string" ? childProfile.interests : "",
+    sports: typeof childProfile.sports === "string" ? childProfile.sports : "",
+  });
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleChange = (field: string, value: string) => {
+    setForm({ ...form, [field]: value });
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const validateStep = (currentStep: number) => {
+    const newErrors: { [key: string]: string } = {};
+    if (currentStep === 1) {
+      if (!form.firstName) newErrors.firstName = "First name is required";
+      if (!form.lastName) newErrors.lastName = "Last name is required";
+      if (!form.gender) newErrors.gender = "Gender is required";
+      if (!form.dob) newErrors.dob = "Date of birth is required";
+    } else if (currentStep === 2) {
+      if (!form.schoolName) newErrors.schoolName = "School name is required";
+      if (!form.schoolClass) newErrors.schoolClass = "Class is required";
+    } else if (currentStep === 3) {
+      if (!form.interests) newErrors.interests = "Interest is required";
+      if (!form.sports) newErrors.sports = "Sport is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const nextStep = () => {
+    if (!validateStep(step)) {
+      return;
+    }
+
+    if (step < 3) {
+      setStep(step + 1);
+    } else {
+      submitProfile();
+    }
+  };
+
+  const submitProfile = async () => {
+    setChildProfile(form);
+
+    setCreating(true);
+    setErrors({});
+
+    try {
+      const res = await fetch(
+        "http://167.71.131.143:3000/api/v1/child/add-child",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(form),
+        }
+      );
+
+      if (res.ok) {
+        setTimeout(() => {
+          setCreating(false);
+          setCreated(true);
+          setTimeout(() => {
+            router.push("/child/child-profile");
+          }, 2000);
+        }, 2000);
+      } else {
+        const errorData = await res.json();
+        setErrors({
+          apiError:
+            errorData.message || "Something went wrong. Please try again.",
+        });
+      }
+    } catch (err: unknown) {
+      setCreating(false);
+      let message = "Something went wrong. Please try again.";
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      setErrors({ apiError: message });
+    }
+  };
+
+  const genders = ["Male", "Female", "Other"];
+  const schoolYears = [
+    "Year 1",
+    "Year 2",
+    "Year 3",
+    "Year 4",
+    "Year 5",
+    "Year 6",
+    "Year 7",
+    "Year 8",
+    "Year 9",
+    "Year 10",
+    "Year 11",
+    "Year 12",
+    "Year 13",
+  ];
+  const interestsOptions = [
+    "Drawing",
+    "Reading",
+    "Coding",
+    "Music",
+    "Crafts",
+    "Gaming",
+    "Science",
+    "Nature",
+  ];
+  const sportsOptions = [
+    "Football",
+    "Basketball",
+    "Tennis",
+    "Swimming",
+    "Athletics",
+    "Cycling",
+    "Martial Arts",
+  ];
+  const favoriteSubjectsOptions = [
+    "Maths",
+    "English",
+    "Science",
+    "History",
+    "Geography",
+    "Art",
+    "Music",
+    "Computer Science",
+  ];
+
+  const progressSteps = [
+    "Complete Profile",
+    "Verify Account",
+    "Add Child's Profile",
+  ];
+
+  return (
+    <div className="min-h-screen  flex flex-col bg-[#F5F5F5]">
+      {/* <header className="h-14 flex items-center px-6 bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+        <Image
+          src="/assets/icons/Logo.svg"
+          alt="Peenly"
+          width={100}
+          height={32}
+        />
+      </header> */}
+
+      <div className="flex flex-1">
+        <aside className="w-80 bg-white flex flex-col items-center py-10 space-y-6">
+          <h2 className="text-[22px] font-semibold mb-8">Child Profile</h2>
+
+          {progressSteps.map((label, index) => (
+            <div key={label} className="flex flex-col items-center">
+              <Circle active={index === 2} done={index < 2} />
+              <p className={`text-xs mt-2 ${index === 2 ? "" : "opacity-40"}`}>
+                {label}
+              </p>
+              {index < progressSteps.length - 1 && <Line />}
+            </div>
+          ))}
+        </aside>
+
+        <main className="flex-1 flex justify-center items-start py-10 px-4">
+          <div className="bg-white w-full max-w-4xl rounded-xl shadow p-10">
+            <h2 className="text-[22px] font-semibold mb-8">
+              {step === 1 && "Child Bio"}
+              {step === 2 && "Child School"}
+              {step === 3 && "Child Interest & Hobbies"}
+            </h2>
+
+            {step === 1 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormGroup
+                  label="First Name"
+                  placeholder="Child's first name"
+                  value={form.firstName}
+                  setValue={(v) => handleChange("firstName", v)}
+                  error={errors.firstName}
+                />
+                <FormGroup
+                  label="Last Name"
+                  placeholder="Child's last name"
+                  value={form.lastName}
+                  setValue={(v) => handleChange("lastName", v)}
+                  error={errors.lastName}
+                />
+                <FormGroup
+                  label="Middle Name"
+                  placeholder="Child's middle name"
+                  value={form.middleName}
+                  setValue={(v) => handleChange("middleName", v)}
+                  optional={true}
+                />
+                <SelectGroup
+                  label="Gender"
+                  placeholder="Select Child's gender"
+                  value={form.gender}
+                  setValue={(v) => handleChange("gender", v)}
+                  options={genders}
+                  error={errors.gender}
+                />
+                <div className="md:col-span-2">
+                  <FormGroup
+                    label="Date of birth"
+                    type="date"
+                    placeholder="dd/mm/yyyy"
+                    value={form.dob}
+                    setValue={(v) => handleChange("dob", v)}
+                    error={errors.dob}
+                  />
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormGroup
+                  label="School name"
+                  placeholder="Child's school name"
+                  value={form.schoolName}
+                  setValue={(v) => handleChange("schoolName", v)}
+                  error={errors.schoolName}
+                />
+                <SelectGroup
+                  label="Year/Class"
+                  placeholder="Select class"
+                  value={form.schoolClass}
+                  setValue={(v) => handleChange("schoolClass", v)}
+                  options={schoolYears}
+                  error={errors.schoolClass}
+                />
+                <div className="md:col-span-2">
+                  <SelectGroup
+                    label="Favorite subjects"
+                    placeholder="Select favorite"
+                    value={form.favoriteSubjects}
+                    setValue={(v) => handleChange("favoriteSubjects", v)}
+                    options={favoriteSubjectsOptions}
+                    error={errors.favoriteSubjects}
+                  />
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <SelectGroup
+                  label="Interests"
+                  placeholder="Select interest"
+                  value={form.interests}
+                  setValue={(v) => handleChange("interests", v)}
+                  options={interestsOptions}
+                  error={errors.interests}
+                />
+                <SelectGroup
+                  label="Favorite sports/games"
+                  placeholder="Select"
+                  value={form.sports}
+                  setValue={(v) => handleChange("sports", v)}
+                  options={sportsOptions}
+                  error={errors.sports}
+                />
+              </div>
+            )}
+
+            {errors.apiError && (
+              <p className="text-red-500 text-sm mt-4">{errors.apiError}</p>
+            )}
+
+            <FooterButtons
+              backAction={() => (step > 1 ? setStep(step - 1) : router.back())}
+              nextText={
+                step === 1
+                  ? "Next Step: Child School Info"
+                  : step === 2
+                  ? "Next Step: Add Child interest"
+                  : "Create Profile"
+              }
+              nextAction={nextStep}
+              showBackButton={true}
+            />
+          </div>
+        </main>
+      </div>
+
+      {creating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl px-10 py-8 text-center shadow-lg w-[300px] h-[250px] flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-lg font-semibold">Creating profile...</p>
+          </div>
+        </div>
+      )}
+
+      {created && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl px-10 py-8 text-center shadow-lg w-[300px] h-[250px] flex flex-col items-center justify-center">
+            <div className="text-white bg-[#2F5FFF] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              ✓
+            </div>
+            <p className="text-lg font-semibold">Profile Created!</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

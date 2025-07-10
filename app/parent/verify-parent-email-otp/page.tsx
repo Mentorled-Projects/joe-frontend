@@ -34,9 +34,17 @@ export default function VerifyParentEmailOtpPage() {
     }
 
     try {
-      await axios.post("http://167.71.131.143:3000/api/v1/auth/verify-email", {
-        email,
-        otp,
+      const token = localStorage.getItem("token");
+      console.log("Completing profile with token:", token);
+
+      await fetch("http://167.71.131.143:3000/api/v1/auth/verify-email", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ otp }),
       });
 
       router.push("/parent/parent-profile");

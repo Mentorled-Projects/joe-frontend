@@ -50,7 +50,7 @@ interface ChildStoreActions {
 
 type ChildStore = ChildStoreState & ChildStoreActions;
 
-/* ---------- Helpers ---------- */
+
 
 // initial empty profile
 const emptyProfile: ChildProfile = {

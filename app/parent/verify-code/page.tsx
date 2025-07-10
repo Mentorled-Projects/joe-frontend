@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useParentStore } from "@/stores/useParentStores";
 
 export default function ParentVerifyCodePage() {
   const [code, setCode] = useState("");
@@ -13,16 +14,14 @@ export default function ParentVerifyCodePage() {
   const [phone, setPhone] = useState("");
 
   const router = useRouter();
+  const { setToken } = useParentStore(); // <-- Zustand setter
 
   /* get saved phone + start countdown */
   useEffect(() => {
     const stored = localStorage.getItem("phoneNumber");
     if (stored) setPhone(stored);
 
-    const id = setInterval(
-      () => setTimer((prev) => (prev > 0 ? prev - 1 : 0)),
-      1000
-    );
+    const id = setInterval(() => setTimer((t) => (t > 0 ? t - 1 : 0)), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -31,6 +30,7 @@ export default function ParentVerifyCodePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (!/^\d{6}$/.test(code)) {
       setError("Invalid code");
@@ -38,10 +38,19 @@ export default function ParentVerifyCodePage() {
     }
 
     try {
-      await axios.post("http://167.71.131.143:3000/api/v1/auth/verify-otp", {
-        phoneNumber: phone,
-        otp: code,
-      });
+      const res = await axios.post(
+        "http://167.71.131.143:3000/api/v1/auth/verify-otp",
+        { phoneNumber: phone, otp: code }
+      );
+
+      const token: string | undefined = res.data?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+        setToken(token);
+        console.log("Token set in Zustand store:", token);
+      } else {
+        throw new Error("Token missing in response");
+      }
 
       router.push("/parent/register-parent-data");
     } catch (err: unknown) {

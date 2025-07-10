@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useParentStore } from "@/stores/useParentStores";
+import { useParentStore } from "@/stores/useParentStores"; // Ensure this path is correct
 
 export default function RegisterParentData() {
   const router = useRouter();
-  const { setProfile } = useParentStore();
+  const { setProfile, token } = useParentStore(); // Destructure token from useParentStore
 
   const [step, setStep] = useState(1);
 
@@ -65,6 +65,7 @@ export default function RegisterParentData() {
   const handleSubmit = async () => {
     if (!validateStep2()) return;
 
+    // Update Zustand store with all profile data before API call
     setProfile({
       firstName: first,
       lastName: last,
@@ -78,13 +79,28 @@ export default function RegisterParentData() {
       language,
     });
 
+    // Check if token exists before making API call
+    if (!token) {
+      console.error("No authentication token found. Please log in first.");
+      setErrors((prev) => ({
+        ...prev,
+        apiError: "Authentication required. Please log in again.",
+      }));
+
+      return;
+    }
+
     try {
+      const token = localStorage.getItem("token");
+      console.log("Completing profile with token:", token);
+
       const res = await fetch(
         "http://167.71.131.143:3000/api/v1/guardian/complete-profile",
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             email,
@@ -107,7 +123,7 @@ export default function RegisterParentData() {
       if (!res.ok) {
         setErrors((prev) => ({
           ...prev,
-          dateOfBirth: data.message || "Something went wrong. Try again.",
+          apiError: data.message || "Something went wrong. Try again.", // Use apiError for general API messages
         }));
         return;
       }
@@ -118,7 +134,8 @@ export default function RegisterParentData() {
       console.error("Failed to complete profile", error);
       setErrors((prev) => ({
         ...prev,
-        dateOfBirth: "Something went wrong. Try again.",
+        apiError:
+          "Something went wrong. Please check your network and try again.", // Use apiError
       }));
     }
   };
@@ -307,6 +324,11 @@ export default function RegisterParentData() {
             {step === 1 ? "Personal Information" : "More About You"}
           </h2>
           {step === 1 ? renderStep1() : renderStep2()}
+          {errors.apiError && ( // Display general API errors
+            <p className="text-red-500 text-sm mt-4 text-center">
+              {errors.apiError}
+            </p>
+          )}
         </div>
       </main>
       {showDone && (

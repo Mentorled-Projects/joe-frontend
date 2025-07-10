@@ -17,12 +17,17 @@ export default function VerifyParentEmail() {
     setError("");
 
     try {
+      const token = localStorage.getItem("token");
+      console.log("Completing profile with token:", token);
+
       const res = await fetch(
         "http://167.71.131.143:3000/api/v1/auth/send-email-otp",
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ email }),
         }

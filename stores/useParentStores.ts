@@ -5,6 +5,7 @@ interface ParentProfile {
   firstName?: string;
   lastName?: string;
   email?: string;
+  phoneNumber?: string;
   image?: string;
   country?: string;
   city?: string;
@@ -16,6 +17,7 @@ interface ParentProfile {
   avatar?: string | null;
   banner?: string | null;
   verificationDocumentType?: string | null;
+  
 }
 
 interface ChildProfile {

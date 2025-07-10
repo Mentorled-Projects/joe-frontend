@@ -71,7 +71,7 @@ export default function ChildProfileHeader() {
 
   return (
     <>
-      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8">
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-4">
         <div className="relative h-48 rounded-t-lg">
           {banner ? (
             <Image src={banner} alt="banner" fill className="object-cover" />

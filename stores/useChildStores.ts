@@ -1,85 +1,94 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+// stores/useChildStores.ts
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-// Define the shape of the ChildProfile
-interface ChildProfile {
+/* ---------- Types ---------- */
+
+export interface Milestone {
+  title: string;
+  date: string;
+  file?: string | null; 
+}
+export interface Education {
+  schoolName: string;
+  certificate: string;
+  startDate: string;
+  endDate: string;
+  logo?: string | null; 
+  description: string;  
+}
+
+export interface ChildProfile {
   firstName?: string;
   lastName?: string;
   middleName?: string;
   gender?: string;
-  dateOfBirth?: string; 
+  dateOfBirth?: string;
   schoolName?: string;
-  Class?: string; 
+  Class?: string;
   favoriteSubjects?: string | null;
-  interests?: string | null;
+  interests?: string[];
   sports?: string | null;
   image?: string | null;
   city?: string;
   country?: string;
   headline?: string;
+  about?: string;
+  milestones: Milestone[]; 
+  education?: Education[];
 }
 
-// Define the shape of the ChildStore's state
 interface ChildStoreState {
   childProfile: ChildProfile;
 }
 
-// Define the actions for updating and resetting the profile
 interface ChildStoreActions {
-  setChildProfile: (profileData: Partial<ChildProfile>) => void;
+  setChildProfile: (data: Partial<ChildProfile>) => void;
   resetChildProfile: () => void;
-  setToken?: (token: string) => void; // Optional: not used in this snippet
+  // setToken?: (token: string) => void; // uncomment if you need it
 }
 
-// Combine state and actions
 type ChildStore = ChildStoreState & ChildStoreActions;
 
-// Create Zustand store with persistence
+/* ---------- Helpers ---------- */
+
+// initial empty profile
+const emptyProfile: ChildProfile = {
+  firstName: "",
+  lastName: "",
+  middleName: "",
+  gender: "",
+  dateOfBirth: "",
+  schoolName: "",
+  Class: "",
+  favoriteSubjects: null,
+  interests: [],
+  sports: null,
+  image: null,
+  city: "",
+  country: "",
+  headline: "",
+  about: "",
+  milestones: [], 
+  education: [],
+};
+
+
+
 export const useChildStore = create<ChildStore>()(
   persist(
     (set) => ({
-      childProfile: {
-        firstName: '',
-        lastName: '',
-        middleName: '',
-        gender: '',
-        dateOfBirth: '', 
-        schoolName: '',
-        Class: '', 
-        favoriteSubjects: null,
-        interests: null,
-        sports: null,
-        image: null,
-        city: '',
-        country: '',
-        headline: '',
-      },
-      setChildProfile: (profileData) =>
+      childProfile: emptyProfile,
+
+      setChildProfile: (data) =>
         set((state) => ({
-          childProfile: { ...state.childProfile, ...profileData },
+          childProfile: { ...state.childProfile, ...data },
         })),
-      resetChildProfile: () =>
-        set({
-          childProfile: {
-            firstName: '',
-            lastName: '',
-            middleName: '',
-            gender: '',
-            dateOfBirth: '', 
-            schoolName: '',
-            Class: '', 
-            favoriteSubjects: null,
-            interests: null,
-            sports: null,
-            image: null,
-            city: '',
-            country: '',
-            headline: '',
-          },
-        }),
+
+      resetChildProfile: () => set({ childProfile: emptyProfile }),
     }),
     {
-      name: 'child-profile-storage', // key in localStorage
+      name: "child-profile-storage", // localStorage key
     }
   )
 );

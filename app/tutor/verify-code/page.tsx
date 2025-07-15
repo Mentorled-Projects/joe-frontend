@@ -31,10 +31,13 @@ const TutorVerifyCodePage = () => {
     }
 
     try {
-      await axios.post("http://167.71.131.143:3000/api/v1/auth/verify-otp", {
-        phoneNumber: phone,
-        otp: code,
-      });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verify-otp`,
+        {
+          phoneNumber: phone,
+          otp: code,
+        }
+      );
 
       setError("");
       setOk("Verification successful! Redirecting…");

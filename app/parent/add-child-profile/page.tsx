@@ -198,14 +198,19 @@ export default function AddChildProfilePage() {
   };
 
   const submitProfile = async () => {
-    setChildProfile(form);
+    setChildProfile({
+      ...form,
+      interests: form.interests
+        ? form.interests.split(",").map((s) => s.trim())
+        : [],
+    });
 
     setCreating(true);
     setErrors({});
 
     try {
       const res = await fetch(
-        "http://167.71.131.143:3000/api/v1/child/add-child",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/child/add-child`,
         {
           method: "POST",
           headers: {

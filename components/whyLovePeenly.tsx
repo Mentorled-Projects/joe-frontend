@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import React from "react"
-import Image from "next/image"
+import React from "react";
+import Image from "next/image";
 
 const features = [
   {
@@ -24,7 +24,7 @@ const features = [
     desc: "Easily get recommended tutor.",
     icon: "/assets/images/love-guitar.svg",
   },
-]
+];
 
 const WhyLovePeenly = () => {
   return (
@@ -35,7 +35,6 @@ const WhyLovePeenly = () => {
       }}
     >
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
-        
         <div className="w-full lg:w-[50%]">
           <div className="rounded-[60px] overflow-hidden shadow-md">
             <Image
@@ -48,7 +47,6 @@ const WhyLovePeenly = () => {
           </div>
         </div>
 
-       
         <div className="w-full lg:w-[50%]">
           <h2 className="text-[#0B2C49] text-2xl md:text-3xl font-bold mb-8 text-center lg:text-left">
             Why Kids & Parents Love Peenly
@@ -80,7 +78,7 @@ const WhyLovePeenly = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default WhyLovePeenly
+export default WhyLovePeenly;

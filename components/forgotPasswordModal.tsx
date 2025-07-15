@@ -34,7 +34,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
   const sendOTP = async () => {
     try {
       const response = await axios.post(
-        "http://167.71.131.143:3000/api/v1/auth/forgot-password",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/forgot-password`,
         {
           phoneNumber: `+234${phone}`,
         }
@@ -59,7 +59,7 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
   const resendOTP = async () => {
     try {
       const response = await axios.post(
-        "http://167.71.131.143:3000/api/v1/auth/resend-forgot-password-otp",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/resend-forgot-password-otp`,
         {
           phoneNumber: `+234${phone}`,
         }
@@ -88,11 +88,6 @@ const ForgotPasswordModal: React.FC<Props> = ({ onClose }) => {
     setLoading(true);
 
     await sendOTP();
-  };
-
-  const openVerifyModal = () => {
-    setShowVerifyModal(true);
-    handleClose();
   };
 
   const handleClose = () => {

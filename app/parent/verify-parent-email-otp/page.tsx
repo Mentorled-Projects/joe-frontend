@@ -37,15 +37,18 @@ export default function VerifyParentEmailOtpPage() {
       const token = localStorage.getItem("token");
       console.log("Completing profile with token:", token);
 
-      await fetch("http://167.71.131.143:3000/api/v1/auth/verify-email", {
-        method: "POST",
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verify-email`,
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ otp }),
-      });
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ otp }),
+        }
+      );
 
       router.push("/parent/parent-profile");
     } catch (err: unknown) {

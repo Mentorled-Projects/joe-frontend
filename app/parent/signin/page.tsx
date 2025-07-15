@@ -44,7 +44,7 @@ const SignInPage = () => {
 
     try {
       const response = await axios.post(
-        "http://167.71.131.143:3000/api/v1/auth/login",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
         {
           phoneNumber: formattedPhone,
           password,

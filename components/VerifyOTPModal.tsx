@@ -35,10 +35,13 @@ const VerifyOTPModal: React.FC<Props> = ({ phone, onClose, onSuccess }) => {
 
     try {
       setLoading(true);
-      await axios.post("http://167.71.131.143:3000/api/v1/auth/resend-otp", {
-        phoneNumber: `+234${phone}`,
-        otp: code,
-      });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/resend-otp`,
+        {
+          phoneNumber: `+234${phone}`,
+          otp: code,
+        }
+      );
 
       onSuccess();
     } catch {

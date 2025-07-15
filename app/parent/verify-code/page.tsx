@@ -14,7 +14,7 @@ export default function ParentVerifyCodePage() {
   const [phone, setPhone] = useState("");
 
   const router = useRouter();
-  const { setToken } = useParentStore(); // <-- Zustand setter
+  const { setToken } = useParentStore();
 
   /* get saved phone + start countdown */
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function ParentVerifyCodePage() {
 
     try {
       const res = await axios.post(
-        "http://167.71.131.143:3000/api/v1/auth/verify-otp",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verify-otp`,
         { phoneNumber: phone, otp: code }
       );
 

@@ -21,7 +21,7 @@ export default function VerifyParentEmail() {
       console.log("Completing profile with token:", token);
 
       const res = await fetch(
-        "http://167.71.131.143:3000/api/v1/auth/send-email-otp",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/send-email-otp`,
         {
           method: "POST",
 

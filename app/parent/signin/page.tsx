@@ -71,8 +71,9 @@ const SignInPage = () => {
         <ForgotPasswordModal onClose={() => setShowForgotPassword(false)} />
       )}
 
-      <main className="flex min-h-screen bg-[#F5F5F5]">
-        <div className="w-[502px] h-screen bg-[#2F5FFF] text-white flex flex-col justify-between px-10 py-12">
+      <main className="flex flex-col md:flex-row min-h-screen bg-[#F5F5F5]">
+        {/* Left Section - Visible on larger screens, hidden on small screens */}
+        <div className="hidden md:flex md:w-[502px] h-screen bg-[#2F5FFF] text-white flex-col justify-between px-10 py-12">
           <div>
             <Image
               src="/assets/icons/Logo-white.svg"
@@ -101,9 +102,12 @@ const SignInPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-1 justify-center items-center px-6 pt-[60px]">
+        {/* Right Section - Main Content */}
+        <div className="flex flex-1 justify-center items-center px-6 pt-[60px] md:py-12">
           <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[652px] h-auto">
-            <h2 className="text-2xl font-bold text-[#0B2C49] mb-6">Sign in</h2>
+            <h2 className="text-2xl font-bold text-[#0B2C49] mb-6 text-center md:text-left">
+              Sign in
+            </h2>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
@@ -170,7 +174,7 @@ const SignInPage = () => {
                 SIGN IN
               </button>
 
-              <div className="flex justify-between items-center text-sm mt-2">
+              <div className="flex flex-col sm:flex-row justify-between items-center text-sm mt-2 gap-3 sm:gap-0">
                 <label className="flex items-center gap-2">
                   <input type="checkbox" className="accent-[#2F5FFF]" />
                   Keep me signed in

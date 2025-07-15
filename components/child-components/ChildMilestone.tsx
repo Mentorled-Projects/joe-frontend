@@ -21,7 +21,6 @@ export default function ChildMilestones() {
   const [showAll, setShowAll] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  /* ------------ NEW: delete handler ------------ */
   const deleteMilestone = (idx: number) => {
     const filtered = childProfile.milestones.filter((_, i) => i !== idx);
     setChildProfile({ milestones: filtered });

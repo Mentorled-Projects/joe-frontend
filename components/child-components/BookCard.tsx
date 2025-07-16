@@ -48,7 +48,7 @@ export default function BookCard({ book, onClick }: BookCardProps) {
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-1 mt-2">
+        {/* <div className="flex flex-wrap gap-1 mt-2">
           {book.tags.map((tag, index) => (
             <span
               key={index}
@@ -57,7 +57,7 @@ export default function BookCard({ book, onClick }: BookCardProps) {
               {tag}
             </span>
           ))}
-        </div>
+        </div> */}
 
         <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
           <button className="flex items-center gap-1 text-[#2F5FFF] hover:text-[#1d46ff] transition-colors duration-200 text-sm font-medium">

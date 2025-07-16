@@ -1,19 +1,37 @@
-// app/child/recommendations/books/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image"; // Assuming you have a header with a logo
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import bookApi from "@/lib/bookApi";
 import { Book } from "@/types/child";
 import BookCard from "@/components/child-components/BookCard";
 
-function SearchBar() {
+interface SearchBarProps {
+  onSearch: (query: string) => void;
+  initialQuery?: string;
+}
+
+function SearchBar({ onSearch, initialQuery = "" }: SearchBarProps) {
+  const [query, setQuery] = useState(initialQuery);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onSearch(query);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [query, onSearch]);
+
   return (
     <div className="relative w-full max-w-3xl mx-auto mb-6">
       <input
         type="text"
-        placeholder="Search for books, movies, and more"
-        className="w-full p-3 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#2F5FFF] text-sm"
+        placeholder="Search for books"
+        className="w-full p-3 pl-10 border border-gray-300 bg-[#E9F3FF] rounded-full focus:outline-none focus:ring-2 focus:ring-[#2F5FFF] text-sm"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
       />
       <svg
         className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -34,36 +52,112 @@ function SearchBar() {
   );
 }
 
-function FilterDropdowns() {
+// --- Reusable FilterDropdowns Component ---
+interface FilterDropdownsProps {
+  onFilterChange: (filters: {
+    genre?: string;
+    subject?: string;
+    age?: string;
+    level?: string;
+  }) => void;
+  currentFilters: {
+    genre?: string;
+    subject?: string;
+    age?: string;
+    level?: string;
+  };
+}
+
+function FilterDropdowns({
+  onFilterChange,
+  currentFilters,
+}: FilterDropdownsProps) {
+  const genres = [
+    "Fantasy",
+    "Mystery",
+    "Science Fiction",
+    "Adventure",
+    "Picture Book",
+    "All",
+  ];
+  const academicSubjects = ["Science", "History", "Math", "Art", "All"];
+  const ageGroups = ["6-8 years", "8-10 years", "9-12 years", "All Ages"];
+  const levels = ["Beginner", "Intermediate", "Advanced", "General"];
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    // If "All" or empty string is selected, set to undefined to remove from filters
+    onFilterChange({
+      ...currentFilters,
+      [name]:
+        value === "" ||
+        value === "All" ||
+        value === "All Ages" ||
+        value === "General"
+          ? undefined
+          : value,
+    });
+  };
+
   return (
     <div className="flex flex-wrap gap-4 mb-8 justify-center">
-      <select className="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700">
-        <option>Genre</option>
-        <option>Fantasy</option>
-        <option>Mystery</option>
-        <option>Science Fiction</option>
+      <select
+        name="genre"
+        value={currentFilters.genre || ""}
+        onChange={handleSelectChange}
+        className="border border-gray-300 rounded-md px-4 py-2 text-sm bg-[#49454F1A] text-gray-700"
+      >
+        <option value="">Genre</option>
+        {genres.map((g) => (
+          <option key={g} value={g}>
+            {g}
+          </option>
+        ))}
       </select>
-      <select className="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700">
-        <option>Academic Subject</option>
-        <option>Science</option>
-        <option>History</option>
+      <select
+        name="subject"
+        value={currentFilters.subject || ""}
+        onChange={handleSelectChange}
+        className="border border-gray-300 rounded-md px-4 py-2 text-sm bg-[#49454F1A] text-gray-700"
+      >
+        <option value="">Academic Subject</option>
+        {academicSubjects.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
       </select>
-      <select className="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700">
-        <option>Age Group</option>
-        <option>6-8 years</option>
-        <option>8-10 years</option>
-        <option>9-12 years</option>
+      <select
+        name="age"
+        value={currentFilters.age || ""}
+        onChange={handleSelectChange}
+        className="border border-gray-300 rounded-md px-4 py-2 text-sm bg-[#49454F1A] text-gray-700"
+      >
+        <option value="">Age Group</option>
+        {ageGroups.map((a) => (
+          <option key={a} value={a}>
+            {a}
+          </option>
+        ))}
       </select>
-      <select className="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700">
-        <option>Level</option>
-        <option>Beginner</option>
-        <option>Intermediate</option>
-        <option>Advanced</option>
+      <select
+        name="level"
+        value={currentFilters.level || ""}
+        onChange={handleSelectChange}
+        className="border border-gray-300 rounded-md px-4 py-2 text-sm bg-[#49454F1A] text-gray-700"
+      >
+        <option value="">Level</option>
+        {levels.map((l) => (
+          <option key={l} value={l}>
+            {l}
+          </option>
+        ))}
       </select>
     </div>
   );
 }
 
+// --- BookDetailsModal (from your provided code - no UI changes) ---
 function BookDetailsModal({
   book,
   onClose,
@@ -96,28 +190,27 @@ function BookDetailsModal({
           </svg>
         </button>
 
-        <div className="flex flex-col items-center mb-6">
-          {/* Placeholder for the character image in the modal */}
-          <Image
-            src="/public/assets/images/Magic-house.svg"
-            alt="Character"
-            width={150}
-            height={150}
-            className="object-contain mb-4"
-            unoptimized
-          />
-          <h2 className="text-2xl font-bold text-gray-900 text-center">
-            {book.title}
-          </h2>
-          <p className="text-md text-gray-700 mt-1">By {book.author}</p>
-          <p className="text-sm text-gray-500 mt-0.5">
+        <div className="flex flex-col mb-6">
+          <div className="flex flex-col items-center mb-6">
+            <Image
+              src="/assets/images/dora.svg"
+              alt="Character"
+              width={550}
+              height={200}
+              className="object-contain mb-4"
+              unoptimized
+            />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">{book.title}</h2>
+          <p className="text-md text-gray-700 mt-2">By {book.author}</p>
+          <p className="text-sm text-gray-500 mt-2">
             Age Range: {book.ageRange} | Level: {book.level}
           </p>
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-2 mt-3">
             {book.tags.map((tag, index) => (
               <span
                 key={index}
-                className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                className="bg-[#E2E8F0] text-[#1E1E1E] text-xs font-medium px-2.5 py-0.5 rounded-full"
               >
                 {tag}
               </span>
@@ -162,24 +255,30 @@ function BookDetailsModal({
         </div>
 
         <div className="mt-8 flex justify-between items-center">
-          <button
-            onClick={() => onLeaveFeedback(book)}
-            className="px-6 py-2 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200"
-          >
-            Leave Feedback
-          </button>
-          <button className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-            Add to Library
-          </button>
-          <button className="text-gray-500 hover:text-gray-700 transition-colors duration-200">
-            Report
-          </button>
+          <div className="mt-8 flex justify-between items-center space-x-4">
+            <button
+              onClick={() => onLeaveFeedback(book)}
+              className="px-4 py-2 bg-[#2F5FFF] text-white text-sm rounded-4xl hover:bg-[#1d46ff] transition-colors duration-200"
+            >
+              Leave Feedback
+            </button>
+            <button className="px-4 py-2 border border-[#2F5FFF] text-sm rounded-4xl text-[#2F5FFF] hover:bg-gray-100 transition-colors duration-200">
+              Add to Library
+            </button>
+          </div>
+
+          <div className="mt-8 flex justify-between items-center">
+            <button className="text-[#1E1E1E] px-4 py-2 border text-sm rounded-4xl bg-[#E2E8F0] hover:text-gray-700 transition-colors duration-200">
+              Report
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
+// --- FeedbackModal (from your provided code - no UI changes) ---
 function FeedbackModal({
   book,
   onClose,
@@ -254,6 +353,7 @@ function FeedbackModal({
   );
 }
 
+// --- Main Page Component ---
 export default function BooksRecommendationsPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -262,12 +362,43 @@ export default function BooksRecommendationsPage() {
   const [showBookDetailsModal, setShowBookDetailsModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
+  // State for search and filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<{
+    genre?: string;
+    subject?: string;
+    age?: string;
+    level?: string;
+  }>({});
+
+  // Memoized callback for search to prevent re-renders of SearchBar
+  const handleSearch = useCallback((query: string) => {
+    setSearchTerm(query);
+  }, []);
+
+  // Memoized callback for filters to prevent re-renders of FilterDropdowns
+  const handleFilterChange = useCallback(
+    (newFilters: {
+      genre?: string;
+      subject?: string;
+      age?: string;
+      level?: string;
+    }) => {
+      setFilters(newFilters);
+    },
+    []
+  );
+
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
         setError(null);
-        const fetchedBooks = await bookApi.getBooks();
+        // Pass search term and filters to the API call
+        const fetchedBooks = await bookApi.getBooks({
+          query: searchTerm,
+          ...filters,
+        });
         setBooks(fetchedBooks);
       } catch (err) {
         console.error("Failed to fetch books:", err);
@@ -278,7 +409,7 @@ export default function BooksRecommendationsPage() {
     };
 
     fetchBooks();
-  }, []);
+  }, [searchTerm, filters]); // Re-fetch books when search term or filters change
 
   const handleBookCardClick = (book: Book) => {
     setSelectedBook(book);
@@ -321,10 +452,13 @@ export default function BooksRecommendationsPage() {
       <main className="flex-1 p-8">
         <div className="max-w-6xl mx-auto">
           {/* Search Bar */}
-          <SearchBar />
+          <SearchBar onSearch={handleSearch} initialQuery={searchTerm} />
 
           {/* Filter Dropdowns */}
-          <FilterDropdowns />
+          <FilterDropdowns
+            onFilterChange={handleFilterChange}
+            currentFilters={filters}
+          />
 
           <h2 className="text-xl font-semibold text-gray-800 mb-6">
             Books Recommended

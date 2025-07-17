@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useParentStore } from "@/stores/useParentStores"; // Ensure this path is correct
+import { useParentStore } from "@/stores/useParentStores";
 
 export default function RegisterParentData() {
   const router = useRouter();
-  const { setProfile, token } = useParentStore(); // Destructure token from useParentStore
+  const { setProfile, token } = useParentStore();
 
   const [step, setStep] = useState(1);
 
@@ -65,7 +65,6 @@ export default function RegisterParentData() {
   const handleSubmit = async () => {
     if (!validateStep2()) return;
 
-    // Update Zustand store with all profile data before API call
     setProfile({
       firstName: first,
       lastName: last,
@@ -79,7 +78,6 @@ export default function RegisterParentData() {
       language,
     });
 
-    // Check if token exists before making API call
     if (!token) {
       console.error("No authentication token found. Please log in first.");
       setErrors((prev) => ({

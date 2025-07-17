@@ -167,7 +167,7 @@ export default function ParentProfileHeader() {
             href={
               isProfileCompleted()
                 ? "/parent/verify-parent-account"
-                : "/register-parent-data"
+                : "/parent/register-parent-data"
             }
             className="mt-6 md:mt-0 bg-[#2F5FFF] hover:bg-[#1d46ff] text-white px-6 py-2 rounded shadow-md transition-colors duration-200"
           >

@@ -8,7 +8,7 @@ const steps = ["Complete Profile", "Verify Account", "Add Child's Profile"];
 
 export default function ParentProgressCard({ progressStep }: Props) {
   return (
-    <div className="max-w-5xl mx-auto h-66 mt-6 grid grid-cols-1 md:grid-cols-10 gap-6">
+    <div className="max-w-5xl mx-auto h-66 mt-2 grid grid-cols-1 md:grid-cols-10 gap-6">
       <div className="bg-white p-14 rounded-xl shadow col-span-1 md:col-span-7 items-center justify-center text-center">
         <h2 className="text-xl font-semibold mb-2">
           You&apos;re Almost There!

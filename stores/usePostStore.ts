@@ -1,26 +1,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ChildPost } from '@/types/child'; // Ensure this path is correct
+import { ChildPost } from '@/types/child';
 
-// Define your initial mock posts here, so they are part of the store's initial state
+
 const initialMockPosts: ChildPost[] = [
   {
     id: "1",
     authorName: "Alex Thompson",
-    authorAvatar: "/assets/images/kiddp.svg", // Placeholder avatar
+    authorAvatar: "/assets/images/kiddp.svg", 
     timeAgo: "4h",
     edited: true,
     content: "Just finished my volcano science project! It actually erupted! 🌋 #ScienceExperiments #Volcano",
-    image: "/assets/images/kid-volcano.svg", // Placeholder post image
+    image: "/assets/images/kid-volcano.svg", 
     tags: ["#ScienceExperiments", "#Volcano"],
   },
   {
     id: "2",
     authorName: "Emma Thompson",
-    authorAvatar: "/assets/images/kiddp.svg", // Placeholder avatar
+    authorAvatar: "/assets/images/kiddp.svg",
     timeAgo: "1h",
     content: "I finished reading 'The Magical Treehouse' series! It was so exciting. What should I read next? #books #reading 📚",
-    image: "/assets/images/kidsRabbit.svg", // Placeholder post image
+    image: "/assets/images/kidsRabbit.svg", 
     tags: ["#books", "#reading"],
   },
 ];
@@ -30,10 +30,10 @@ interface PostState {
 }
 
 interface PostActions {
-  setPosts: (posts: ChildPost[]) => void; // Added setPosts action
+  setPosts: (posts: ChildPost[]) => void; 
   addPost: (post: ChildPost) => void;
-  updatePost: (postId: string, updatedFields: Partial<ChildPost>) => void; // Added updatePost action
-  deletePost: (postId: string) => void; // Added deletePost action
+  updatePost: (postId: string, updatedFields: Partial<ChildPost>) => void; 
+  deletePost: (postId: string) => void;
 }
 
 type PostStore = PostState & PostActions;
@@ -41,17 +41,17 @@ type PostStore = PostState & PostActions;
 export const usePostStore = create<PostStore>()(
   persist(
     (set) => ({
-      posts: initialMockPosts, // Initialize with your mock posts
+      posts: initialMockPosts, 
 
-      // Action to set all posts (e.g., after fetching from API)
+     
       setPosts: (newPosts) => set({ posts: newPosts }),
 
-      // Action to add a new post
+     
       addPost: (post) => set((state) => ({
-        posts: [post, ...state.posts], // Add new post to the beginning of the array
+        posts: [post, ...state.posts], 
       })),
 
-      // Action to update an existing post
+     
       updatePost: (postId, updatedFields) =>
         set((state) => ({
           posts: state.posts.map((post) =>
@@ -59,14 +59,14 @@ export const usePostStore = create<PostStore>()(
           ),
         })),
 
-      // Action to delete a post
+     
       deletePost: (postId) =>
         set((state) => ({
           posts: state.posts.filter((post) => post.id !== postId),
         })),
     }),
     {
-      name: 'child-posts-storage', // Name for localStorage key
+      name: 'child-posts-storage', 
     }
   )
 );

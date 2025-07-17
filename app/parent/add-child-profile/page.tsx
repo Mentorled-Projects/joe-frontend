@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { useParentStore } from "@/stores/useParentStores";
 import { useChildStore } from "@/stores/useChildStores";
+import Image from "next/image";
 
 function FormGroup({
   label,
@@ -69,6 +69,85 @@ function SelectGroup({
           <option key={o}>{o}</option>
         ))}
       </select>
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
+  );
+}
+
+// Custom MultiSelectGroup component for dropdown with checkboxes
+function MultiSelectGroup({
+  label,
+  value, // This will be an array of selected strings
+  setValue, // This will update the array of selected strings
+  options,
+  error,
+  placeholder = "Select",
+}: {
+  label: string;
+  value: string[];
+  setValue: (v: string[]) => void;
+  options: string[];
+  error?: string;
+  placeholder?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleOptionClick = (option: string) => {
+    if (value.includes(option)) {
+      setValue(value.filter((item) => item !== option));
+    } else {
+      setValue([...value, option]);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <label className="block text-[16px] font-medium mb-2">{label}</label>
+      <div
+        className="input-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2F5FFF] cursor-pointer flex justify-between items-center"
+        onClick={handleToggle}
+      >
+        {value.length > 0 ? value.join(", ") : placeholder}
+        <svg
+          className={`w-4 h-4 transform transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          ></path>
+        </svg>
+      </div>
+      {isOpen && (
+        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 shadow-lg max-h-48 overflow-y-auto">
+          {options.map((option) => (
+            <div
+              key={option}
+              className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100"
+              onClick={() => handleOptionClick(option)}
+            >
+              <input
+                type="checkbox"
+                checked={value.includes(option)}
+                readOnly // Make it read-only as clicks are handled by the div
+                className="mr-2 h-4 w-4 text-[#2F5FFF] rounded focus:ring-[#2F5FFF]"
+              />
+              {option}
+            </div>
+          ))}
+        </div>
+      )}
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   );
@@ -148,21 +227,15 @@ export default function AddChildProfilePage() {
     gender: childProfile.gender || "",
     dob: childProfile.dateOfBirth || "",
     schoolName: childProfile.schoolName || "",
-    // Ensure schoolClass is always a string
-    schoolClass:
-      typeof childProfile.Class === "string" ? childProfile.Class : "",
-    favoriteSubjects:
-      typeof childProfile.favoriteSubjects === "string"
-        ? childProfile.favoriteSubjects
-        : "",
-    interests:
-      typeof childProfile.interests === "string" ? childProfile.interests : "",
-    sports: typeof childProfile.sports === "string" ? childProfile.sports : "",
+    schoolClass: childProfile.Class || "",
+    favoriteSubjects: childProfile.favoriteSubjects || [], // Initialize as array
+    interests: childProfile.interests || [], // Initialize as array
+    sports: childProfile.sports || [], // Initialize as array
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | string[]) => {
     setForm({ ...form, [field]: value });
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
@@ -177,9 +250,12 @@ export default function AddChildProfilePage() {
     } else if (currentStep === 2) {
       if (!form.schoolName) newErrors.schoolName = "School name is required";
       if (!form.schoolClass) newErrors.schoolClass = "Class is required";
+      // Favorite subjects are optional, no validation needed here.
     } else if (currentStep === 3) {
-      if (!form.interests) newErrors.interests = "Interest is required";
-      if (!form.sports) newErrors.sports = "Sport is required";
+      if (form.interests.length === 0)
+        newErrors.interests = "At least one interest is required";
+      if (form.sports.length === 0)
+        newErrors.sports = "At least one sport/game is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -198,28 +274,50 @@ export default function AddChildProfilePage() {
   };
 
   const submitProfile = async () => {
+    // Update childProfile store with current form data
     setChildProfile({
-      ...form,
-      interests: form.interests
-        ? form.interests.split(",").map((s) => s.trim())
-        : [],
+      firstName: form.firstName,
+      lastName: form.lastName,
+      middleName: form.middleName,
+      gender: form.gender,
+      dateOfBirth: form.dob,
+      schoolName: form.schoolName,
+      Class: form.schoolClass,
+      favoriteSubjects: form.favoriteSubjects, // Sent as array
+      interests: form.interests, // Sent as array
+      sports: form.sports, // Sent as array
     });
 
     setCreating(true);
     setErrors({});
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/child/add-child`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!API_BASE_URL) {
+        throw new Error(
+          "NEXT_PUBLIC_API_URL is not defined in environment variables."
+        );
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/child/add-child`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          middleName: form.middleName,
+          gender: form.gender,
+          dateOfBirth: form.dob,
+          schoolName: form.schoolName,
+          Class: form.schoolClass,
+          favoriteSubjects: form.favoriteSubjects, // Sent as array
+          interests: form.interests, // Sent as array
+          sports: form.sports, // Sent as array
+        }),
+      });
 
       if (res.ok) {
         setTimeout(() => {
@@ -299,17 +397,17 @@ export default function AddChildProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen  flex flex-col bg-[#F5F5F5]">
-      {/* <header className="h-14 flex items-center px-6 bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+    <div className="min-h-screen flex flex-col bg-[#F5F5F5]">
+      <header className="h-14 flex items-center px-6 bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
         <Image
           src="/assets/icons/Logo.svg"
           alt="Peenly"
           width={100}
           height={32}
         />
-      </header> */}
+      </header>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 mt-12">
         <aside className="w-80 bg-white flex flex-col items-center py-10 space-y-6">
           <h2 className="text-[22px] font-semibold mb-8">Child Profile</h2>
 
@@ -394,7 +492,7 @@ export default function AddChildProfilePage() {
                   error={errors.schoolClass}
                 />
                 <div className="md:col-span-2">
-                  <SelectGroup
+                  <MultiSelectGroup // Using MultiSelectGroup
                     label="Favorite subjects"
                     placeholder="Select favorite"
                     value={form.favoriteSubjects}
@@ -408,7 +506,7 @@ export default function AddChildProfilePage() {
 
             {step === 3 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <SelectGroup
+                <MultiSelectGroup // Using MultiSelectGroup
                   label="Interests"
                   placeholder="Select interest"
                   value={form.interests}
@@ -416,7 +514,7 @@ export default function AddChildProfilePage() {
                   options={interestsOptions}
                   error={errors.interests}
                 />
-                <SelectGroup
+                <MultiSelectGroup // Using MultiSelectGroup
                   label="Favorite sports/games"
                   placeholder="Select"
                   value={form.sports}

@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-
 import { useChildStore } from "@/stores/useChildStores";
 
 export default function ChildProfileCard() {
   const { childProfile } = useChildStore();
 
-  const childAvatar = childProfile?.image || "/assets/images/avatar.png";
+  const childAvatar = childProfile?.image || "/assets/images/kiddp-profile.svg";
+  const childBanner = childProfile?.banner || "/assets/images/kid-banner.svg";
 
   const childName = `${childProfile.firstName || "Child"} ${
     childProfile.lastName || "Name"
@@ -34,12 +34,21 @@ export default function ChildProfileCard() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-      <div className="relative h-32 bg-gray-200 rounded-lg overflow-hidden"></div>
+      {/* Banner Image */}
+      <div className="relative h-32 rounded-lg overflow-hidden">
+        <Image
+          src={childBanner}
+          alt="Child Banner"
+          layout="fill"
+          objectFit="cover"
+          className="w-full h-full"
+          unoptimized
+        />
+      </div>
 
+      {/* Profile Picture */}
       <div className="relative -mt-16 flex justify-start">
         <div className="w-28 h-28 rounded-full border-4 border-white overflow-hidden shadow-md bg-gray-300 flex items-center justify-center ml-4">
-          {" "}
-          {/* Added ml-4 for left margin */}
           <Image
             src={childAvatar}
             alt="Child Profile"
@@ -51,7 +60,7 @@ export default function ChildProfileCard() {
         </div>
       </div>
 
-      {/* Removed text-center from this div */}
+      {/* Child Info */}
       <div className="mt-4 px-4 pb-4">
         <h1 className="text-xl font-semibold text-gray-800">{childName}</h1>
         <p className="text-sm text-gray-600 mt-1">

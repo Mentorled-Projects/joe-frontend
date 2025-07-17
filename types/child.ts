@@ -1,4 +1,4 @@
-
+// types/child.ts
 
 export interface ChildPost {
   id: string;
@@ -8,7 +8,7 @@ export interface ChildPost {
   edited?: boolean; 
   content: string;
   image?: string | null; 
-  tags?: string[];
+  tags?: string[]; 
 }
 
 export interface RecommendationItem {
@@ -18,7 +18,6 @@ export interface RecommendationItem {
   imageUrl: string; 
 }
 
-
 export interface Book {
   id: string;
   title: string;
@@ -26,13 +25,13 @@ export interface Book {
   imageUrl: string;
   ageRange: string;
   level: string;
-  tags: string[]; // e.g., ["Science", "Adventure"]
-  rating: number; // e.g., 4.5
-  reviewsCount: number; // e.g., 125
+  tags: string[]; 
+  rating: number; 
+  reviewsCount: number; 
   summary: string;
   learningOutcomes: string;
   whyRecommend: string;
-  ratingsBreakdown: { // For the detailed rating bar chart
+  ratingsBreakdown: { 
     5: number; 
     4: number; 
     3: number; 
@@ -41,9 +40,34 @@ export interface Book {
   };
 }
 
-// NEW: Feedback interface
+
+export interface Movie {
+  id: string;
+  title: string;
+  imageUrl: string;
+  genre: string[]; 
+  familyFriendlyRating: string; 
+  ageRange: string;
+  level: string; 
+  rating: number; 
+  reviewsCount: number; 
+  summary: string;
+  learningOutcomes: string;
+  whyRecommend: string;
+  videoUrl?: string; 
+  ratingsBreakdown: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+}
+
+
 export interface Feedback {
-  bookId: string;
+  bookId?: string; 
+  movieId?: string; 
   content: string;
   rating?: number; 
 }

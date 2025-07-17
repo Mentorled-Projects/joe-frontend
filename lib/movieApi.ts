@@ -7,7 +7,7 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const TMDB_YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
 
-const FAMILY_GENRE_ID = 10751;
+const FAMILY_GENRE_ID = 10751; // TMDb Genre ID for Family movies
 
 interface TmdbMovieResult {
   id: number;
@@ -18,6 +18,7 @@ interface TmdbMovieResult {
   vote_average: number;
   vote_count: number;
   release_date: string;
+  adult: boolean; // Added for explicit check
 }
 
 interface TmdbDiscoverResponse {
@@ -36,6 +37,7 @@ interface TmdbMovieDetail {
   vote_average: number;
   vote_count: number;
   release_date: string;
+  adult: boolean; // Added for explicit check
   videos?: {
     results: {
       id: string;
@@ -45,6 +47,7 @@ interface TmdbMovieDetail {
       type: string;
     }[];
   };
+  // certifications?: { US?: { certification: string; meaning: string; order: number; }[] };
 }
 
 
@@ -52,12 +55,10 @@ const getGenreNames = (genreIds: number[], allGenres: { id: number; name: string
   return genreIds.map(id => allGenres.find(genre => genre.id === id)?.name || 'Unknown').filter(name => name !== 'Unknown');
 };
 
-
-let cachedTmdbGenres: { id: number; name: string }[] | null = null;
+let cachedTmdbGenres: { id: number; name: string }[] = [];
 async function fetchTmdbGenres(): Promise<{ id: number; name: string }[]> {
-  if (cachedTmdbGenres) {
-   
-    return cachedTmdbGenres ?? [];
+  if (cachedTmdbGenres.length > 0) {
+    return cachedTmdbGenres;
   }
   try {
     const response = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}`);
@@ -66,7 +67,7 @@ async function fetchTmdbGenres(): Promise<{ id: number; name: string }[]> {
     }
     const data = await response.json();
     cachedTmdbGenres = data.genres;
-    return cachedTmdbGenres ?? [];
+    return cachedTmdbGenres;
   } catch (error) {
     console.error("Error fetching TMDb genres:", error);
     return [];
@@ -90,6 +91,8 @@ const movieApi = {
     params.append('sort_by', 'popularity.desc');
 
     params.append('with_genres', String(FAMILY_GENRE_ID));
+    params.append('certification_country', 'US');
+    params.append('certification.lte', 'PG');
 
     if (filters?.query) {
       url = `${TMDB_BASE_URL}/search/movie`;
@@ -111,9 +114,7 @@ const movieApi = {
             case 'PG-13': certification = 'PG-13'; break;
         }
         if (certification) {
-            params.append('certification_country', 'US');
-            params.append('certification_country', 'UK');
-            params.append('certification', certification);
+            params.set('certification.lte', certification);
         }
     }
 
@@ -126,7 +127,9 @@ const movieApi = {
       }
       const data: TmdbDiscoverResponse = await response.json();
 
-      const movies: Movie[] = data.results.map((item: TmdbMovieResult) => ({
+      const filteredTmdbResults = data.results.filter(item => !item.adult);
+
+      const movies: Movie[] = filteredTmdbResults.map((item: TmdbMovieResult) => ({
         id: String(item.id),
         title: item.title,
         imageUrl: item.poster_path ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}` : "https://placehold.co/200x300/E0E0E0/666666?text=No+Poster",
@@ -174,6 +177,11 @@ const movieApi = {
         throw new Error(`HTTP error! status: ${movieDetailResponse.status}`);
       }
       const item: TmdbMovieDetail = await movieDetailResponse.json();
+
+      if (item.adult) {
+        console.warn(`Attempted to fetch adult movie details for ID: ${id}. Blocking.`);
+        return undefined;
+      }
 
       let videoUrl: string | undefined;
       const trailer = item.videos?.results.find(v => v.site === "YouTube" && v.type === "Trailer");

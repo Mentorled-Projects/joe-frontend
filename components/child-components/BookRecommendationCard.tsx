@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { RecommendationItem } from "@/types/child";
 
-// Mock data for book recommendations (replace with actual API data later)
 const mockBooks: RecommendationItem[] = [
   {
     id: "b1",
@@ -47,8 +46,8 @@ export default function BookRecommendationCard() {
               <Image
                 src={book.imageUrl}
                 alt={book.title}
-                width={100} // Adjust width/height for consistent card size
-                height={112} // Adjust width/height for consistent card size
+                width={100}
+                height={112}
                 className="object-cover w-full h-full"
                 unoptimized
               />

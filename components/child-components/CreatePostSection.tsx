@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react"; // Corrected import statement
+import { useState } from "react";
 import { FiVideo, FiImage, FiEdit3 } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { useChildStore } from "@/stores/useChildStores";
@@ -13,7 +13,7 @@ import { useParentStore } from "@/stores/useParentStores";
 export default function CreatePostSection() {
   const { childProfile } = useChildStore();
   const { addPost } = usePostStore();
-  const { profile: parentProfile } = useParentStore();
+  const { profile: parentProfile, token: parentToken } = useParentStore();
 
   const childAvatar = childProfile?.image || "/assets/images/avatar.png";
 
@@ -25,6 +25,7 @@ export default function CreatePostSection() {
     null
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
 
   const handleOpenModal = () => {
     setShowPostModal(true);
@@ -37,6 +38,7 @@ export default function CreatePostSection() {
     setPostVideoFile(null);
     setPostMediaPreviewUrl(null);
     setIsUploading(false);
+    setIsPosting(false);
   };
 
   const handleFileChange = (
@@ -71,10 +73,15 @@ export default function CreatePostSection() {
     }
 
     const phoneNumber = parentProfile?.phoneNumber;
-    if ((postImageFile || postVideoFile) && !phoneNumber) {
-      alert(
-        "Phone number is required to upload media. Please complete your parent profile."
-      );
+    const childId = parentProfile?.childId;
+    const token = parentToken;
+
+    if (!childId) {
+      alert("Child ID not found. Cannot create post.");
+      return;
+    }
+    if (!token) {
+      alert("Authentication token not found. Please log in again.");
       return;
     }
 
@@ -86,7 +93,8 @@ export default function CreatePostSection() {
         const fileToUpload = postImageFile || postVideoFile;
         if (fileToUpload && phoneNumber) {
           const response = await uploadFile(fileToUpload, phoneNumber);
-          uploadedMediaUrl = response?.url || response;
+          uploadedMediaUrl =
+            (response as { url: string })?.url || (response as string);
         }
       } catch (error) {
         console.error("Error uploading media:", error);
@@ -98,20 +106,61 @@ export default function CreatePostSection() {
       }
     }
 
-    const newPost: ChildPost = {
-      id: Date.now().toString(),
-      authorName: `${childProfile.firstName || "Child"} ${
-        childProfile.lastName || "User"
-      }`,
-      authorAvatar: childAvatar,
-      timeAgo: "Just now",
-      content: postContent,
-      image: uploadedMediaUrl,
-      tags: [],
-    };
+    setIsPosting(true);
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!API_BASE_URL) {
+        throw new Error(
+          "NEXT_PUBLIC_API_URL is not defined in environment variables."
+        );
+      }
 
-    addPost(newPost);
-    handleCloseModal();
+      const payload = {
+        child: childId,
+        content: postContent,
+        image: uploadedMediaUrl,
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/post/add-post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const newPost: ChildPost = {
+          id: Date.now().toString(),
+          authorName: `${childProfile.firstName || "Child"} ${
+            childProfile.lastName || "User"
+          }`,
+          authorAvatar: childAvatar,
+          timeAgo: "Just now",
+          content: postContent,
+          image: uploadedMediaUrl,
+          tags: [],
+        };
+        addPost(newPost);
+        alert("Post created successfully!");
+        handleCloseModal();
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to create post.");
+      }
+    } catch (err: unknown) {
+      console.error("Failed to create post:", err);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : "Please try again.";
+      alert(`Error creating post: ${errorMessage}`);
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -246,6 +295,7 @@ export default function CreatePostSection() {
               <button
                 className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
                 onClick={handleCloseModal}
+                disabled={isPosting} // Disable cancel while posting
               >
                 Cancel
               </button>
@@ -254,10 +304,15 @@ export default function CreatePostSection() {
                 onClick={handlePost}
                 disabled={
                   isUploading ||
+                  isPosting || // Disable if posting
                   (!postContent.trim() && !postImageFile && !postVideoFile)
                 }
               >
-                {isUploading ? "Uploading..." : "Post"}
+                {isUploading
+                  ? "Uploading..."
+                  : isPosting
+                  ? "Posting..."
+                  : "Post"}
               </button>
             </div>
           </div>

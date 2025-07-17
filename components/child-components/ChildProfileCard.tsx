@@ -36,7 +36,6 @@ export default function ChildProfileCard() {
     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
       <div className="relative h-32 bg-gray-200 rounded-lg overflow-hidden"></div>
 
-      {/* Changed flex justify-center to flex justify-start and removed px-4 from this div */}
       <div className="relative -mt-16 flex justify-start">
         <div className="w-28 h-28 rounded-full border-4 border-white overflow-hidden shadow-md bg-gray-300 flex items-center justify-center ml-4">
           {" "}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Import useEffect
 import { MdEdit } from "react-icons/md";
 import { IoMdAdd, IoMdClose } from "react-icons/io";
 import { FaArrowRight } from "react-icons/fa";
@@ -10,48 +10,213 @@ import { useParentStore } from "@/stores/useParentStores";
 import { uploadFile } from "@/stores/uploadService";
 import Image from "next/image";
 
+// Define Milestone interface to ensure type safety
+interface Milestone {
+  title: string;
+  description: string;
+  date: string;
+  imageUrl?: string;
+}
+
 export default function ChildMilestones() {
   const { childProfile, setChildProfile } = useChildStore();
-  const { profile } = useParentStore();
+  const { profile, token } = useParentStore();
 
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [addingMilestone, setAddingMilestone] = useState(false);
+  const [loadingMilestones, setLoadingMilestones] = useState(true); // New state for loading existing milestones
+  const [errorLoadingMilestones, setErrorLoadingMilestones] = useState<
+    string | null
+  >(null); // New state for error
 
-  const deleteMilestone = (idx: number) => {
-    const filtered = childProfile.milestones.filter((_, i) => i !== idx);
+  const currentMilestones: Milestone[] = (childProfile.milestones ||
+    []) as Milestone[];
+
+  // New useEffect to fetch milestones on component mount
+  useEffect(() => {
+    const fetchMilestones = async () => {
+      // Do not set errorLoadingMilestones for missing childId/token here to avoid UI display
+      if (!profile.childId || !token) {
+        setLoadingMilestones(false);
+        // Optionally log to console for debugging, but don't set a user-facing error state
+        console.warn(
+          "Child ID or authentication token not found. Milestones cannot be fetched."
+        );
+        return;
+      }
+
+      setLoadingMilestones(true);
+      setErrorLoadingMilestones(null); // Clear any previous error
+
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        if (!API_BASE_URL) {
+          throw new Error(
+            "NEXT_PUBLIC_API_URL is not defined in environment variables."
+          );
+        }
+
+        const res = await fetch(
+          `${API_BASE_URL}/api/v1/milestones/get-milestones/${profile.childId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.milestones)) {
+            const fetchedMilestones: Milestone[] = data.milestones.map(
+              (item: Milestone) => ({
+                title: item.title,
+                description: item.description,
+                date: item.date,
+                imageUrl:
+                  item.imageUrl || "/assets/images/milestone_placeholder.png",
+              })
+            );
+            setChildProfile({ milestones: fetchedMilestones });
+          } else {
+            setChildProfile({ milestones: [] });
+          }
+        } else {
+          const errorData = await res.json();
+
+          setErrorLoadingMilestones(
+            errorData.message || "Failed to fetch milestones."
+          );
+        }
+      } catch (err: unknown) {
+        console.error("Error fetching milestones:", err);
+        if (err instanceof Error) {
+          setErrorLoadingMilestones(
+            `Failed to load milestones: ${err.message || "Please try again."}`
+          );
+        } else {
+          setErrorLoadingMilestones(
+            "Failed to load milestones: Please try again."
+          );
+        }
+      } finally {
+        setLoadingMilestones(false);
+      }
+    };
+
+    fetchMilestones();
+  }, [profile.childId, token, setChildProfile]);
+
+  const deleteMilestone = async (idx: number) => {
+    const filtered = currentMilestones.filter((_, i) => i !== idx);
     setChildProfile({ milestones: filtered });
+    alert("Milestone deleted.");
   };
 
   const handleAddMilestone = async () => {
-    if (!file || !profile?.phoneNumber) {
-      alert("Missing file or phone number.");
+    if (!title.trim() || !description.trim() || !date) {
+      alert("Please fill in all required fields (Title, Description, Date).");
       return;
     }
 
-    try {
+    if (!profile.childId) {
+      alert("Child ID not found. Cannot add milestone.");
+      return;
+    }
+    if (!token) {
+      alert("Authentication token not found. Please log in again.");
+      return;
+    }
+
+    setAddingMilestone(true);
+    setUploading(false);
+
+    let uploadedImageUrl: string | undefined;
+
+    if (file) {
       setUploading(true);
-      const response = await uploadFile(file, profile.phoneNumber);
-      const fileUrl = response?.url || response;
+      try {
+        const response = await uploadFile(
+          file,
+          profile.phoneNumber || "default"
+        );
+        uploadedImageUrl =
+          (response as { url: string })?.url || (response as string);
+        if (!uploadedImageUrl) {
+          throw new Error("File upload returned no URL.");
+        }
+      } catch (err) {
+        console.error("File upload failed:", err);
+        alert("Failed to upload image. Please try again.");
+        setAddingMilestone(false);
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
 
-      const newMilestone = { title, date, file: fileUrl };
+    try {
+      const payload = {
+        child: profile.childId,
+        title,
+        description,
+        date,
+      };
 
-      setChildProfile({
-        milestones: [...childProfile.milestones, newMilestone],
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!API_BASE_URL) {
+        throw new Error(
+          "NEXT_PUBLIC_API_URL is not defined in environment variables."
+        );
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/child/add-milestone`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
       });
 
-      setShowModal(false);
-      setTitle("");
-      setDate("");
-      setFile(null);
-    } catch (err) {
-      console.error("File upload failed:", err);
-      alert("Failed to upload file. Please try again.");
+      if (res.ok) {
+        const newMilestone: Milestone = {
+          title,
+          description,
+          date,
+          imageUrl: uploadedImageUrl,
+        };
+        setChildProfile({
+          milestones: [...currentMilestones, newMilestone],
+        });
+        alert("Milestone added successfully!");
+        setShowModal(false);
+        setTitle("");
+        setDescription("");
+        setDate("");
+        setFile(null);
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to add milestone.");
+      }
+    } catch (err: unknown) {
+      console.error("Failed to add milestone:", err);
+      if (err instanceof Error) {
+        alert(`Error adding milestone: ${err.message || "Please try again."}`);
+      } else {
+        alert("Error adding milestone: Please try again.");
+      }
     } finally {
-      setUploading(false);
+      setAddingMilestone(false);
     }
   };
 
@@ -61,17 +226,30 @@ export default function ChildMilestones() {
       <div className="flex justify-between items-start">
         <div>
           <h2 className="text-xl font-semibold">Milestones</h2>
-          {!childProfile.milestones.length && (
+          {/* Only show loading or specific API errors, not auth/childId missing */}
+          {loadingMilestones && (
             <p className="text-sm text-gray-500 mt-2">
-              No achievements added yet
+              Loading achievements...
             </p>
           )}
+          {errorLoadingMilestones && (
+            <p className="text-sm text-red-500 mt-2">
+              {errorLoadingMilestones}
+            </p>
+          )}
+
+          {!loadingMilestones &&
+            !errorLoadingMilestones &&
+            currentMilestones.length === 0 && (
+              <p className="text-sm text-gray-500 mt-2">
+                No achievements added yet
+              </p>
+            )}
         </div>
         <div className="flex gap-4">
           <button onClick={() => setShowModal(true)} title="Add Milestone">
             <IoMdAdd size={22} className="text-gray-600 hover:text-black" />
           </button>
-          {/* existing edit icon (future) */}
           <button onClick={() => setShowModal(true)} title="Edit Milestones">
             <MdEdit size={20} className="text-gray-600 hover:text-black" />
           </button>
@@ -79,58 +257,70 @@ export default function ChildMilestones() {
       </div>
 
       {/* cards */}
-      {childProfile.milestones.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {(showAll
-            ? childProfile.milestones
-            : childProfile.milestones.slice(0, 3)
-          ).map((m, i) => (
-            <div
-              key={i}
-              className="relative bg-white rounded-lg border shadow-sm overflow-hidden"
-            >
-              {/* delete icon */}
-              <button
-                onClick={() => deleteMilestone(i)}
-                title="Delete"
-                className="absolute top-2 right-2 bg-white/70 hover:bg-white rounded-full p-1"
-              >
-                <FiTrash size={16} className="text-red-600" />
-              </button>
+      {!loadingMilestones &&
+        !errorLoadingMilestones &&
+        currentMilestones.length > 0 && (
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {(showAll ? currentMilestones : currentMilestones.slice(0, 3)).map(
+              (m, i) => (
+                <div
+                  key={i}
+                  className="relative bg-white rounded-lg border shadow-sm overflow-hidden"
+                >
+                  {/* delete icon */}
+                  <button
+                    onClick={() => deleteMilestone(i)}
+                    title="Delete"
+                    className="absolute top-2 right-2 bg-white/70 hover:bg-white rounded-full p-1"
+                  >
+                    <FiTrash size={16} className="text-red-600" />
+                  </button>
 
-              <Image
-                src={m.file ?? "/placeholder.png"}
-                alt={m.title}
-                width={400}
-                height={192}
-                className="object-cover w-full h-48"
-                style={{ width: "100%", height: "12rem", objectFit: "cover" }}
-                unoptimized
-              />
+                  <Image
+                    src={
+                      m.imageUrl || "/assets/images/milestone_placeholder.png"
+                    }
+                    alt={m.title}
+                    width={400}
+                    height={192}
+                    className="object-cover w-full h-48"
+                    style={{
+                      width: "100%",
+                      height: "12rem",
+                      objectFit: "cover",
+                    }}
+                    unoptimized
+                  />
 
-              <div className="p-4">
-                <h3 className="font-semibold text-sm">
-                  {m.title || "Untitled"}
-                </h3>
-                <p className="text-xs text-gray-600">
-                  {m.date || "No date specified"}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-sm">
+                      {m.title || "Untitled"}
+                    </h3>
+                    <p className="text-xs text-gray-600">
+                      {m.date || "No date specified"}
+                    </p>
+                    <p className="text-xs text-gray-700 mt-1 line-clamp-2">
+                      {m.description || "No description."}
+                    </p>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        )}
 
       {/* show-all toggle */}
-      {childProfile.milestones.length > 3 && (
-        <div
-          className="mt-4 text-sm text-blue-600 hover:underline cursor-pointer flex items-center gap-1"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? "Hide" : `Show all (${childProfile.milestones.length})`}{" "}
-          <FaArrowRight className="mt-0.5" />
-        </div>
-      )}
+      {!loadingMilestones &&
+        !errorLoadingMilestones &&
+        currentMilestones.length > 3 && (
+          <div
+            className="mt-4 text-sm text-blue-600 hover:underline cursor-pointer flex items-center gap-1"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? "Hide" : `Show all (${currentMilestones.length})`}{" "}
+            <FaArrowRight className="mt-0.5" />
+          </div>
+        )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
@@ -146,11 +336,19 @@ export default function ChildMilestones() {
 
             <input
               type="text"
-              placeholder="e.g., Won a Reading Contest"
+              placeholder="e.g., Won a Reading Contest (Title)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full mb-4 p-3 border rounded-lg"
             />
+
+            <textarea
+              placeholder="Description of the milestone (e.g., completed phonics exercises)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full mb-4 p-3 border rounded-lg resize-y"
+              rows={3}
+            ></textarea>
 
             <input
               type="date"
@@ -159,13 +357,18 @@ export default function ChildMilestones() {
               className="w-full mb-4 p-3 border rounded-lg"
             />
 
-            <label className="w-full mb-7 p-2 border rounded-lg text-sm cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700">
-              {file ? file.name : "Choose image file 📁"}
+            <label className="w-full mb-7 p-2 border rounded-lg text-sm cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center">
+              {uploading
+                ? "Uploading image..."
+                : file
+                ? file.name
+                : "Choose image file 📁"}
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="hidden"
+                disabled={uploading}
               />
             </label>
 
@@ -179,9 +382,15 @@ export default function ChildMilestones() {
               <button
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 onClick={handleAddMilestone}
-                disabled={!title.trim() || !date || !file || uploading}
+                disabled={
+                  !title.trim() ||
+                  !description.trim() ||
+                  !date ||
+                  addingMilestone ||
+                  uploading
+                }
               >
-                {uploading ? "Uploading..." : "Save"}
+                {addingMilestone ? "Adding..." : "Save Milestone"}
               </button>
             </div>
           </div>

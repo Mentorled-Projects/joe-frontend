@@ -30,8 +30,10 @@ interface PostState {
 }
 
 interface PostActions {
+  setPosts: (posts: ChildPost[]) => void; // Added setPosts action
   addPost: (post: ChildPost) => void;
-  // You might add other actions later, e.g., deletePost, updatePost, fetchPosts
+  updatePost: (postId: string, updatedFields: Partial<ChildPost>) => void; // Added updatePost action
+  deletePost: (postId: string) => void; // Added deletePost action
 }
 
 type PostStore = PostState & PostActions;
@@ -41,10 +43,27 @@ export const usePostStore = create<PostStore>()(
     (set) => ({
       posts: initialMockPosts, // Initialize with your mock posts
 
+      // Action to set all posts (e.g., after fetching from API)
+      setPosts: (newPosts) => set({ posts: newPosts }),
+
       // Action to add a new post
       addPost: (post) => set((state) => ({
         posts: [post, ...state.posts], // Add new post to the beginning of the array
       })),
+
+      // Action to update an existing post
+      updatePost: (postId, updatedFields) =>
+        set((state) => ({
+          posts: state.posts.map((post) =>
+            post.id === postId ? { ...post, ...updatedFields } : post
+          ),
+        })),
+
+      // Action to delete a post
+      deletePost: (postId) =>
+        set((state) => ({
+          posts: state.posts.filter((post) => post.id !== postId),
+        })),
     }),
     {
       name: 'child-posts-storage', // Name for localStorage key

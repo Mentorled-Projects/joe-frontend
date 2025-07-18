@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware"; // Import createJSONStorage
+import { persist, createJSONStorage } from "zustand/middleware"; 
 
 interface ParentProfile {
   firstName?: string;
@@ -17,13 +17,13 @@ interface ParentProfile {
   banner?: string | null;
   verificationDocumentType?: string | null;
   phoneNumber?: string;
-  childId?: string; // Added childId property
+  childId?: string; 
 }
 
 interface ParentState {
   token: string;
   profile: ParentProfile;
-  _hasHydrated: boolean; // Added hydration flag
+  _hasHydrated: boolean; 
 }
 
 interface ParentStoreActions {
@@ -31,7 +31,7 @@ interface ParentStoreActions {
   setProfile: (profile: Partial<ParentProfile>) => void;
   resetParentState: () => void;
   isProfileCompleted: () => boolean;
-  setHasHydrated: (hasHydrated: boolean) => void; // Setter for hydration flag
+  setHasHydrated: (hasHydrated: boolean) => void; 
 }
 
 type ParentStore = ParentState & ParentStoreActions;
@@ -44,10 +44,10 @@ export const useParentStore = create<ParentStore>()(
         avatar: null,
         banner: null,
         verificationDocumentType: null,
-        phoneNumber: undefined, // Initialize phoneNumber
-        childId: undefined, // Initialize childId
+        phoneNumber: undefined, 
+        childId: undefined, 
       },
-      _hasHydrated: false, // Initialize hydration flag to false
+      _hasHydrated: false, 
 
       setToken: (token) => set({ token }),
       setProfile: (profile) =>
@@ -57,8 +57,8 @@ export const useParentStore = create<ParentStore>()(
       resetParentState: () =>
         set({
           token: "",
-          profile: {}, // Reset profile to an empty object
-          _hasHydrated: false, // Reset hydration flag on store clear
+          profile: {}, 
+          _hasHydrated: false, 
         }),
       isProfileCompleted: () => {
         const { profile } = get();
@@ -79,10 +79,10 @@ export const useParentStore = create<ParentStore>()(
     }),
     {
       name: "parent-store",
-      storage: createJSONStorage(() => localStorage), // Specify localStorage as storage
+      storage: createJSONStorage(() => localStorage), 
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.setHasHydrated(true); // Set the flag to true after rehydration
+          state.setHasHydrated(true); 
         }
       },
     }

@@ -26,7 +26,7 @@ const mockBooks: RecommendationItem[] = [
 ];
 
 export default function BookRecommendationCard() {
-  const books = mockBooks; // Using mock data for now
+  const books = mockBooks;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
@@ -64,7 +64,6 @@ export default function BookRecommendationCard() {
         ))}
       </div>
 
-      {/* See All Button */}
       <div className="mt-4 text-center">
         <Link
           href="/child/recommendations/books"

@@ -3,24 +3,26 @@ import { persist } from 'zustand/middleware';
 
 
 interface ChildProfile {
-  _id?: string; // Added _id property for consistency
+  _id?: string;
   firstName?: string;
   lastName?: string;
   middleName?: string;
   gender?: string;
-  dateOfBirth?: string; // Consistent with API
+  dateOfBirth?: string;
   schoolName?: string;
-  Class?: string; // Changed to 'Class' to match API
-  favoriteSubjects?: string[]; // Changed to string[]
-  interests?: string[]; // Changed to string[]
-  sports?: string[]; // Changed to string[]
+  Class?: string;
+  favoriteSubjects?: string[];
+  interests?: string[];
+  sports?: string[];
   image?: string | null;
-  banner?: string | null; // Added banner property
+  banner?: string | null;
   city?: string;
   country?: string;
-  age?: number; // Added age property
-  about?: string; // Added 'about' property
+  age?: number;
+  about?: string;
   education?: EducationEntry[];
+  headline?: string;
+
 }
 
 
@@ -61,17 +63,19 @@ export const useChildStore = create<ChildStore>()(
         dateOfBirth: '', // Consistent with interface and API
         schoolName: '',
         Class: '', // Consistent with interface and API
-        favoriteSubjects: [], // Initialized as empty array
-        interests: [], // Initialized as empty array
-        sports: [], // Initialized as empty array
+        favoriteSubjects: [], 
+        interests: [], 
+        sports: [], 
         image: null,
-        banner: null, // Initialize banner
+        banner: null, 
         city: '',
         country: '',
-        age: undefined, // Initialize age
-        about: '', // Initialize 'about'
+        age: undefined, 
+        about: '', 
+        education: [], 
+        headline: '', 
       },
-      // Action to update the child profile
+      
       setChildProfile: (profileData) => set((state) => ({
         childProfile: { ...state.childProfile, ...profileData }
       })),
@@ -95,6 +99,8 @@ export const useChildStore = create<ChildStore>()(
           country: '',
           age: undefined, // Reset age
           about: '', // Reset 'about'
+          education: [], 
+          headline: '', 
         }
       }),
     }),

@@ -8,13 +8,12 @@ import Image from "next/image";
 
 import { useChildStore } from "@/stores/useChildStores";
 import { useParentStore } from "@/stores/useParentStores";
-import { uploadFile } from "@/stores/uploadService"; // adjust path if needed
+import { uploadFile } from "@/stores/uploadService";
 
 export default function ChildEducation() {
   const { childProfile, setChildProfile } = useChildStore();
-  const { profile } = useParentStore(); // should have phoneNumber
+  const { profile } = useParentStore();
 
-  /* ------------ local modal state ------------ */
   const [showModal, setShowModal] = useState(false);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
@@ -29,7 +28,6 @@ export default function ChildEducation() {
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  /* ------------ helpers ------------ */
   const resetForm = () => {
     setSchoolName("");
     setCertificate("");
@@ -75,7 +73,6 @@ export default function ChildEducation() {
 
     setUploading(true);
     try {
-      /* 1. upload logo if changed or newly added */
       let logoUrl: string | null = logoPreview;
       const logoChanged = logoFile && !logoPreview?.startsWith("data:");
       if (logoFile && logoChanged && profile?.phoneNumber) {
@@ -126,7 +123,6 @@ export default function ChildEducation() {
     }
   };
 
-  /* ------------ component ------------ */
   return (
     <section className="max-w-5xl mx-auto bg-white rounded-lg shadow border border-gray-200 px-6 py-6 mb-4">
       {/* Header */}

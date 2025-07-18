@@ -6,7 +6,10 @@ import { usePathname } from "next/navigation";
 import { useParentStore } from "@/stores/useParentStores";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FiMenu } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 
+// Navigation links data
 const nav = [
   { href: "/parent/parent-profile", label: "Profile", icon: UserIcon },
   { href: "/parent/messages", label: "Messages", icon: MessageIcon },
@@ -16,7 +19,6 @@ const nav = [
     icon: FilmIcon,
   },
   { href: "/parent/HireTutor", label: "Hire a Tutor", icon: BookIcon },
-
   {
     href: "/parent/recommendations/books",
     label: "Book Recommendations",
@@ -31,18 +33,21 @@ export default function ParentHeader() {
   const profilePic = profile?.image || "/assets/images/avatar.png";
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("phoneNumber");
     setProfile({});
     setToken("");
-    router.push("/auth/signin");
+    router.push("/parent/signin");
+    setIsMobileMenuOpen(false);
   };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
       <div className="mx-auto max-w-7xl flex items-center justify-between h-17 px-6">
+        {/* Logo */}
         <Link href="/">
           <Image
             src="/assets/icons/Logo.svg"
@@ -54,7 +59,8 @@ export default function ParentHeader() {
           />
         </Link>
 
-        <nav className="flex items-center space-x-10">
+        {/* Desktop Navigation - Hidden on small screens */}
+        <nav className="hidden md:flex items-center space-x-10">
           {nav.map(({ href, label, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
@@ -82,7 +88,8 @@ export default function ParentHeader() {
           })}
         </nav>
 
-        <div className="relative flex items-center space-x-4">
+        {/* Desktop Profile & Notifications - Hidden on small screens */}
+        <div className="hidden md:flex relative items-center space-x-4">
           <BellIcon className="w-5 h-5 text-gray-600 hover:text-[#2F5FFF] cursor-pointer" />
           <div className="relative">
             <button
@@ -96,6 +103,7 @@ export default function ParentHeader() {
                   width={32}
                   height={32}
                   className="rounded-full object-cover"
+                  unoptimized
                 />
               </div>
               <svg
@@ -120,11 +128,103 @@ export default function ParentHeader() {
             )}
           </div>
         </div>
+
+        {/* Hamburger Menu Button - Visible only on small screens */}
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="text-gray-700 hover:text-[#2F5FFF] focus:outline-none"
+          >
+            <FiMenu size={24} />
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center py-6 px-4 md:hidden">
+          {/* Close button */}
+          <div className="w-full flex justify-end mb-8">
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-gray-700 hover:text-[#2F5FFF] focus:outline-none"
+            >
+              <IoMdClose size={28} />
+            </button>
+          </div>
+
+          {/* Mobile Profile Section */}
+          <div className="flex flex-col mb-8">
+            <div className="w-20 h-20 rounded-full overflow-hidden mb-2">
+              <Image
+                src={profilePic}
+                alt="Profile"
+                width={80}
+                height={80}
+                className="rounded-full object-cover"
+                unoptimized
+              />
+            </div>
+            <p className="font-semibold text-lg">
+              {profile?.firstName || "Parent"}
+            </p>
+            <button
+              onClick={() => {
+                setDropdownOpen((prev) => !prev);
+                // Optionally navigate to profile page on click
+                router.push("/parent/parent-profile");
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-sm text-[#2F5FFF] hover:underline mt-1"
+            >
+              View Profile
+            </button>
+          </div>
+
+          {/* Mobile Navigation Links */}
+          <nav className="flex flex-col items-center space-y-6 w-full">
+            {nav.map(({ href, label, icon: Icon }) => {
+              const active = pathname.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setIsMobileMenuOpen(false)} // Close menu on link click
+                  className="flex items-center space-x-3 w-full px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
+                >
+                  <Icon
+                    className={`w-6 h-6 ${
+                      active ? "text-[#2F5FFF]" : "text-gray-700"
+                    }`}
+                  />
+                  <span
+                    className={`text-lg ${
+                      active ? "text-[#2F5FFF] font-medium" : "text-gray-700"
+                    }`}
+                  >
+                    {label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Mobile Logout Button */}
+          <div className="mt-15 w-full px-4 py-4">
+            <button
+              onClick={handleLogout}
+              className="w-full py-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
 
+// SVG Icons (unchanged)
 function BookIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" {...props}>

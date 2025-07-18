@@ -15,7 +15,7 @@ const SignInPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [countryCode, setCountryCode] = useState("+234"); // Default to Nigeria
+  const [countryCode, setCountryCode] = useState("+234");
 
   const router = useRouter();
   const { setToken } = useParentStore();
@@ -58,7 +58,7 @@ const SignInPage = () => {
         setToken(token);
       }
 
-      router.push("/parent-profile");
+      router.push("/parent/parent-profile");
     } catch (err: unknown) {
       console.error("Login failed:", err);
       setError("Invalid credentials. Please try again.");

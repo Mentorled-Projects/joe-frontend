@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 
 // Define the shape of the ChildProfile
 interface ChildProfile {
+  _id?: string; // Added _id property for consistency
   firstName?: string;
   lastName?: string;
   middleName?: string;
@@ -18,6 +19,7 @@ interface ChildProfile {
   city?: string;
   country?: string;
   age?: number; // Added age property
+  about?: string; // Added 'about' property
 }
 
 // Define the shape of the ChildStore's state
@@ -41,6 +43,7 @@ export const useChildStore = create<ChildStore>()(
     (set) => ({
       // Initial state for the 'childProfile' object
       childProfile: {
+        _id: undefined, // Initialize _id
         firstName: '',
         lastName: '',
         middleName: '',
@@ -56,6 +59,7 @@ export const useChildStore = create<ChildStore>()(
         city: '',
         country: '',
         age: undefined, // Initialize age
+        about: '', // Initialize 'about'
       },
       // Action to update the child profile
       setChildProfile: (profileData) => set((state) => ({
@@ -64,6 +68,7 @@ export const useChildStore = create<ChildStore>()(
       // Action to reset child profile
       resetChildProfile: () => set({
         childProfile: {
+          _id: undefined, // Reset _id
           firstName: '',
           lastName: '',
           middleName: '',
@@ -79,6 +84,7 @@ export const useChildStore = create<ChildStore>()(
           city: '',
           country: '',
           age: undefined, // Reset age
+          about: '', // Reset 'about'
         }
       }),
     }),

@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { IoMdAdd } from "react-icons/io";
-import { useParentStore } from "@/stores/useParentStores"; // To get parent token
-import { useChildStore } from "@/stores/useChildStores"; // To set the active child profile
+import { useParentStore } from "@/stores/useParentStores"; // To get parent token and hydration status
+import { useChildStore } from "@/stores/useChildStores"; // To set the active child profile and reset it
 
 // Define the structure of child data expected from the API
 interface ChildData {
@@ -19,8 +19,9 @@ interface ChildData {
 
 export default function ParentChildrenCard() {
   const router = useRouter();
-  const { token: parentToken } = useParentStore(); // Get the parent's authentication token
-  const { setChildProfile } = useChildStore(); // Action to set the active child in the child store
+  // Get token and hydration status from parent store
+  const { token: parentToken, _hasHydrated } = useParentStore(); // Destructure _hasHydrated
+  const { setChildProfile, resetChildProfile } = useChildStore(); // Action to set the active child in the child store, and reset
 
   const [children, setChildren] = useState<ChildData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +29,13 @@ export default function ParentChildrenCard() {
 
   useEffect(() => {
     const fetchChildren = async () => {
-      if (!parentToken) {
-        setError("Authentication token not found. Please log in again.");
+      if (!_hasHydrated || !parentToken) {
+        if (_hasHydrated && !parentToken) {
+          setError("Authentication token not found. Please log in again.");
+        } else if (!_hasHydrated) {
+          setLoading(true);
+          return;
+        }
         setLoading(false);
         return;
       }
@@ -38,7 +44,6 @@ export default function ParentChildrenCard() {
       setError(null);
 
       try {
-        // Ensure NEXT_PUBLIC_API_URL is defined in your .env.local file
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
         if (!API_BASE_URL) {
           throw new Error(
@@ -52,21 +57,19 @@ export default function ParentChildrenCard() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${parentToken}`, // Include the authentication token
+              Authorization: `Bearer ${parentToken}`,
             },
           }
         );
 
         if (res.ok) {
           const data = await res.json();
-          // Assuming the API returns an object with a 'children' array property
           if (data && Array.isArray(data.children)) {
             setChildren(data.children);
           } else {
-            setChildren([]); // If no children or unexpected format, set to empty array
+            setChildren([]);
           }
         } else {
-          // Handle API errors (e.g., 401 Unauthorized, 500 Internal Server Error)
           const errorData = await res.json();
           throw new Error(errorData.message || "Failed to fetch children.");
         }
@@ -81,29 +84,32 @@ export default function ParentChildrenCard() {
     };
 
     fetchChildren();
-  }, [parentToken]); // Re-run effect if parentToken changes
+  }, [parentToken, _hasHydrated]);
 
   const handleAddAnotherChild = () => {
-    router.push("/child/add-child-profile"); // Navigate to the add child profile page
+    resetChildProfile();
+    router.push("/parent/add-child-profile");
   };
 
   const handleChildCardClick = (child: ChildData) => {
-    // When a child card is clicked, set that child as the active profile in the child store
     setChildProfile({
       firstName: child.firstName,
       lastName: child.lastName,
-      // Map other relevant properties from ChildData to ChildProfile here
-      // Ensure your ChildProfile interface in useChildStores.ts matches these properties
       image: child.image,
       Class: child.Class,
       age: child.age,
+      _id: child._id,
     });
-    // Navigate to the child's dedicated profile page
-    router.push(`/child/${child._id}/home`); // Assuming the child's main page is /child/:id/home
+
+    router.push(`/child/${child._id}/home`);
   };
 
+  if (!_hasHydrated) {
+    return <p className="text-center text-gray-500">Loading user session...</p>;
+  }
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
+    <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Your Children</h2>
         <button
@@ -128,8 +134,6 @@ export default function ParentChildrenCard() {
 
       {!loading && !error && children.length > 0 && (
         <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide">
-          {" "}
-          {/* scrollbar-hide is a Tailwind class, might need custom CSS */}
           {children.map((child) => (
             <div
               key={child._id}
@@ -145,10 +149,9 @@ export default function ParentChildrenCard() {
                       width={48}
                       height={48}
                       className="object-cover w-full h-full"
-                      unoptimized // Use unoptimized for external images if not using Next.js Image optimization
+                      unoptimized
                     />
                   ) : (
-                    // Fallback to initial if no image
                     child.firstName.charAt(0).toUpperCase()
                   )}
                 </div>
@@ -180,7 +183,6 @@ export default function ParentChildrenCard() {
                     </svg>
                     Profile URL
                   </span>
-                  {/* Profile URL Toggle - Placeholder for future functionality */}
                   <label
                     htmlFor={`profile-toggle-${child._id}`}
                     className="flex items-center cursor-pointer"

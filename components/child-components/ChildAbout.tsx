@@ -28,6 +28,7 @@ export default function ChildAbout() {
       return;
     }
 
+    // Ensure childId is available from the parent profile
     if (!profile.childId) {
       alert("Child ID not found. Cannot update about section.");
       return;
@@ -77,7 +78,7 @@ export default function ChildAbout() {
         alert("Error saving about section: Please try again.");
       }
     } finally {
-      setSaving(false); // End saving
+      setSaving(false);
     }
   };
 

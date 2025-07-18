@@ -407,8 +407,10 @@ export default function AddChildProfilePage() {
         />
       </header>
 
-      <div className="flex flex-1 mt-12">
-        <aside className="w-80 bg-white flex flex-col items-center py-10 space-y-6">
+      {/* Main content area, adjusted for mobile responsiveness */}
+      <div className="flex flex-1 mt-14 flex-col md:flex-row">
+        {/* Sidebar Progress - Hidden on small screens, shown on medium and up */}
+        <aside className="hidden md:flex md:w-80 bg-white flex-col items-center py-10 space-y-6">
           <h2 className="text-[22px] font-semibold mb-8">Child Profile</h2>
 
           {progressSteps.map((label, index) => (
@@ -422,16 +424,17 @@ export default function AddChildProfilePage() {
           ))}
         </aside>
 
-        <main className="flex-1 flex justify-center items-start py-10 px-4">
-          <div className="bg-white w-full max-w-4xl rounded-xl shadow p-10">
-            <h2 className="text-[22px] font-semibold mb-8">
+        {/* Main Content - Takes full width on small screens, flex-1 on medium and up */}
+        <main className="flex-1 flex justify-center items-start py-10 px-4 md:px-8">
+          <div className="bg-white w-full max-w-4xl rounded-xl shadow p-6 sm:p-8 md:p-10">
+            <h2 className="text-[22px] font-semibold mb-8 text-center md:text-left">
               {step === 1 && "Child Bio"}
               {step === 2 && "Child School"}
               {step === 3 && "Child Interest & Hobbies"}
             </h2>
 
             {step === 1 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <FormGroup
                   label="First Name"
                   placeholder="Child's first name"
@@ -462,6 +465,8 @@ export default function AddChildProfilePage() {
                   error={errors.gender}
                 />
                 <div className="md:col-span-2">
+                  {" "}
+                  {/* This ensures it spans 2 columns on md and up */}
                   <FormGroup
                     label="Date of birth"
                     type="date"
@@ -475,7 +480,7 @@ export default function AddChildProfilePage() {
             )}
 
             {step === 2 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <FormGroup
                   label="School name"
                   placeholder="Child's school name"
@@ -505,7 +510,7 @@ export default function AddChildProfilePage() {
             )}
 
             {step === 3 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <MultiSelectGroup // Using MultiSelectGroup
                   label="Interests"
                   placeholder="Select interest"
@@ -526,7 +531,9 @@ export default function AddChildProfilePage() {
             )}
 
             {errors.apiError && (
-              <p className="text-red-500 text-sm mt-4">{errors.apiError}</p>
+              <p className="text-red-500 text-sm mt-4 text-center md:text-left">
+                {errors.apiError}
+              </p>
             )}
 
             <FooterButtons
@@ -546,8 +553,8 @@ export default function AddChildProfilePage() {
       </div>
 
       {creating && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl px-10 py-8 text-center shadow-lg w-[300px] h-[250px] flex flex-col items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl px-10 py-8 text-center shadow-lg w-full max-w-[300px] h-[250px] flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
             <p className="text-lg font-semibold">Creating profile...</p>
           </div>
@@ -555,8 +562,8 @@ export default function AddChildProfilePage() {
       )}
 
       {created && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl px-10 py-8 text-center shadow-lg w-[300px] h-[250px] flex flex-col items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl px-10 py-8 text-center shadow-lg w-full max-w-[300px] h-[250px] flex flex-col items-center justify-center">
             <div className="text-white bg-[#2F5FFF] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
               ✓
             </div>

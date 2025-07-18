@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Define the shape of the ChildProfile
+
 interface ChildProfile {
   _id?: string; // Added _id property for consistency
   firstName?: string;
@@ -20,11 +20,21 @@ interface ChildProfile {
   country?: string;
   age?: number; // Added age property
   about?: string; // Added 'about' property
+  education?: EducationEntry[];
 }
 
-// Define the shape of the ChildStore's state
+
 interface ChildStoreState {
   childProfile: ChildProfile;
+}
+
+interface EducationEntry {
+  schoolName: string;
+  certificate: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  logo?: string | null;
 }
 
 

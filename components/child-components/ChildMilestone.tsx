@@ -10,7 +10,6 @@ import { useParentStore } from "@/stores/useParentStores";
 import { uploadFile } from "@/stores/uploadService";
 import Image from "next/image";
 
-// Define Milestone interface to ensure type safety
 interface Milestone {
   title: string;
   description: string;
@@ -30,7 +29,7 @@ export default function ChildMilestones() {
   const [showAll, setShowAll] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [addingMilestone, setAddingMilestone] = useState(false);
-  const [loadingMilestones, setLoadingMilestones] = useState(true); // New state for loading existing milestones
+  const [loadingMilestones, setLoadingMilestones] = useState(true);
   const [errorLoadingMilestones, setErrorLoadingMilestones] = useState<
     string | null
   >(null); // New state for error
@@ -38,13 +37,11 @@ export default function ChildMilestones() {
   const currentMilestones: Milestone[] = (childProfile.milestones ||
     []) as Milestone[];
 
-  // New useEffect to fetch milestones on component mount
   useEffect(() => {
     const fetchMilestones = async () => {
-      // Do not set errorLoadingMilestones for missing childId/token here to avoid UI display
-      if (!profile.childId || !token) {
+      if (!childProfile.childId || !token) {
         setLoadingMilestones(false);
-        // Optionally log to console for debugging, but don't set a user-facing error state
+
         console.warn(
           "Child ID or authentication token not found. Milestones cannot be fetched."
         );
@@ -63,7 +60,7 @@ export default function ChildMilestones() {
         }
 
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/milestones/get-milestones/${profile.childId}`,
+          `${API_BASE_URL}/api/v1/milestones/get-milestones/${childProfile.childId}`,
           {
             method: "GET",
             headers: {
@@ -113,7 +110,7 @@ export default function ChildMilestones() {
     };
 
     fetchMilestones();
-  }, [profile.childId, token, setChildProfile]);
+  }, [childProfile.childId, token, setChildProfile]);
 
   const deleteMilestone = async (idx: number) => {
     const filtered = currentMilestones.filter((_, i) => i !== idx);
@@ -166,7 +163,7 @@ export default function ChildMilestones() {
 
     try {
       const payload = {
-        child: profile.childId,
+        child: childProfile.childId,
         title,
         description,
         date,

@@ -1,9 +1,25 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+interface EducationEntry {
+  schoolName: string;
+  certificate: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  logo?: string | null;
+}
+
+interface Milestone {
+  title: string;
+  description: string;
+  date: string;
+  imageUrl?: string;
+}
 
 interface ChildProfile {
   _id?: string;
+  childId?: string;
   firstName?: string;
   lastName?: string;
   middleName?: string;
@@ -22,23 +38,18 @@ interface ChildProfile {
   about?: string;
   education?: EducationEntry[];
   headline?: string;
-
+  achievements?: string[];
+  milestones?: Milestone[];
+  hobbies?: string[];
+  skills?: string[];
+  awards?: string[];
+  projects?: string[];
+  languages?: string;
 }
-
 
 interface ChildStoreState {
   childProfile: ChildProfile;
 }
-
-interface EducationEntry {
-  schoolName: string;
-  certificate: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-  logo?: string | null;
-}
-
 
 interface ChildStoreActions {
   setChildProfile: (profileData: Partial<ChildProfile>) => void;
@@ -46,63 +57,76 @@ interface ChildStoreActions {
   setToken?: (token: string) => void;
 }
 
-
 type ChildStore = ChildStoreState & ChildStoreActions;
-
 
 export const useChildStore = create<ChildStore>()(
   persist(
     (set) => ({
-      // Initial state for the 'childProfile' object
       childProfile: {
-        _id: undefined, // Initialize _id
+        _id: undefined,
+        childId: '',
         firstName: '',
         lastName: '',
         middleName: '',
         gender: '',
-        dateOfBirth: '', // Consistent with interface and API
+        dateOfBirth: '',
         schoolName: '',
-        Class: '', // Consistent with interface and API
-        favoriteSubjects: [], 
-        interests: [], 
-        sports: [], 
+        Class: '',
+        favoriteSubjects: [],
+        interests: [],
+        sports: [],
         image: null,
-        banner: null, 
+        banner: null,
         city: '',
         country: '',
-        age: undefined, 
-        about: '', 
-        education: [], 
-        headline: '', 
+        age: undefined,
+        about: '',
+        education: [],
+        headline: '',
+        achievements: [],
+        milestones: [],
+        hobbies: [],
+        skills: [],
+        awards: [],
+        projects: [],
+        languages: '',
       },
-      
-      setChildProfile: (profileData) => set((state) => ({
-        childProfile: { ...state.childProfile, ...profileData }
-      })),
-      // Action to reset child profile
-      resetChildProfile: () => set({
-        childProfile: {
-          _id: undefined, // Reset _id
-          firstName: '',
-          lastName: '',
-          middleName: '',
-          gender: '',
-          dateOfBirth: '', // Consistent with interface and API
-          schoolName: '',
-          Class: '', // Consistent with interface and API
-          favoriteSubjects: [],
-          interests: [],
-          sports: [],
-          image: null,
-          banner: null, // Reset banner
-          city: '',
-          country: '',
-          age: undefined, // Reset age
-          about: '', // Reset 'about'
-          education: [], 
-          headline: '', 
-        }
-      }),
+      setChildProfile: (profileData) =>
+        set((state) => ({
+          childProfile: { ...state.childProfile, ...profileData },
+        })),
+      resetChildProfile: () =>
+        set({
+          childProfile: {
+            _id: undefined,
+            childId: '',
+            firstName: '',
+            lastName: '',
+            middleName: '',
+            gender: '',
+            dateOfBirth: '',
+            schoolName: '',
+            Class: '',
+            favoriteSubjects: [],
+            interests: [],
+            sports: [],
+            image: null,
+            banner: null,
+            city: '',
+            country: '',
+            age: undefined,
+            about: '',
+            education: [],
+            headline: '',
+            achievements: [],
+            milestones: [],
+            hobbies: [],
+            skills: [],
+            awards: [],
+            projects: [],
+            languages: '',
+          },
+        }),
     }),
     {
       name: 'child-profile-storage',

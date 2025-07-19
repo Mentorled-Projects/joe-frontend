@@ -17,7 +17,9 @@ interface ParentProfile {
   banner?: string | null;
   verificationDocumentType?: string | null;
   phoneNumber?: string;
-  childId?: string; 
+  childId?: string;
+   favoriteTutorIds?: string[];
+
 }
 
 interface ParentState {
@@ -45,7 +47,8 @@ export const useParentStore = create<ParentStore>()(
         banner: null,
         verificationDocumentType: null,
         phoneNumber: undefined, 
-        childId: undefined, 
+        childId: undefined,
+        favoriteTutorIds: [],
       },
       _hasHydrated: false, 
 
@@ -57,8 +60,10 @@ export const useParentStore = create<ParentStore>()(
       resetParentState: () =>
         set({
           token: "",
-          profile: {}, 
-          _hasHydrated: false, 
+          profile: {
+            favoriteTutorIds: [], 
+          },
+          _hasHydrated: false,
         }),
       isProfileCompleted: () => {
         const { profile } = get();
@@ -73,8 +78,8 @@ export const useParentStore = create<ParentStore>()(
           !!profile.religion
         );
       },
-      setHasHydrated: (hasHydated) => {
-        set({ _hasHydrated: hasHydated });
+      setHasHydrated: (hasHydrated) => {
+        set({ _hasHydrated: hasHydrated });
       },
     }),
     {

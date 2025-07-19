@@ -3,27 +3,26 @@
 import Image from "next/image";
 import { RecommendationItem } from "@/types/child";
 
-// Mock data for movie recommendations (replace with actual API data later)
 const mockMovies: RecommendationItem[] = [
   {
     id: "m1",
     title: "The Secret Garden",
-    imageUrl: "/assets/images/secretGarden.jpg", // Placeholder image
+    imageUrl: "/assets/images/secretGarden.jpg",
   },
   {
     id: "m2",
     title: "The Lion King",
-    imageUrl: "/assets/images/lionking.jpeg", // Placeholder image
+    imageUrl: "/assets/images/lionking.jpeg",
   },
   {
     id: "m3",
     title: "Moana",
-    imageUrl: "/assets/images/moana.jpeg", // Placeholder image
+    imageUrl: "/assets/images/moana.jpeg",
   },
 ];
 
 export default function MovieRecommendationCard() {
-  const movies = mockMovies; // Using mock data for now
+  const movies = mockMovies;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
@@ -46,8 +45,8 @@ export default function MovieRecommendationCard() {
               <Image
                 src={movie.imageUrl}
                 alt={movie.title}
-                width={100} // Adjust width/height for consistent card size
-                height={112} // Adjust width/height for consistent card size
+                width={100}
+                height={112}
                 className="object-cover w-full h-full"
                 unoptimized
               />

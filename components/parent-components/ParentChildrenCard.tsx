@@ -109,7 +109,7 @@ export default function ParentChildrenCard() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
+    <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6 -mt-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Your Children</h2>
         <button

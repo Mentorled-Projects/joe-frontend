@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import ParentProfileHeader from "@/components/parent-components/ParentProfileHeader";
 import ParentProgressCard from "@/components/parent-components/ParentProgressCard";
 import ParentChildrenCard from "@/components/parent-components/ParentChildrenCard";
+import ParentActivityOverview from "@/components/parent-components/ParentActivityOverview";
 import { useParentStore } from "@/stores/useParentStores";
 
 export default function ParentProfilePage() {
@@ -21,9 +22,12 @@ export default function ParentProfilePage() {
   return (
     <div className="bg-[#F5F5F5] min-h-screen pt-15">
       <ParentProfileHeader />
-      <div className="container mx-auto px-4 py-2">
+      <div className="container mx-auto px-4 py-6">
         {profileReady ? (
-          <ParentChildrenCard />
+          <>
+            <ParentChildrenCard />
+            <ParentActivityOverview />
+          </>
         ) : (
           <ParentProgressCard progressStep={0} />
         )}

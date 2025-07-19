@@ -73,7 +73,7 @@ export default function CreatePostSection() {
     }
 
     const phoneNumber = parentProfile?.phoneNumber;
-    const childId = parentProfile?.childId;
+    const childId = childProfile?.childId;
     const token = parentToken;
 
     if (!childId) {

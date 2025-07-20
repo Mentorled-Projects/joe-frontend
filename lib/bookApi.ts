@@ -18,14 +18,20 @@ function getOpenLibraryImageUrl(coverId: number | undefined, size: 'S' | 'M' | '
 }
 
 const bookApi = {
-  getBooks: async (filters?: { genre?: string; subject?: string; age?: string; level?: string; query?: string }): Promise<Book[]> => {
+  getBooks: async (filters?: { genre?: string; subject?: string; age?: string; level?: string; query?: string; isParentView?: boolean }): Promise<Book[]> => {
     let url = 'https://openlibrary.org/search.json';
     const params = new URLSearchParams();
 
+    // Determine if a specific search query or subject/genre filter is provided
+    const hasSpecificSearch = filters?.query || (filters?.genre && filters.genre !== 'All') || (filters?.subject && filters.subject !== 'All');
+
     if (filters?.query) {
       params.append('q', filters.query);
-      params.append('subject', 'children');
-    } else {
+    } else if (filters?.isParentView && !hasSpecificSearch) {
+      // For parent view, if no specific query or genre/subject, default to 'fiction'
+      params.append('q', 'fiction');
+    } else if (!filters?.isParentView && !hasSpecificSearch) {
+      // For child view, if no specific query or genre/subject, default to 'children'
       params.append('subject', 'children');
     }
 
@@ -36,7 +42,7 @@ const bookApi = {
         params.append('subject', filters.subject.toLowerCase());
     }
 
-    params.append('limit', '40');
+    params.append('limit', '40'); // Limit the number of results
 
     url += `?${params.toString()}`;
 
@@ -56,8 +62,8 @@ const bookApi = {
           title: item.title,
           author: authorName,
           imageUrl: getOpenLibraryImageUrl(coverId, 'M'),
-          ageRange: "All Ages",
-          level: "General",
+          ageRange: "All Ages", 
+          level: "General", 
           tags: item.subject ? item.subject.slice(0, 3) : ["General"],
           rating: parseFloat((Math.random() * (5 - 3) + 3).toFixed(1)),
           reviewsCount: Math.floor(Math.random() * 200) + 50,
@@ -74,10 +80,13 @@ const bookApi = {
         };
       });
 
+    
       const filteredBooks = [...books];
       if (filters?.age && filters.age !== 'All Ages') {
+       
       }
       if (filters?.level && filters.level !== 'General') {
+       
       }
 
       return filteredBooks;

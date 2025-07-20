@@ -86,7 +86,7 @@ function FilterDropdowns({
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    // If "All" or empty string is selected, set to undefined to remove from filters
+
     onFilterChange({
       ...currentFilters,
       [name]:
@@ -157,7 +157,6 @@ function FilterDropdowns({
   );
 }
 
-// --- BookDetailsModal (from your provided code - no UI changes) ---
 function BookDetailsModal({
   book,
   onClose,
@@ -278,7 +277,6 @@ function BookDetailsModal({
   );
 }
 
-// --- FeedbackModal (from your provided code - no UI changes) ---
 function FeedbackModal({
   book,
   onClose,
@@ -371,12 +369,10 @@ export default function BooksRecommendationsPage() {
     level?: string;
   }>({});
 
-  // Memoized callback for search to prevent re-renders of SearchBar
   const handleSearch = useCallback((query: string) => {
     setSearchTerm(query);
   }, []);
 
-  // Memoized callback for filters to prevent re-renders of FilterDropdowns
   const handleFilterChange = useCallback(
     (newFilters: {
       genre?: string;
@@ -394,7 +390,7 @@ export default function BooksRecommendationsPage() {
       try {
         setLoading(true);
         setError(null);
-        // Pass search term and filters to the API call
+
         const fetchedBooks = await bookApi.getBooks({
           query: searchTerm,
           ...filters,
@@ -409,7 +405,7 @@ export default function BooksRecommendationsPage() {
     };
 
     fetchBooks();
-  }, [searchTerm, filters]); // Re-fetch books when search term or filters change
+  }, [searchTerm, filters]);
 
   const handleBookCardClick = (book: Book) => {
     setSelectedBook(book);

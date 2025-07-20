@@ -47,7 +47,7 @@ export default function ParentSignUpPage() {
 
     try {
       await axios.post(
-        "https://167.71.131.143:3000/api/v1/auth/register-guardian",
+        `${process.env.NEXT_PUBLIC_API_URL}api/v1/auth/register-guardian`,
         {
           phoneNumber: fullPhone,
           password,

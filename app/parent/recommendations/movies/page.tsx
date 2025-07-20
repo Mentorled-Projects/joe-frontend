@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import movieApi from "@/lib/movieApi";
-import { Movie } from "@/types/child"; // Movie interface is now used explicitly
+import { Movie } from "@/types/child";
 import MovieCard from "@/components/child-components/MovieCard";
 import MovieDetailsModal from "@/components/child-components/MovieDetailsModal";
 
@@ -330,29 +329,6 @@ export default function ParentMovieRecommendationsPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
-      <header className="h-14 flex items-center px-6 bg-white shadow-sm sticky top-0 z-10">
-        <Image
-          src="/assets/icons/Logo.svg"
-          alt="Peenly"
-          width={100}
-          height={32}
-        />
-        <nav className="ml-auto space-x-4">
-          <a
-            href="/parent/parent-profile"
-            className="text-gray-600 hover:text-[#2F5FFF]"
-          >
-            Home
-          </a>
-          <a
-            href="/parent/recommendations/movies"
-            className="text-[#2F5FFF] font-semibold"
-          >
-            Recommendations
-          </a>
-        </nav>
-      </header>
-
       <main className="flex-1 p-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 text-center">
@@ -360,7 +336,7 @@ export default function ParentMovieRecommendationsPage() {
               Movie Recommendations
             </h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover a wide range of movies for all ages and tastes!
+              Discover a wide range of movies for you and your family!
             </p>
           </div>
 

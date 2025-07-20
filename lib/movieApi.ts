@@ -7,7 +7,7 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const TMDB_YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
 
-const FAMILY_GENRE_ID = 10751; // TMDb Genre ID for Family movies
+const FAMILY_GENRE_ID = 10751;
 
 interface TmdbMovieResult {
   id: number;
@@ -18,7 +18,7 @@ interface TmdbMovieResult {
   vote_average: number;
   vote_count: number;
   release_date: string;
-  adult: boolean; // Added for explicit check
+  adult: boolean;
 }
 
 interface TmdbDiscoverResponse {
@@ -37,7 +37,7 @@ interface TmdbMovieDetail {
   vote_average: number;
   vote_count: number;
   release_date: string;
-  adult: boolean; // Added for explicit check
+  adult: boolean;
   videos?: {
     results: {
       id: string;
@@ -47,7 +47,6 @@ interface TmdbMovieDetail {
       type: string;
     }[];
   };
-  // certifications?: { US?: { certification: string; meaning: string; order: number; }[] };
 }
 
 
@@ -74,8 +73,9 @@ async function fetchTmdbGenres(): Promise<{ id: number; name: string }[]> {
   }
 }
 
+
 const movieApi = {
-  getMovies: async (filters?: { genre?: string; familyFriendlyRating?: string; age?: string; level?: string; query?: string }): Promise<Movie[]> => {
+  getMovies: async (filters?: { genre?: string; familyFriendlyRating?: string; age?: string; level?: string; query?: string; isParentView?: boolean }): Promise<Movie[]> => {
     if (!TMDB_API_KEY) {
       console.error("TMDb API key is missing. Please set NEXT_PUBLIC_TMDB_API_KEY in your .env.local file.");
       return [];
@@ -86,13 +86,16 @@ const movieApi = {
     let url = `${TMDB_BASE_URL}/discover/movie`;
     const params = new URLSearchParams();
     params.append('api_key', TMDB_API_KEY);
-    params.append('include_adult', 'false');
+    params.append('include_adult', 'false'); // Always exclude adult content by default
     params.append('language', 'en-US');
     params.append('sort_by', 'popularity.desc');
 
-    params.append('with_genres', String(FAMILY_GENRE_ID));
-    params.append('certification_country', 'US');
-    params.append('certification.lte', 'PG');
+    // Apply child-specific filters ONLY if not in parent view
+    if (!filters?.isParentView) {
+      params.append('with_genres', String(FAMILY_GENRE_ID));
+      params.append('certification_country', 'US');
+      params.append('certification.lte', 'PG');
+    }
 
     if (filters?.query) {
       url = `${TMDB_BASE_URL}/search/movie`;
@@ -102,7 +105,8 @@ const movieApi = {
     if (filters?.genre && filters.genre !== 'All') {
       const selectedGenre = allGenres.find(g => g.name.toLowerCase() === filters.genre!.toLowerCase());
       if (selectedGenre) {
-        params.set('with_genres', `${FAMILY_GENRE_ID},${selectedGenre.id}`);
+        // If in child view, combine with FAMILY_GENRE_ID. Otherwise, just use the selected genre.
+        params.set('with_genres', filters?.isParentView ? String(selectedGenre.id) : `${FAMILY_GENRE_ID},${selectedGenre.id}`);
       }
     }
 
@@ -112,6 +116,8 @@ const movieApi = {
             case 'G': certification = 'G'; break;
             case 'PG': certification = 'PG'; break;
             case 'PG-13': certification = 'PG-13'; break;
+            case 'R': certification = 'R'; break; // Added R for parent view
+            case 'NC-17': certification = 'NC-17'; break; // Added NC-17 for parent view
         }
         if (certification) {
             params.set('certification.lte', certification);
@@ -134,9 +140,9 @@ const movieApi = {
         title: item.title,
         imageUrl: item.poster_path ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}` : "https://placehold.co/200x300/E0E0E0/666666?text=No+Poster",
         genre: getGenreNames(item.genre_ids, allGenres),
-        familyFriendlyRating: "G",
-        ageRange: "All Ages",
-        level: "General",
+        familyFriendlyRating: "G", // This will be a placeholder, as TMDB doesn't directly provide this in results
+        ageRange: "All Ages", // Placeholder
+        level: "General", // Placeholder
         rating: parseFloat((item.vote_average / 2).toFixed(1)),
         reviewsCount: item.vote_count,
         summary: item.overview || "No summary available.",
@@ -160,7 +166,7 @@ const movieApi = {
     }
   },
 
-  getMovieById: async (id: string): Promise<Movie | undefined> => {
+  getMovieById: async (id: string, isParentView?: boolean): Promise<Movie | undefined> => {
     if (!TMDB_API_KEY) {
       console.error("TMDb API key is missing.");
       return undefined;
@@ -178,8 +184,9 @@ const movieApi = {
       }
       const item: TmdbMovieDetail = await movieDetailResponse.json();
 
-      if (item.adult) {
-        console.warn(`Attempted to fetch adult movie details for ID: ${id}. Blocking.`);
+      // Always block adult content unless explicitly allowed for a specific parent setting (not implemented here)
+      if (item.adult && !isParentView) { // Keep blocking for child view
+        console.warn(`Attempted to fetch adult movie details for ID: ${id} in child view. Blocking.`);
         return undefined;
       }
 
@@ -194,9 +201,9 @@ const movieApi = {
         title: item.title,
         imageUrl: item.poster_path ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}` : "https://placehold.co/200x300/E0E0E0/666666?text=No+Poster",
         genre: getGenreNames(item.genres.map(g => g.id), allGenres),
-        familyFriendlyRating: "G",
-        ageRange: "All Ages",
-        level: "General",
+        familyFriendlyRating: "G", // Placeholder
+        ageRange: "All Ages", // Placeholder
+        level: "General", // Placeholder
         rating: parseFloat((item.vote_average / 2).toFixed(1)),
         reviewsCount: item.vote_count,
         summary: item.overview || "No summary available.",

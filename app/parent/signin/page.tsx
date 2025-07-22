@@ -16,11 +16,10 @@ const SignInPage = () => {
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [countryCode, setCountryCode] = useState("+234");
-  const [loading, setLoading] = useState(false); // New state for loading indicator
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  // Destructure setToken AND setProfile from useParentStore
-  const { setToken, setProfile } = useParentStore();
+  const { setToken } = useParentStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +45,7 @@ const SignInPage = () => {
       : `${countryCode}${phone}`;
 
     try {
-      const response = await axios.post(
+      const loginResponse = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
         {
           phoneNumber: formattedPhone,
@@ -54,26 +53,47 @@ const SignInPage = () => {
         }
       );
 
-      const token = response?.data?.token;
-      const userProfile = response?.data?.user; // Assuming your API returns a 'user' object with _id and other profile data
+      const token = loginResponse?.data?.token;
 
-      if (token) {
-        localStorage.setItem("token", token);
-        localStorage.setItem("phoneNumber", formattedPhone);
-        setToken(token); // Set the token in Zustand
-
-        // If userProfile exists, set it in Zustand
-        if (userProfile) {
-          setProfile(userProfile); // This will update profile._id and other fields
-        }
+      if (!token) {
+        throw new Error("Login successful but no token received.");
       }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("phoneNumber", formattedPhone);
+      setToken(token); // Set the token in Zustand
+
+      // const profileResponse = await axios.get(
+      //   `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/profile`,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //   }
+      // );
+
+      // const userProfile = profileResponse?.data?.profile;
+
+      // if (userProfile) {
+      //   setProfile(userProfile);
+      // } else {
+      //   console.warn("Profile data not found after login. Please check the /api/v1/guardian/profile response structure.");
+
+      // }
 
       router.push("/parent/parent-profile");
     } catch (err: unknown) {
       console.error("Login failed:", err);
-      setError("Invalid credentials. Please try again.");
+
+      if (axios.isAxiosError(err) && err.response) {
+        setError(
+          err.response.data.message || "Invalid credentials. Please try again."
+        );
+      } else {
+        setError("Login failed. Please check your network and try again.");
+      }
     } finally {
-      setLoading(false); // Set loading to false when submission finishes (success or error)
+      setLoading(false);
     }
   };
 
@@ -182,7 +202,7 @@ const SignInPage = () => {
               <button
                 type="submit"
                 className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" // Added flex, items-center, justify-center for loader
-                disabled={loading} // Disable button while loading
+                disabled={loading}
               >
                 {loading ? (
                   <svg

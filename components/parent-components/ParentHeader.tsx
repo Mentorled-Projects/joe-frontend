@@ -189,7 +189,7 @@ export default function ParentHeader() {
                 <Link
                   key={href}
                   href={href}
-                  onClick={() => setIsMobileMenuOpen(false)} // Close menu on link click
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center space-x-3 w-full px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
                 >
                   <Icon
@@ -209,7 +209,6 @@ export default function ParentHeader() {
             })}
           </nav>
 
-          {/* Mobile Logout Button */}
           <div className="mt-15 w-full px-4 py-4">
             <button
               onClick={handleLogout}
@@ -224,7 +223,6 @@ export default function ParentHeader() {
   );
 }
 
-// SVG Icons (unchanged)
 function BookIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" {...props}>

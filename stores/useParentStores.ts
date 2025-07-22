@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware"; 
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface ParentProfile {
   firstName?: string;
@@ -18,8 +18,8 @@ interface ParentProfile {
   verificationDocumentType?: string | null;
   phoneNumber?: string;
   childId?: string;
-   favoriteTutorIds?: string[];
-
+  favoriteTutorIds?: string[]; 
+  _id?: string; 
 }
 
 interface ParentState {
@@ -33,7 +33,7 @@ interface ParentStoreActions {
   setProfile: (profile: Partial<ParentProfile>) => void;
   resetParentState: () => void;
   isProfileCompleted: () => boolean;
-  setHasHydrated: (hasHydrated: boolean) => void; 
+  setHasHydrated: (hasHydrated: boolean) => void;
 }
 
 type ParentStore = ParentState & ParentStoreActions;
@@ -46,11 +46,12 @@ export const useParentStore = create<ParentStore>()(
         avatar: null,
         banner: null,
         verificationDocumentType: null,
-        phoneNumber: undefined, 
+        phoneNumber: undefined,
         childId: undefined,
         favoriteTutorIds: [],
+        _id: undefined,
       },
-      _hasHydrated: false, 
+      _hasHydrated: false,
 
       setToken: (token) => set({ token }),
       setProfile: (profile) =>
@@ -62,6 +63,7 @@ export const useParentStore = create<ParentStore>()(
           token: "",
           profile: {
             favoriteTutorIds: [], 
+            _id: undefined,
           },
           _hasHydrated: false,
         }),
@@ -78,16 +80,16 @@ export const useParentStore = create<ParentStore>()(
           !!profile.religion
         );
       },
-      setHasHydrated: (hasHydrated) => {
-        set({ _hasHydrated: hasHydrated });
+      setHasHydrated: (hasHydated) => {
+        set({ _hasHydrated: hasHydated });
       },
     }),
     {
       name: "parent-store",
-      storage: createJSONStorage(() => localStorage), 
+      storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.setHasHydrated(true); 
+          state.setHasHydrated(true);
         }
       },
     }

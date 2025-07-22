@@ -7,8 +7,10 @@ import { FaArrowRight } from "react-icons/fa";
 import { FiTrash } from "react-icons/fi";
 import { useChildStore } from "@/stores/useChildStores";
 import { useParentStore } from "@/stores/useParentStores";
+
 import { uploadFile } from "@/stores/uploadService";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 
 interface Milestone {
   title: string;
@@ -20,6 +22,8 @@ interface Milestone {
 export default function ChildMilestones() {
   const { childProfile, setChildProfile } = useChildStore();
   const { profile, token } = useParentStore();
+  const params = useParams();
+  console.log(params);
 
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
@@ -119,12 +123,13 @@ export default function ChildMilestones() {
   };
 
   const handleAddMilestone = async () => {
+    console.log({ token, childProfile, title, description, date, file });
     if (!title.trim() || !description.trim() || !date) {
       alert("Please fill in all required fields (Title, Description, Date).");
       return;
     }
 
-    if (!profile.childId) {
+    if (!childProfile.childId) {
       alert("Child ID not found. Cannot add milestone.");
       return;
     }
@@ -219,11 +224,9 @@ export default function ChildMilestones() {
 
   return (
     <section className="max-w-5xl mx-auto bg-white rounded-lg shadow border border-gray-200 px-8 py-6 mb-4">
-      {/* header */}
       <div className="flex justify-between items-start">
         <div>
           <h2 className="text-xl font-semibold">Milestones</h2>
-          {/* Only show loading or specific API errors, not auth/childId missing */}
           {loadingMilestones && (
             <p className="text-sm text-gray-500 mt-2">
               Loading achievements...

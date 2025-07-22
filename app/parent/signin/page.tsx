@@ -7,7 +7,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import ForgotPasswordModal from "@/components/forgotPasswordModal";
-import { useParentStore } from "@/stores/useParentStores";
+import { useParentStore } from "@/stores/useParentStores"; // Import useParentStore
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,9 +16,11 @@ const SignInPage = () => {
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [countryCode, setCountryCode] = useState("+234");
+  const [loading, setLoading] = useState(false); // New state for loading indicator
 
   const router = useRouter();
-  const { setToken } = useParentStore();
+  // Destructure setToken AND setProfile from useParentStore
+  const { setToken, setProfile } = useParentStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +37,7 @@ const SignInPage = () => {
     }
 
     setError("");
+    setLoading(true); // Set loading to true when submission starts
 
     const formattedPhone = phone.startsWith("0")
       ? `${countryCode}${phone.slice(1)}`
@@ -52,16 +55,25 @@ const SignInPage = () => {
       );
 
       const token = response?.data?.token;
+      const userProfile = response?.data?.user; // Assuming your API returns a 'user' object with _id and other profile data
+
       if (token) {
         localStorage.setItem("token", token);
         localStorage.setItem("phoneNumber", formattedPhone);
-        setToken(token);
+        setToken(token); // Set the token in Zustand
+
+        // If userProfile exists, set it in Zustand
+        if (userProfile) {
+          setProfile(userProfile); // This will update profile._id and other fields
+        }
       }
 
       router.push("/parent/parent-profile");
     } catch (err: unknown) {
       console.error("Login failed:", err);
       setError("Invalid credentials. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false when submission finishes (success or error)
     }
   };
 
@@ -169,9 +181,33 @@ const SignInPage = () => {
 
               <button
                 type="submit"
-                className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4]"
+                className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" // Added flex, items-center, justify-center for loader
+                disabled={loading} // Disable button while loading
               >
-                SIGN IN
+                {loading ? (
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                ) : (
+                  "SIGN IN"
+                )}
               </button>
 
               <div className="flex flex-col sm:flex-row justify-between items-center text-sm mt-2 gap-3 sm:gap-0">

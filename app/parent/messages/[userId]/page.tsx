@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation"; // Import useParams and useRouter
+import { useParams, useRouter } from "next/navigation";
 import ParentHeader from "@/components/parent-components/ParentHeader";
 import MessageSidebar from "@/components/parent-components/MessageSidebar";
 import MessageChatWindow from "@/components/parent-components/MessageChatWindow";
 import NewMessageModal from "@/components/parent-components/NewMessageModal";
-import { useParentStore } from "@/stores/useParentStores"; // To get user ID and token
+import { useParentStore } from "@/stores/useParentStores";
 
 interface Conversation {
   id: string;
@@ -18,7 +18,7 @@ interface Conversation {
 export default function DynamicMessagesPage() {
   const params = useParams();
   const router = useRouter();
-  const { profile, token, _hasHydrated } = useParentStore();
+  const { profile, token, _hasHydrated } = useParentStore(); // Destructure _hasHydrated
 
   const otherUserIdFromUrl = Array.isArray(params.userId)
     ? params.userId[0]
@@ -28,6 +28,7 @@ export default function DynamicMessagesPage() {
   >(otherUserIdFromUrl || null);
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
 
+  // Mock conversations for the sidebar. In a real app, this would be fetched from an API.
   const mockConversations: Conversation[] = [
     {
       id: "user123",
@@ -85,14 +86,17 @@ export default function DynamicMessagesPage() {
     },
   ];
 
+  // Update internal state when URL param changes
   useEffect(() => {
     setSelectedConversationId(otherUserIdFromUrl || null);
   }, [otherUserIdFromUrl]);
 
+  // Handle selection from sidebar, navigate to dynamic route
   const handleSelectConversation = (userId: string) => {
     router.push(`/parent/messages/${userId}`);
   };
 
+  // Wait for the Zustand store to hydrate before rendering content that depends on it
   if (!_hasHydrated) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
@@ -104,7 +108,9 @@ export default function DynamicMessagesPage() {
     );
   }
 
+  // Now that the store is hydrated, check for authentication
   if (!token || !profile._id) {
+    // Assuming _id is available in parent profile after login
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
         <ParentHeader />

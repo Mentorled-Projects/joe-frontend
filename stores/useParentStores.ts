@@ -5,7 +5,7 @@ interface ParentProfile {
   firstName?: string;
   lastName?: string;
   email?: string;
-  image?: string; // Assuming 'image' might be used for avatar URL if not 'avatar'
+  image?: string; 
   country?: string;
   city?: string;
   relationship?: string;
@@ -16,15 +16,16 @@ interface ParentProfile {
   avatar?: string | null;
   banner?: string | null;
   verificationDocumentType?: string | null;
-  phoneNumber?: string; // Ensured phoneNumber is here
-  childId?: string; // Ensured childId is here
-  _id?: string; // Ensured _id is here and correctly typed
+  phoneNumber?: string; 
+  childId?: string; 
+  _id?: string; 
+  favoriteTutorIds?: string[];
 }
 
 interface ParentState {
   token: string;
   profile: ParentProfile;
-  _hasHydrated: boolean; // Added hydration flag
+  _hasHydrated: boolean; 
 }
 
 interface ParentStoreActions {
@@ -32,7 +33,7 @@ interface ParentStoreActions {
   setProfile: (profile: Partial<ParentProfile>) => void;
   resetParentState: () => void;
   isProfileCompleted: () => boolean;
-  setHasHydrated: (hasHydrated: boolean) => void; // Setter for hydration flag
+  setHasHydrated: (hasHydrated: boolean) => void; 
 }
 
 type ParentStore = ParentState & ParentStoreActions;
@@ -51,7 +52,7 @@ export const useParentStore = create<ParentStore>()(
         firstName: undefined, // Initialize firstName
         lastName: undefined, // Initialize lastName
         email: undefined, // Initialize email
-        // Add other fields from login response if needed for initial state
+        
         country: undefined,
         city: undefined,
         relationship: undefined,
@@ -59,6 +60,7 @@ export const useParentStore = create<ParentStore>()(
         gender: undefined,
         language: undefined,
         dateOfBirth: undefined,
+        favoriteTutorIds: [],
       },
       _hasHydrated: false,
 

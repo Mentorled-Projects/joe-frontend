@@ -14,23 +14,21 @@ interface UserSearchResult {
 
 interface NewMessageModalProps {
   onClose: () => void;
-
   currentUserId: string;
-  token: string;
+  // token: string; // Commented out: No longer needed as API calls are removed
 }
 
 export default function NewMessageModal({
   onClose,
   currentUserId,
-  token,
-}: NewMessageModalProps) {
+}: // token, // Commented out
+NewMessageModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Mock user data for search. In a real app, this would be fetched from an API.
   const mockUsers: UserSearchResult[] = React.useMemo(
     () => [
       {
@@ -73,6 +71,7 @@ export default function NewMessageModal({
       setError(null);
 
       try {
+        // This part already uses mockUsers, so no API call here.
         const filtered = mockUsers.filter(
           (user) =>
             user.id !== currentUserId &&
@@ -94,7 +93,7 @@ export default function NewMessageModal({
     }, 300); // Debounce search
 
     return () => clearTimeout(handler);
-  }, [searchTerm, currentUserId, token, mockUsers]);
+  }, [searchTerm, currentUserId, mockUsers]); // Removed 'token' from dependencies as it's not used here
 
   const handleUserSelect = (userId: string) => {
     router.push(`/parent/messages/${userId}`);

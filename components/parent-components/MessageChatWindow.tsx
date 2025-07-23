@@ -5,30 +5,34 @@ import Image from "next/image";
 import MessageBubble from "./MessageBubble";
 import { FiSend } from "react-icons/fi"; // Send icon
 
+// Define Message interface to include conversationId for local storage
 interface Message {
   id: string;
   senderId: string;
   receiverId: string;
   content: string;
   timestamp: string;
+  conversationId: string; // Added for local storage
 }
 
 interface MessageChatWindowProps {
-  currentUserId: string;
+  currentUserId: string | null; // Changed to allow null for mock purposes
   otherUserId: string | null;
   otherUserName: string;
-  token: string;
+  // token: string; // Commented out: No longer needed as API calls are removed
 }
 
+const LOCAL_STORAGE_MESSAGES_KEY_PREFIX = "chatMessages_"; // Prefix for local storage keys
+
 export default function MessageChatWindow({
-  currentUserId,
+  currentUserId, // Using this as a mock sender ID for now
   otherUserId,
   otherUserName,
-  token,
-}: MessageChatWindowProps) {
+}: // token, // Commented out
+MessageChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Still useful for initial load from localStorage
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for scrolling to bottom
 
@@ -37,9 +41,9 @@ export default function MessageChatWindow({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Effect to fetch messages when otherUserId changes
+  // Effect to load messages from localStorage when otherUserId changes
   useEffect(() => {
-    const fetchMessages = async () => {
+    const loadMessagesFromLocalStorage = () => {
       if (!otherUserId) {
         setMessages([]); // Clear messages if no conversation is selected
         return;
@@ -49,66 +53,60 @@ export default function MessageChatWindow({
       setError(null);
 
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-        if (!API_BASE_URL) {
-          throw new Error(
-            "NEXT_PUBLIC_API_URL is not defined in environment variables."
-          );
-        }
-
-        const res = await fetch(
-          `${API_BASE_URL}/api/v1/message/get-messages/${otherUserId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (res.ok) {
-          const data = await res.json();
-          // Assuming data.messages is an array of message objects
-          setMessages(data.messages || []);
+        const localStorageKey = `${LOCAL_STORAGE_MESSAGES_KEY_PREFIX}${otherUserId}`;
+        const storedMessages = localStorage.getItem(localStorageKey);
+        if (storedMessages) {
+          setMessages(JSON.parse(storedMessages));
         } else {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Failed to fetch messages.");
+          setMessages([]); // No messages found for this conversation
         }
-      } catch (err: unknown) {
-        console.error("Error fetching messages:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load messages."
-        );
+      } catch (err) {
+        console.error("Error loading messages from localStorage:", err);
+        setError("Failed to load messages from local storage.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMessages();
-  }, [otherUserId, token]); // Dependency on otherUserId and token
+    loadMessagesFromLocalStorage();
+  }, [otherUserId]); // Dependency on otherUserId
 
   // Effect to scroll to bottom when messages update
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !otherUserId) return;
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !otherUserId || !currentUserId) return;
 
     const messageToSend: Message = {
-      id: `mock-${Date.now()}`, // Mock ID
+      id: `local-${Date.now()}`, // Unique ID for local storage
       senderId: currentUserId,
       receiverId: otherUserId,
       content: newMessage.trim(),
       timestamp: new Date().toISOString(),
+      conversationId: otherUserId, // Store conversationId with the message
     };
 
-    // Optimistically add message to UI
-    setMessages((prevMessages) => [...prevMessages, messageToSend]);
+    // Update messages in state
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages, messageToSend];
+      // Save updated messages to localStorage
+      try {
+        const localStorageKey = `${LOCAL_STORAGE_MESSAGES_KEY_PREFIX}${otherUserId}`;
+        localStorage.setItem(localStorageKey, JSON.stringify(updatedMessages));
+      } catch (err) {
+        console.error("Error saving messages to localStorage:", err);
+        alert("Failed to save message to local storage.");
+      }
+      return updatedMessages;
+    });
+
     setNewMessage(""); // Clear input field
     scrollToBottom(); // Scroll to new message
 
+    // API call commented out for now
+    /*
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
       if (!API_BASE_URL) {
@@ -117,9 +115,7 @@ export default function MessageChatWindow({
         );
       }
 
-      // Mock API call for sending message. Replace with actual API endpoint.
       const res = await fetch(`${API_BASE_URL}/api/v1/message`, {
-        // Assuming POST /api/v1/message
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,22 +128,18 @@ export default function MessageChatWindow({
       });
 
       if (!res.ok) {
-        // If sending fails, you might want to revert the optimistic update
-        // or show an error indicator on the message.
         const errorData = await res.json();
         throw new Error(errorData.message || "Failed to send message.");
       }
-      // If successful, the message is already in the UI. No need to re-fetch all messages
-      // unless your backend sends back the full message object with a real ID.
     } catch (err: unknown) {
       console.error("Error sending message:", err);
-      // Handle error, e.g., display a toast notification
       alert("Failed to send message. Please try again.");
       // Optionally remove the optimistically added message or mark it as failed
       setMessages((prevMessages) =>
         prevMessages.filter((msg) => msg.id !== messageToSend.id)
       );
     }
+    */
   };
 
   if (!otherUserId) {

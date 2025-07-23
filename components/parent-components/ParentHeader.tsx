@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useParentStore } from "@/stores/useParentStores";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react"; // Import useCallback
 import { useRouter } from "next/navigation";
-import { FiMenu } from "react-icons/fi";
-import { IoMdClose } from "react-icons/io";
+import { FiMenu } from "react-icons/fi"; // Import FiMenu for hamburger
+import { IoMdClose } from "react-icons/io"; // Import IoMdClose for close button
 
 // Navigation links data
 const nav = [
@@ -26,14 +26,164 @@ const nav = [
   },
 ];
 
+// Interface for a Notification received from the backend
+interface Notification {
+  _id: string; // Using _id as per backend response
+  message: string;
+  timestamp: string;
+  read: boolean;
+}
+
 export default function ParentHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, setProfile, setToken } = useParentStore();
+  const { profile, setProfile, token, setToken } = useParentStore(); // Get token from store
   const profilePic = profile?.image || "/assets/images/avatar.png";
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] =
+    useState(false);
+  const [loadingNotifications, setLoadingNotifications] = useState(true);
+  const [errorNotifications, setErrorNotifications] = useState<string | null>(
+    null
+  );
+
+  // Function to fetch notifications from the backend
+  const fetchNotifications = useCallback(async () => {
+    // Wrap with useCallback
+    if (!token) {
+      // console.warn("No token available to fetch notifications."); // Log but don't set error for no token
+      setLoadingNotifications(false);
+      return [];
+    }
+
+    setLoadingNotifications(true);
+    setErrorNotifications(null);
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!API_BASE_URL) {
+        throw new Error(
+          "NEXT_PUBLIC_API_URL is not defined in environment variables."
+        );
+      }
+      const res = await fetch(`${API_BASE_URL}/api/v1/message/notifications`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Ensure data.notifications is an array before mapping
+        if (data && Array.isArray(data.notifications)) {
+          const fetched = data.notifications.map((notif: Notification) => ({
+            // Changed 'any' to 'Notification'
+            _id: notif._id,
+            message: notif.message,
+            timestamp: notif.timestamp,
+            read: notif.read,
+          }));
+          setNotifications(fetched);
+          return fetched;
+        } else {
+          console.warn(
+            "API response for notifications is not an array or is missing 'notifications' property:",
+            data
+          );
+          setNotifications([]); // Set to empty array to prevent errors
+          return [];
+        }
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to fetch notifications."); // Corrected 'new new Error'
+      }
+    } catch (err: unknown) {
+      // Changed 'any' to 'unknown'
+      console.error("Error fetching notifications:", err);
+      let message = "Failed to load notifications.";
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      setErrorNotifications(message);
+      return [];
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, [token]); // Add token as a dependency for useCallback
+
+  // Function to mark a notification as read on the backend
+  const markNotificationAsRead = async (id: string) => {
+    if (!token) {
+      alert(
+        "Authentication token not found. Cannot mark notification as read."
+      );
+      return false;
+    }
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+      if (!API_BASE_URL) {
+        throw new Error(
+          "NEXT_PUBLIC_API_URL is not defined in environment variables."
+        );
+      }
+      const res = await fetch(
+        `${API_BASE_URL}/api/v1/message/notification/${id}/read`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.ok) {
+        return true;
+      } else {
+        const errorData = await res.json();
+        throw new Error(
+          errorData.message || "Failed to mark notification as read."
+        );
+      }
+    } catch (err: unknown) {
+      // Changed 'any' to 'unknown'
+      console.error("Error marking notification as read:", err);
+      let message = "Please try again.";
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      alert(`Failed to mark notification as read: ${message}`);
+      return false;
+    }
+  };
+
+  // Fetch notifications on component mount and periodically
+  useEffect(() => {
+    fetchNotifications(); // Initial fetch
+
+    const interval = setInterval(() => {
+      fetchNotifications(); // Fetch every 30 seconds
+    }, 30000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [token, fetchNotifications]); // Add fetchNotifications to dependency array
+
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+
+  const handleNotificationClick = async (notificationId: string) => {
+    const success = await markNotificationAsRead(notificationId);
+    if (success) {
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
+      );
+      // Optionally, navigate to a specific page based on notification type
+      // router.push('/parent/messages');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -41,7 +191,7 @@ export default function ParentHeader() {
     setProfile({});
     setToken("");
     router.push("/parent/signin");
-    setIsMobileMenuOpen(false);
+    setIsMobileMenuOpen(false); // Close mobile menu on logout
   };
 
   return (
@@ -90,7 +240,65 @@ export default function ParentHeader() {
 
         {/* Desktop Profile & Notifications - Hidden on small screens */}
         <div className="hidden md:flex relative items-center space-x-4">
-          <BellIcon className="w-5 h-5 text-gray-600 hover:text-[#2F5FFF] cursor-pointer" />
+          {/* Notification Bell Icon */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotificationsDropdown((prev) => !prev)}
+              className="relative p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#2F5FFF]"
+              aria-label="Notifications"
+            >
+              <BellIcon className="w-5 h-5 text-gray-600" />
+              {unreadNotificationsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {unreadNotificationsCount}
+                </span>
+              )}
+            </button>
+            {showNotificationsDropdown && (
+              <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-lg z-50 py-2 max-h-96 overflow-y-auto">
+                <h3 className="text-md font-semibold px-4 pb-2 border-b border-gray-200">
+                  Notifications
+                </h3>
+                {loadingNotifications && (
+                  <p className="text-center text-gray-500 py-4 text-sm">
+                    Loading notifications...
+                  </p>
+                )}
+                {errorNotifications && (
+                  <p className="text-center text-red-500 py-4 text-sm">
+                    {errorNotifications}
+                  </p>
+                )}
+                {!loadingNotifications &&
+                !errorNotifications &&
+                notifications.length === 0 ? (
+                  <p className="text-center text-gray-500 py-4 text-sm">
+                    No new notifications.
+                  </p>
+                ) : (
+                  !loadingNotifications &&
+                  !errorNotifications &&
+                  notifications.map((n) => (
+                    <div
+                      key={n._id}
+                      className={`px-4 py-3 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50 ${
+                        n.read
+                          ? "text-gray-600"
+                          : "bg-blue-50 font-medium text-gray-800"
+                      }`}
+                      onClick={() => handleNotificationClick(n._id)}
+                    >
+                      <p className="text-sm">{n.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(n.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="relative">
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
@@ -103,7 +311,7 @@ export default function ParentHeader() {
                   width={32}
                   height={32}
                   className="rounded-full object-cover"
-                  unoptimized
+                  unoptimized // Add unoptimized for external image or if not configured in next.config.js
                 />
               </div>
               <svg
@@ -154,7 +362,7 @@ export default function ParentHeader() {
           </div>
 
           {/* Mobile Profile Section */}
-          <div className="flex flex-col mb-8">
+          <div className="flex flex-col items-center mb-8">
             <div className="w-20 h-20 rounded-full overflow-hidden mb-2">
               <Image
                 src={profilePic}
@@ -170,10 +378,9 @@ export default function ParentHeader() {
             </p>
             <button
               onClick={() => {
-                setDropdownOpen((prev) => !prev);
                 // Optionally navigate to profile page on click
                 router.push("/parent/parent-profile");
-                setIsMobileMenuOpen(false);
+                setIsMobileMenuOpen(false); // Close mobile menu on navigation
               }}
               className="text-sm text-[#2F5FFF] hover:underline mt-1"
             >
@@ -189,7 +396,7 @@ export default function ParentHeader() {
                 <Link
                   key={href}
                   href={href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={() => setIsMobileMenuOpen(false)} // Close menu on link click
                   className="flex items-center space-x-3 w-full px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
                 >
                   <Icon
@@ -209,7 +416,8 @@ export default function ParentHeader() {
             })}
           </nav>
 
-          <div className="mt-15 w-full px-4 py-4">
+          {/* Mobile Logout Button */}
+          <div className="mt-auto w-full px-4 py-4">
             <button
               onClick={handleLogout}
               className="w-full py-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200"
@@ -223,6 +431,7 @@ export default function ParentHeader() {
   );
 }
 
+// SVG Icons (unchanged)
 function BookIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" {...props}>
@@ -284,8 +493,6 @@ function FilmIcon(props: React.SVGProps<SVGSVGElement>) {
         ry="2.18"
         stroke="currentColor"
         strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
       <path
         d="M7 2v20"

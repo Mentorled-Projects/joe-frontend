@@ -18,7 +18,9 @@ interface Conversation {
 export default function DynamicMessagesPage() {
   const params = useParams();
   const router = useRouter();
-  const { profile, token, _hasHydrated } = useParentStore(); // Destructure _hasHydrated
+  const {
+    /* profile token, _hasHydrated */
+  } = useParentStore(); // Commented out token and _hasHydrated
 
   const otherUserIdFromUrl = Array.isArray(params.userId)
     ? params.userId[0]
@@ -96,7 +98,8 @@ export default function DynamicMessagesPage() {
     router.push(`/parent/messages/${userId}`);
   };
 
-  // Wait for the Zustand store to hydrate before rendering content that depends on it
+  // Commented out: Wait for the Zustand store to hydrate before rendering content that depends on it
+  /*
   if (!_hasHydrated) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
@@ -107,10 +110,11 @@ export default function DynamicMessagesPage() {
       </div>
     );
   }
+  */
 
-  // Now that the store is hydrated, check for authentication
+  // Commented out: Now that the store is hydrated, check for authentication
+  /*
   if (!token || !profile._id) {
-    // Assuming _id is available in parent profile after login
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
         <ParentHeader />
@@ -120,15 +124,20 @@ export default function DynamicMessagesPage() {
       </div>
     );
   }
+  */
 
   const otherUserName =
     mockConversations.find((conv) => conv.id === selectedConversationId)
       ?.name || "Select a chat";
 
+  // Using a mock current user ID for demonstration
+  const mockCurrentUserId = "parent123";
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
       <ParentHeader />
-      <div className="flex flex-1 pt-14">
+      {/* Removed pt-14 to make the content start directly under the header */}
+      <div className="flex flex-1">
         {/* Sidebar */}
         <MessageSidebar
           conversations={mockConversations}
@@ -139,18 +148,18 @@ export default function DynamicMessagesPage() {
 
         {/* Chat Window */}
         <MessageChatWindow
-          currentUserId={profile._id}
+          currentUserId={mockCurrentUserId} // Use mock ID
           otherUserId={selectedConversationId}
           otherUserName={otherUserName}
-          token={token}
+          // token={token} // Commented out
         />
       </div>
 
       {showNewMessageModal && (
         <NewMessageModal
           onClose={() => setShowNewMessageModal(false)}
-          currentUserId={profile._id}
-          token={token}
+          currentUserId={mockCurrentUserId} // Use mock ID
+          // token={token} // Commented out
         />
       )}
     </div>

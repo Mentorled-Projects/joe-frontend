@@ -5,9 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import ParentHeader from "@/components/parent-components/ParentHeader";
 import TutorCard from "@/components/parent-components/TutorCard";
+import ReviewsModal from "@/components/parent-components/ReviewsModal";
+import ScheduleModal from "@/components/parent-components/ScheduleModal";
+import SuccessModal from "@/components/parent-components/SuccessModal";
 import { Tutor } from "@/types/Tutor";
 import mockTutorApi from "@/lib/mockTutorApi";
 import { useParentStore } from "@/stores/useParentStores";
+import { IoArrowBackOutline } from "react-icons/io5";
 
 export default function SingleTutorProfilePage() {
   const { tutorId } = useParams();
@@ -18,6 +22,10 @@ export default function SingleTutorProfilePage() {
   const [similarTutors, setSimilarTutors] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     const fetchTutorDetails = async () => {
@@ -31,7 +39,6 @@ export default function SingleTutorProfilePage() {
       setError(null);
 
       try {
-        // --- Mock API Call (for development) ---
         const fetchedTutor = await mockTutorApi.getTutorById(tutorId as string);
         if (fetchedTutor) {
           setTutor(fetchedTutor);
@@ -89,6 +96,19 @@ export default function SingleTutorProfilePage() {
     fetchTutorDetails();
   }, [tutorId, token]);
 
+  const handleGoBack = () => {
+    router.push("/parent/HireTutor");
+  };
+
+  const handleScheduleSuccess = () => {
+    setShowScheduleModal(false);
+    setShowSuccessModal(true);
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      router.push("/parent/HireTutor");
+    }, 2000);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-center">
@@ -132,16 +152,24 @@ export default function SingleTutorProfilePage() {
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col">
       <ParentHeader />
       <main className="flex-1 pt-14 px-4 py-8 max-w-5xl mx-auto w-full">
-        {/* Tutor Profile Header Section */}
         <section className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
           <div className="relative h-48 w-full bg-gray-200">
             <Image
-              src={tutor.banner || "/assets/teacher-banner.svg"}
-              alt="Tutor"
+              src="/assets/images/teacher-banner.svg"
+              alt="Tutor Banner"
               fill
               className="object-cover"
               unoptimized
             />
+            {/* Back Arrow Button */}
+            <button
+              onClick={handleGoBack}
+              className="absolute top-4 right-4 p-2 bg-white/80 rounded-full shadow-md hover:bg-white transition-colors duration-200"
+              aria-label="Go back to tutor list"
+            >
+              <IoArrowBackOutline size={24} className="text-gray-700" />
+            </button>
+
             <div className="absolute -bottom-16 left-8">
               <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md">
                 <Image
@@ -196,9 +224,16 @@ export default function SingleTutorProfilePage() {
           <p className="text-gray-700 whitespace-pre-line leading-relaxed">
             {tutor.about || "No 'About' section provided yet."}
           </p>
+          {/* Reviews Button */}
+          <button
+            onClick={() => setShowReviewsModal(true)}
+            className="mt-4 px-6 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors duration-200 text-sm font-medium"
+          >
+            Reviews
+          </button>
         </section>
 
-        {/* Availability & Message Tutor */}
+        {/* Availability & Message/Schedule Buttons */}
         <section className="bg-white rounded-xl shadow-md p-8 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Availability
@@ -215,9 +250,18 @@ export default function SingleTutorProfilePage() {
           ) : (
             <p className="text-gray-600">Availability not specified.</p>
           )}
-          <button className="mt-6 px-6 py-3 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200 text-lg font-medium">
-            Message Tutor
-          </button>
+          <div className="mt-6 flex gap-4">
+            <button className="px-6 py-3 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200 text-lg font-medium">
+              Message Tutor
+            </button>
+            {/* Schedule Button */}
+            <button
+              onClick={() => setShowScheduleModal(true)}
+              className="px-6 py-3 border border-[#2F5FFF] text-[#2F5FFF] rounded-md hover:bg-[#e0e7ff] transition-colors duration-200 text-lg font-medium"
+            >
+              Schedule
+            </button>
+          </div>
         </section>
 
         {/* Subjects Section */}
@@ -274,6 +318,30 @@ export default function SingleTutorProfilePage() {
           </section>
         )}
       </main>
+
+      {/* Modals */}
+      {showReviewsModal && (
+        <ReviewsModal
+          onClose={() => setShowReviewsModal(false)}
+          tutorName={tutor.firstName}
+          tutorId={tutor._id}
+        />
+      )}
+
+      {showScheduleModal && (
+        <ScheduleModal
+          onClose={() => setShowScheduleModal(false)}
+          tutorName={tutor.firstName}
+          onScheduleSuccess={handleScheduleSuccess}
+        />
+      )}
+
+      {showSuccessModal && (
+        <SuccessModal
+          onClose={() => setShowSuccessModal(false)}
+          message="Session Scheduled!"
+        />
+      )}
     </div>
   );
 }

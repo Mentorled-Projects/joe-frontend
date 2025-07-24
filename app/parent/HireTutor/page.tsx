@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react"; // Import useCallback and useMemo
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import ParentHeader from "@/components/parent-components/ParentHeader";
 import TutorCard from "@/components/parent-components/TutorCard";
@@ -129,16 +129,14 @@ export default function HireTutorPage() {
       },
     ],
     []
-  ); // Empty dependency array means it's created once
+  );
 
-  // State for filters (basic implementation for now)
   const [locationFilter, setLocationFilter] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("All Subjects");
   const [minPrice, setMinPrice] = useState(20);
   const [maxPrice, setMaxPrice] = useState(100);
   const [sortOption, setSortOption] = useState("Recommended");
 
-  // Wrap fetchTutors in useCallback to stabilize its reference
   const fetchTutors = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -165,7 +163,6 @@ export default function HireTutorPage() {
       // const data = await res.json();
       // setTutors(data.tutors || []); // Assuming response has a 'tutors' array
 
-      // Using mock data for now
       setTutors(mockTutors);
     } catch (err: unknown) {
       console.error("Error fetching tutors:", err);
@@ -177,13 +174,12 @@ export default function HireTutorPage() {
     } finally {
       setLoading(false);
     }
-  }, [mockTutors]); // mockTutors is now a stable dependency due to useMemo
+  }, [mockTutors]);
 
   useEffect(() => {
     fetchTutors();
-  }, [fetchTutors]); // fetchTutors is now a stable dependency
+  }, [fetchTutors]);
 
-  // Filtered and sorted tutors (client-side for mock data)
   const filteredTutors = tutors
     .filter((tutor) => {
       const matchesLocation = locationFilter
@@ -202,9 +198,9 @@ export default function HireTutorPage() {
     })
     .sort((a, b) => {
       if (sortOption === "Recommended") {
-        return (b.rating || 0) - (a.rating || 0); // Sort by rating descending
+        return (b.rating || 0) - (a.rating || 0);
       }
-      // Add other sorting logic here if needed
+
       return 0;
     });
 

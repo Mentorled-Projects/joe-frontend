@@ -9,11 +9,12 @@ export default function TutorLayout({ children }: { children: ReactNode }) {
 
   const hideHeaderRoutes = [
     "/tutor/signup",
-    "/tutor/login",
+    "/tutor/signin",
     "/tutor/verify-otp",
     "/tutor/forgot-password",
     "/tutor/reset-password",
     "/tutor/register-tutor-data",
+    "/tutor/reset-password",
   ];
 
   const shouldShowHeader = !hideHeaderRoutes.includes(pathname);

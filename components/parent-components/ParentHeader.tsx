@@ -26,9 +26,8 @@ const nav = [
   },
 ];
 
-// Interface for a Notification received from the backend
 interface Notification {
-  _id: string; // Using _id as per backend response
+  _id: string;
   message: string;
   timestamp: string;
   read: boolean;
@@ -52,9 +51,8 @@ export default function ParentHeader() {
 
   // Function to fetch notifications from the backend
   const fetchNotifications = useCallback(async () => {
-    // Wrap with useCallback
     if (!token) {
-      // console.warn("No token available to fetch notifications."); // Log but don't set error for no token
+      // console.warn("No token available to fetch notifications."); //
       setLoadingNotifications(false);
       return [];
     }
@@ -94,15 +92,14 @@ export default function ParentHeader() {
             "API response for notifications is not an array or is missing 'notifications' property:",
             data
           );
-          setNotifications([]); // Set to empty array to prevent errors
+          setNotifications([]);
           return [];
         }
       } else {
         const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to fetch notifications."); // Corrected 'new new Error'
+        throw new Error(errorData.message || "Failed to fetch notifications.");
       }
     } catch (err: unknown) {
-      // Changed 'any' to 'unknown'
       console.error("Error fetching notifications:", err);
       let message = "Failed to load notifications.";
       if (err instanceof Error) {
@@ -113,9 +110,8 @@ export default function ParentHeader() {
     } finally {
       setLoadingNotifications(false);
     }
-  }, [token]); // Add token as a dependency for useCallback
+  }, [token]);
 
-  // Function to mark a notification as read on the backend
   const markNotificationAsRead = async (id: string) => {
     if (!token) {
       alert(

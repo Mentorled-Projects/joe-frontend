@@ -90,6 +90,8 @@ export default function SingleTutorProfilePage() {
         }
       } finally {
         setLoading(false);
+
+        window.scrollTo(0, 0);
       }
     };
 
@@ -107,6 +109,14 @@ export default function SingleTutorProfilePage() {
       setShowSuccessModal(false);
       router.push("/parent/HireTutor");
     }, 2000);
+  };
+
+  const handleMessageTutor = () => {
+    if (tutor?._id) {
+      router.push(`/parent/messages/${tutor._id}`);
+    } else {
+      console.warn("Tutor ID not available for messaging.");
+    }
   };
 
   if (loading) {
@@ -161,7 +171,7 @@ export default function SingleTutorProfilePage() {
               className="object-cover"
               unoptimized
             />
-            {/* Back Arrow Button */}
+
             <button
               onClick={handleGoBack}
               className="absolute top-4 right-4 p-2 bg-white/80 rounded-full shadow-md hover:bg-white transition-colors duration-200"
@@ -251,13 +261,16 @@ export default function SingleTutorProfilePage() {
             <p className="text-gray-600">Availability not specified.</p>
           )}
           <div className="mt-6 flex gap-4">
-            <button className="px-6 py-3 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200 text-lg font-medium">
+            <button
+              onClick={handleMessageTutor} // Updated onClick
+              className="px-6 py-2 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200 text-sm font-medium" // Adjusted size
+            >
               Message Tutor
             </button>
             {/* Schedule Button */}
             <button
               onClick={() => setShowScheduleModal(true)}
-              className="px-6 py-3 border border-[#2F5FFF] text-[#2F5FFF] rounded-md hover:bg-[#e0e7ff] transition-colors duration-200 text-lg font-medium"
+              className="px-6 py-2 border border-[#2F5FFF] text-[#2F5FFF] rounded-md hover:bg-[#e0e7ff] transition-colors duration-200 text-sm font-medium" // Adjusted size
             >
               Schedule
             </button>

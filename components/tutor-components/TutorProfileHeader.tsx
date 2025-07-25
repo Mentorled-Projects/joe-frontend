@@ -10,12 +10,10 @@ import { useTutorStore } from "@/stores/useTutorStores";
 const AVATAR_KEY = "tutorAvatar";
 const BANNER_KEY = "tutorBanner";
 
-// Define the props interface for TutorProfileHeader
 interface TutorProfileHeaderProps {
   tutorId: string;
 }
 
-// Define the expected structure of the API response for tutor data
 interface FetchedTutorData {
   id: string;
   name: string;
@@ -39,13 +37,11 @@ export default function TutorProfileHeader({
   );
   const [file, setFile] = useState<File | null>(null);
 
-  // State to store fetched tutor details for the displayed profile
   const [displayedTutorDetails, setDisplayedTutorDetails] =
     useState<FetchedTutorData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Effect to fetch tutor details from the API based on tutorId
   useEffect(() => {
     const fetchTutorDetails = async () => {
       setIsLoading(true);
@@ -58,13 +54,28 @@ export default function TutorProfileHeader({
           );
         }
 
+        // Retrieve token from localStorage
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("No authentication token found. Please sign in.");
+          setIsLoading(false);
+          return;
+        }
+
         const response = await fetch(
-          `${API_BASE_URL}/api/v1/tutor/get-by-id/${tutorId}`
+          `${API_BASE_URL}/api/v1/tutor/get-by-id/${tutorId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            },
+          }
         );
 
         if (!response.ok) {
+          const errorData = await response.json();
           throw new Error(
-            `Failed to fetch tutor data: ${response.status} ${response.statusText}`
+            errorData.message ||
+              `Failed to fetch tutor data: ${response.status} ${response.statusText}`
           );
         }
 
@@ -72,7 +83,9 @@ export default function TutorProfileHeader({
         setDisplayedTutorDetails(data);
       } catch (err: unknown) {
         console.error("Error fetching tutor details:", err);
-        setError("Failed to load tutor data.");
+        setError(
+          err instanceof Error ? err.message : "Failed to load tutor data."
+        );
         setDisplayedTutorDetails(null);
       } finally {
         setIsLoading(false);
@@ -84,7 +97,6 @@ export default function TutorProfileHeader({
     }
   }, [tutorId]);
 
-  // Determine displayed values from fetched data, fallback to loggedInTutorProfile or defaults
   const tutorName =
     displayedTutorDetails?.name || loggedInTutorProfile?.firstName || "Tutor";
   const tutorLocation =
@@ -155,6 +167,8 @@ export default function TutorProfileHeader({
       </section>
     );
   }
+
+  const isOwnProfile = loggedInTutorProfile?._id === tutorId;
 
   return (
     <>
@@ -242,7 +256,8 @@ export default function TutorProfileHeader({
             </div>
           </div>
 
-          {loggedInTutorProfile?._id === tutorId && (
+          {/* Use isOwnProfile here */}
+          {isOwnProfile && (
             <div className="mt-4 md:mt-0 flex flex-col md:flex-row items-center gap-4 md:gap-6">
               <button
                 onClick={() => router.push(actionButtonPath)}

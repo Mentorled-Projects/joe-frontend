@@ -4,13 +4,34 @@ import { useState, useEffect, ChangeEvent } from "react";
 import Image from "next/image";
 import { MdCloudUpload, MdEdit } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
+import { useRouter } from "next/navigation";
+import { useTutorStore } from "@/stores/useTutorStores";
 
 const AVATAR_KEY = "tutorAvatar";
 const BANNER_KEY = "tutorBanner";
 
-export default function TutorProfileHeader() {
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const [banner, setBanner] = useState<string | null>(null);
+// Define the props interface for TutorProfileHeader
+interface TutorProfileHeaderProps {
+  tutorId: string;
+}
+
+// Define the expected structure of the API response for tutor data
+interface FetchedTutorData {
+  id: string;
+  name: string;
+  email: string;
+  location?: string;
+  isAccountVerified?: boolean;
+}
+
+export default function TutorProfileHeader({
+  tutorId,
+}: TutorProfileHeaderProps) {
+  const router = useRouter();
+  const { profile: loggedInTutorProfile, setProfile } = useTutorStore();
+
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [uploadTarget, setUploadTarget] = useState<"avatar" | "banner">(
@@ -18,19 +39,78 @@ export default function TutorProfileHeader() {
   );
   const [file, setFile] = useState<File | null>(null);
 
-  const name = "Sarah Johnson";
-  const location = "Manchester, UK";
-  const verified = false;
-  const online = false;
+  // State to store fetched tutor details for the displayed profile
+  const [displayedTutorDetails, setDisplayedTutorDetails] =
+    useState<FetchedTutorData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Effect to fetch tutor details from the API based on tutorId
+  useEffect(() => {
+    const fetchTutorDetails = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        if (!API_BASE_URL) {
+          throw new Error(
+            "NEXT_PUBLIC_API_URL is not defined in environment variables."
+          );
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/v1/tutor/get-by-id/${tutorId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch tutor data: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const data: FetchedTutorData = await response.json();
+        setDisplayedTutorDetails(data);
+      } catch (err: unknown) {
+        console.error("Error fetching tutor details:", err);
+        setError("Failed to load tutor data.");
+        setDisplayedTutorDetails(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (tutorId) {
+      fetchTutorDetails();
+    }
+  }, [tutorId]);
+
+  // Determine displayed values from fetched data, fallback to loggedInTutorProfile or defaults
+  const tutorName =
+    displayedTutorDetails?.name || loggedInTutorProfile?.firstName || "Tutor";
+  const tutorLocation =
+    displayedTutorDetails?.location ||
+    loggedInTutorProfile?.location ||
+    "Location Not Set";
+  const isAccountVerified =
+    displayedTutorDetails?.isAccountVerified ??
+    loggedInTutorProfile?.isAccountVerified ??
+    false;
+  const isProfileCompleted = loggedInTutorProfile?.isProfileCompleted ?? false;
+
+  const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
-    setAvatar(localStorage.getItem(AVATAR_KEY));
-    setBanner(localStorage.getItem(BANNER_KEY));
+    setAvatarPreview(localStorage.getItem(AVATAR_KEY));
+    setBannerPreview(localStorage.getItem(BANNER_KEY));
   }, []);
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f && f.size < 5 * 1024 * 1024) setFile(f);
+    if (f && f.size < 5 * 1024 * 1024) {
+      setFile(f);
+    } else if (f) {
+      console.error("File size exceeds 5 MB limit.");
+    }
   };
 
   const saveImage = () => {
@@ -39,10 +119,11 @@ export default function TutorProfileHeader() {
     reader.onloadend = () => {
       const dataUrl = reader.result as string;
       if (uploadTarget === "avatar") {
-        setAvatar(dataUrl);
+        setAvatarPreview(dataUrl);
         localStorage.setItem(AVATAR_KEY, dataUrl);
+        setProfile({ image: dataUrl });
       } else {
-        setBanner(dataUrl);
+        setBannerPreview(dataUrl);
         localStorage.setItem(BANNER_KEY, dataUrl);
       }
       setFile(null);
@@ -51,12 +132,43 @@ export default function TutorProfileHeader() {
     reader.readAsDataURL(file);
   };
 
+  let actionButtonText = "Complete Profile";
+  let actionButtonPath = "/tutor/register-tutor-data";
+
+  if (isProfileCompleted) {
+    actionButtonText = "Verify Account";
+    actionButtonPath = "/tutor/verify-tutor-account";
+  }
+
+  if (isLoading) {
+    return (
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
+        Loading tutor profile...
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center text-red-600">
+        Error: {error}
+      </section>
+    );
+  }
+
   return (
     <>
-      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-4">
-        <div className="relative h-48 rounded-t-lg overflow-hidden">
-          {banner ? (
-            <Image src={banner} alt="banner" fill className="object-cover" />
+      <section className="bg-white rounded-xl shadow-md overflow-hidden mb-8 max-w-5xl mx-auto">
+        {/* Banner Section */}
+        <div className="relative h-48 w-full bg-gray-200">
+          {bannerPreview ? (
+            <Image
+              src={bannerPreview}
+              alt="Tutor Banner"
+              fill
+              className="object-cover"
+              unoptimized
+            />
           ) : (
             <div className="h-full w-full bg-gradient-to-r from-[#2F5FFF] to-[#9B5BFF]" />
           )}
@@ -66,105 +178,102 @@ export default function TutorProfileHeader() {
               setUploadTarget("banner");
               setShowModal(true);
             }}
-            className="absolute top-4 right-4 bg-white/70 hover:bg-white text-black p-2 rounded-full shadow"
+            className="absolute top-4 right-4 p-2 bg-white/70 rounded-full shadow-md hover:bg-white transition-colors duration-200"
+            aria-label="Upload banner"
           >
-            <MdCloudUpload size={20} />
+            <MdCloudUpload size={24} className="text-gray-700" />
           </button>
 
-          {/* avatar and edit button */}
-          {/* avatar and edit button */}
-          <div className="absolute -bottom-[70px] left-8 flex items-center gap-4">
-            <div className="relative">
-              {avatar ? (
+          <div className="absolute -bottom-16 left-8 flex items-end gap-4">
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md relative bg-gray-200 flex items-center justify-center">
+              {avatarPreview ? (
                 <Image
-                  src={avatar}
-                  alt="avatar"
-                  width={140}
-                  height={140}
-                  className="rounded-full object-cover border-4 border-white"
+                  src={avatarPreview}
+                  alt="Tutor Profile"
+                  width={128}
+                  height={128}
+                  className="object-cover rounded-full"
+                  unoptimized
                 />
               ) : (
-                <div className="w-[140px] h-[140px] rounded-full bg-gray-200 flex items-center justify-center text-4xl border-4 border-white">
-                  👤
-                </div>
+                <span className="text-6xl text-gray-500">👤</span>
               )}
 
-              {/* online status dot */}
-              <div className="w-6 h-6 rounded-full bg-[#2F5FFF] absolute bottom-2 right-2 border-2 border-white" />
+              <div
+                className={`w-6 h-6 rounded-full absolute bottom-2 right-2 border-2 border-white ${
+                  isOnline ? "bg-[#2F5FFF]" : "bg-gray-400"
+                }`}
+              />
             </div>
-
+            {/* Edit Picture Button */}
             <button
               onClick={() => {
                 setUploadTarget("avatar");
                 setShowModal(true);
               }}
-              className="flex items-center gap-1 border border-black text-black text-sm px-3 py-1 rounded bg-white hover:bg-gray-100"
+              className="px-4 py-2 bg-gray-200 rounded-md shadow-md text-gray-700 hover:bg-gray-300 transition-colors duration-200 flex items-center gap-1 text-sm mb-2"
             >
-              <MdEdit size={14} /> Edit profile
+              <MdEdit size={16} /> Edit picture
             </button>
           </div>
         </div>
 
-        <div className="pt-16 pb-6 px-8 flex flex-col md:flex-row md:items-center md:justify-between">
+        {/* Profile Details and Action Button Section */}
+        <div className="pt-20 pb-6 px-8 flex flex-col md:flex-row md:justify-between md:items-end">
           <div>
-            <h1 className="text-2xl font-bold">{name}</h1>
-            <div className="flex items-center gap-6 mt-2 text-sm">
-              <span className="flex items-center gap-1 text-gray-600">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
-                  <path d="M19 11c0 5-7 11-7 11S5 16 5 11a7 7 0 1 1 14 0Z" />
-                </svg>
-                {location}
-              </span>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome {tutorName} 👋
+            </h1>
+            <div className="flex flex-wrap items-center text-gray-600 text-sm mt-2 space-x-4">
+              <p className="flex items-center">
+                <UserIcon className="w-4 h-4 mr-1" /> Tutor Account
+              </p>
+              <p className="flex items-center">
+                <LocationIcon className="w-4 h-4 mr-1" /> {tutorLocation}
+              </p>
+              <p className="flex items-center">
+                <StatusIcon
+                  className={`w-4 h-4 mr-1 ${
+                    isAccountVerified ? "text-green-500" : "text-red-500"
+                  }`}
+                />{" "}
+                {isAccountVerified ? "Verified" : "Unverified"}
+              </p>
+            </div>
+          </div>
 
-              <span
-                className={`flex items-center gap-1 ${
-                  verified ? "text-black" : "text-red-600"
-                }`}
+          {loggedInTutorProfile?._id === tutorId && (
+            <div className="mt-4 md:mt-0 flex flex-col md:flex-row items-center gap-4 md:gap-6">
+              <button
+                onClick={() => router.push(actionButtonPath)}
+                className="px-6 py-2 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200 text-sm font-medium w-full md:w-auto"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke={verified ? "#22c55e" : "#ef4444"}
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                </svg>
-                {verified ? "Verified" : "Unverified"}
-              </span>
-            </div>
-          </div>
+                {actionButtonText}
+              </button>
 
-          <div className="mt-4 md:mt-0 flex items-center gap-6">
-            <button className="bg-[#2F5FFF] text-white px-4 py-2 text-sm rounded">
-              Verify Account
-            </button>
-
-            <div className="flex items-center gap-2 text-sm">
-              Profile Status:
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  defaultChecked={online}
-                />
-                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-[#2F5FFF] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
-                <span className="ml-2">{online ? "Online" : "Offline"}</span>
-              </label>
+              <div className="flex items-center gap-2 text-sm">
+                Profile Status:
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={isOnline}
+                    onChange={() => setIsOnline(!isOnline)}
+                  />
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-[#2F5FFF] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                  <span className="ml-2">
+                    {isOnline ? "Online" : "Offline"}
+                  </span>
+                </label>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50">
-          <div className="bg-white rounded-xl w-full max-w-xl p-8 relative">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-xl p-8 relative shadow-lg">
             <button
               className="absolute right-4 top-4 text-gray-500 hover:text-black"
               onClick={() => {
@@ -185,7 +294,7 @@ export default function TutorProfileHeader() {
                 onChange={onFileChange}
               />
               <MdCloudUpload size={48} className="text-gray-600 mb-4" />
-              <p className="text-gray-700">
+              <p className="text-gray-700 text-center">
                 Click to upload or drag and drop <br />
                 <span className="text-xs text-gray-500">
                   PNG or JPG (max 5 MB)
@@ -193,15 +302,16 @@ export default function TutorProfileHeader() {
               </p>
             </label>
 
-            <div className="mt-6 flex justify-between items-center">
+            <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
               <button
                 className="text-sm text-red-500 hover:underline"
                 onClick={() => {
                   if (uploadTarget === "avatar") {
-                    setAvatar(null);
+                    setAvatarPreview(null);
                     localStorage.removeItem(AVATAR_KEY);
+                    setProfile({ image: undefined });
                   } else {
-                    setBanner(null);
+                    setBannerPreview(null);
                     localStorage.removeItem(BANNER_KEY);
                   }
                   setShowModal(false);
@@ -211,9 +321,9 @@ export default function TutorProfileHeader() {
                 Remove {uploadTarget === "avatar" ? "Avatar" : "Banner"}
               </button>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full sm:w-auto justify-end">
                 <button
-                  className="btn-outline"
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors duration-200 text-sm"
                   onClick={() => {
                     setShowModal(false);
                     setFile(null);
@@ -222,7 +332,7 @@ export default function TutorProfileHeader() {
                   Cancel
                 </button>
                 <button
-                  className="btn-primary disabled:opacity-50"
+                  className="px-4 py-2 bg-[#2F5FFF] text-white rounded-md hover:bg-[#1d46ff] transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!file}
                   onClick={saveImage}
                 >
@@ -234,5 +344,48 @@ export default function TutorProfileHeader() {
         </div>
       )}
     </>
+  );
+}
+
+function UserIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M4 20c0-4 4-6 8-6s8 2 8 6"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function LocationIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function StatusIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" {...props}>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M12 7V12L15 13.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

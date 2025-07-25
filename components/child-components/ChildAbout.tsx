@@ -18,7 +18,7 @@ export default function ChildAbout() {
     if (childProfile?.about) {
       setAbout(childProfile.about);
     } else {
-      setAbout(""); // Ensure it's empty if no 'about' exists
+      setAbout("");
     }
   }, [childProfile.about]);
 
@@ -28,7 +28,6 @@ export default function ChildAbout() {
       return;
     }
 
-    // Ensure childId is available from the parent profile
     if (!profile.childId) {
       alert("Child ID not found. Cannot update about section.");
       return;
@@ -38,7 +37,7 @@ export default function ChildAbout() {
       return;
     }
 
-    setSaving(true); // Start saving
+    setSaving(true);
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
       if (!API_BASE_URL) {
@@ -50,17 +49,16 @@ export default function ChildAbout() {
       const res = await fetch(
         `${API_BASE_URL}/api/v1/child/${profile.childId}/about`,
         {
-          method: "PATCH", // Use PATCH method as per API documentation
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ about }), // Send 'about' in the request body
+          body: JSON.stringify({ about }),
         }
       );
 
       if (res.ok) {
-        // Update local state only after successful API call
         setChildProfile({ about });
         alert("About section updated successfully!");
         setShowModal(false);

@@ -7,7 +7,13 @@ import BookRecommendationCard from "./BookRecommendationCard";
 import UpcomingMilestonesCard from "./UpcomingMilestonesCard";
 import FavoriteTutorsCard from "./FavoriteTutorsCard";
 
-export default function ParentActivityOverview() {
+interface ParentActivityOverviewProps {
+  parentId: string;
+}
+
+export default function ParentActivityOverview({
+  parentId,
+}: ParentActivityOverviewProps) {
   return (
     <section className="max-w-5xl mx-auto mb-6">
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
@@ -20,7 +26,7 @@ export default function ParentActivityOverview() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:col-span-2 lg:col-span-2 -mt-26">
           <UpcomingMilestonesCard />
-          <FavoriteTutorsCard />
+          <FavoriteTutorsCard parentId={parentId} />
         </div>
 
         <div>

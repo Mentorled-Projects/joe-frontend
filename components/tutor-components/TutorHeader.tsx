@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation"; // Import useRouter
-import { useState, useEffect, useCallback } from "react"; // Import useState, useEffect, useCallback
-import { useTutorStore } from "@/stores/useTutorStores"; // Import useTutorStore
-import { FiMenu } from "react-icons/fi"; // For mobile menu (if needed later)
-import { IoMdClose } from "react-icons/io"; // For mobile menu (if needed later)
+import { useState, useEffect, useCallback } from "react";
+import { useTutorStore } from "@/stores/useTutorStores";
+import { FiMenu } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 
 // Navigation links data
 const nav = [
@@ -15,7 +15,6 @@ const nav = [
   { href: "/tutor/notifications", label: "Notification", icon: BellIcon },
 ];
 
-// Interface for a Notification received from the backend (assuming similar structure to Parent)
 interface Notification {
   _id: string;
   message: string;
@@ -57,7 +56,6 @@ export default function TutorHeader() {
         );
       }
       const res = await fetch(`${API_BASE_URL}/api/v1/tutor/notifications`, {
-        // Assuming this endpoint for tutors
         method: "GET",
         headers: {
           "Content-Type": "application/json",

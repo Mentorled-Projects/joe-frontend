@@ -3,12 +3,15 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTutorStore } from "@/stores/useTutorStores"; // Import the tutor store
 
 type Step = 1 | 2;
 type Errs = Record<string, string>;
 
 export default function TutorRegisterPage() {
   const router = useRouter();
+  const { setProfile } = useTutorStore(); // Get setProfile from the store
+
   const [step, setStep] = useState<Step>(1);
   const [showDone, setShowDone] = useState(false);
 
@@ -81,8 +84,25 @@ export default function TutorRegisterPage() {
 
   const nextStep = () => validateStep1() && setStep(2);
   const prevStep = () => setStep(1);
+
   const finish = () => {
     if (!validateStep2()) return;
+
+    // Save profile data to Zustand store
+    setProfile({
+      firstName,
+      lastName,
+      email,
+      gender,
+      language,
+      city,
+      country,
+      dateOfBirth: dob,
+      subjects: [{ name: subject, level: category }],
+
+      isProfileCompleted: true,
+    });
+
     setShowDone(true);
     setTimeout(() => router.push("/tutor/profile"), 2000);
   };

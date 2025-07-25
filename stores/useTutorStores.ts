@@ -1,15 +1,18 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-// Define the TutorProfile interface
 interface TutorProfile {
   _id?: string;
   firstName?: string;
   lastName?: string;
   email?: string;
-  image?: string; // This will be the profile picture URL
+  image?: string;
   phoneNumber?: string;
-  location?: string;
+  language?: string;
+  gender?: string;
+  city?: string;
+  country?: string;
+  dateOfBirth?: string;
   hourlyRate?: {
     min: number;
     max: number;
@@ -19,22 +22,19 @@ interface TutorProfile {
   subjects?: { name: string; level: string }[];
   certifications?: string[];
   about?: string;
-  availability?: {
-    day: string;
-    startTime: string;
-    endTime: string;
-  }[];
-  // Add any other profile fields a tutor might have
+  experience?: string;
+  availability?: string;
+  location?: string;
+  isProfileCompleted?: boolean;
+  isAccountVerified?: boolean;
 }
 
-// Define the state for the tutor store
 interface TutorState {
   token: string;
   profile: TutorProfile;
-  _hasHydrated: boolean; // Flag to indicate if the store has rehydrated from localStorage
+  _hasHydrated: boolean;
 }
 
-// Define the actions for the tutor store
 interface TutorStoreActions {
   setToken: (token: string) => void;
   setProfile: (profile: Partial<TutorProfile>) => void;
@@ -42,33 +42,38 @@ interface TutorStoreActions {
   setHasHydrated: (hasHydrated: boolean) => void;
 }
 
-// Combine state and actions into a single type
 type TutorStore = TutorState & TutorStoreActions;
 
 export const useTutorStore = create<TutorStore>()(
   persist(
-    (set) => ({ 
-      // Initial state
+    (set) => ({
       token: "",
       profile: {
         _id: undefined,
         firstName: undefined,
         lastName: undefined,
         email: undefined,
-        image: undefined, // Default profile image
+        image: undefined,
         phoneNumber: undefined,
-        location: undefined,
+        language: undefined,
+        gender: undefined,
+        city: undefined, 
+        country: undefined,
+        dateOfBirth: undefined, 
         hourlyRate: undefined,
         rating: undefined,
         reviewsCount: undefined,
         subjects: undefined,
         certifications: undefined,
         about: undefined,
+        experience: undefined,
         availability: undefined,
+        isProfileCompleted: false,
+        isAccountVerified: false,
+        location: undefined, 
       },
-      _hasHydrated: false, // Initially false, set to true after rehydration
+      _hasHydrated: false,
 
-      // Actions
       setToken: (token) => set({ token }),
       setProfile: (profile) =>
         set((state) => ({
@@ -77,21 +82,28 @@ export const useTutorStore = create<TutorStore>()(
       resetTutorState: () =>
         set({
           token: "",
-          profile: { // Reset profile to its initial undefined state
+          profile: {
             _id: undefined,
             firstName: undefined,
             lastName: undefined,
             email: undefined,
             image: undefined,
             phoneNumber: undefined,
-            location: undefined,
+            language: undefined,
+            gender: undefined,
+            city: undefined,
+            country: undefined,
+            dateOfBirth: undefined,
             hourlyRate: undefined,
             rating: undefined,
             reviewsCount: undefined,
             subjects: undefined,
             certifications: undefined,
             about: undefined,
+            experience: undefined,
             availability: undefined,
+            isProfileCompleted: false,
+            isAccountVerified: false,
           },
           _hasHydrated: false,
         }),
@@ -100,11 +112,11 @@ export const useTutorStore = create<TutorStore>()(
       },
     }),
     {
-      name: "tutor-store", // Name for localStorage key
-      storage: createJSONStorage(() => localStorage), // Use localStorage
+      name: "tutor-store",
+      storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.setHasHydrated(true); // Mark as hydrated after rehydration
+          state.setHasHydrated(true);
         }
       },
     }

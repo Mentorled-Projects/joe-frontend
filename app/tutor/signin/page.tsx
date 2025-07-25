@@ -17,6 +17,7 @@ export default function TutorSignInPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState("");
   const [showForgot, setShowForgot] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // New loading state
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +32,7 @@ export default function TutorSignInPage() {
     }
 
     setError("");
+    setIsLoading(true); // Set loading to true when submission starts
     const fullPhone = `${countryCode}${phone.replace(/^0/, "")}`;
 
     try {
@@ -39,9 +41,18 @@ export default function TutorSignInPage() {
         { phoneNumber: fullPhone, password }
       );
       localStorage.setItem("token", data.token);
-      router.push("/tutor/profile");
-    } catch {
+
+      const tutorId = data.id;
+      if (tutorId) {
+        router.push(`/tutor/${tutorId}`);
+      } else {
+        setError("Login successful, but tutor ID not found in response.");
+      }
+    } catch (err) {
+      console.error("Sign-in error:", err);
       setError("Invalid credentials. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,8 +63,7 @@ export default function TutorSignInPage() {
       )}
 
       <main className="flex min-h-screen bg-[#F5F5F5]">
-        {/* LEFT BLUE PANEL */}
-        <div className="w-[502px] h-screen bg-[#2F5FFF] text-white flex flex-col justify-between px-10 py-12">
+        <div className="hidden md:flex w-[502px] h-screen bg-[#2F5FFF] text-white flex-col justify-between px-10 py-12">
           <div>
             <Image
               src="/assets/icons/Logo-white.svg"
@@ -82,8 +92,7 @@ export default function TutorSignInPage() {
           </div>
         </div>
 
-        {/* RIGHT WHITE PANEL */}
-        <div className="flex flex-1 justify-center items-center px-6 pt-[60px]">
+        <div className="flex flex-1 justify-center items-center px-6 pt-[60px] w-full">
           <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[652px]">
             <h2 className="text-2xl font-bold text-[#0B2C49] mb-6">Sign in</h2>
 
@@ -115,7 +124,6 @@ export default function TutorSignInPage() {
                 </div>
               </div>
 
-              {/* PASSWORD */}
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Password
@@ -144,16 +152,14 @@ export default function TutorSignInPage() {
                   </button>
                 </div>
               </div>
-
               {error && <p className="text-red-500 text-sm">{error}</p>}
-
               <button
                 type="submit"
-                className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4]"
+                className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4] disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={isLoading}
               >
-                SIGN IN
+                {isLoading ? "SIGNING IN..." : "SIGN IN"}
               </button>
-
               <div className="flex justify-between items-center text-sm mt-2">
                 <label className="flex items-center gap-2">
                   <input type="checkbox" className="accent-[#2F5FFF]" />
@@ -167,7 +173,6 @@ export default function TutorSignInPage() {
                   Forgot password?
                 </button>
               </div>
-
               <p className="text-sm text-center mt-6">
                 New to Peenly?{" "}
                 <Link

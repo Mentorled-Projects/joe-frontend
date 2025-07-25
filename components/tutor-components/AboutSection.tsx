@@ -6,7 +6,7 @@ import { IoMdClose } from "react-icons/io";
 
 const BIO_KEY = "tutorBio";
 const PLACEHOLDER =
-  "Passionate mathematics tutor with 5+ years of experience helping students excel in algebra, calculus, and statistics.\nI believe in making complex concepts simple and engaging.";
+  "Tell us about yourself. This will help parents understand your teaching style and expertise.";
 
 export default function AboutSection() {
   const [bio, setBio] = useState<string>("");

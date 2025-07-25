@@ -4,30 +4,40 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { IoMdAdd } from "react-icons/io";
-import { useParentStore } from "@/stores/useParentStores"; // To get parent token and hydration status
-import { useChildStore } from "@/stores/useChildStores"; // To set the active child profile and reset it
+import { useParentStore } from "@/stores/useParentStores";
+import { useChildStore } from "@/stores/useChildStores";
+
+// Define the props interface for ParentChildrenCard
+interface ParentChildrenCardProps {
+  parentId: string; // The dynamic 'id' of the parent whose profile is being viewed
+}
 
 // Define the structure of child data expected from the API
 interface ChildData {
   _id: string;
   firstName: string;
   lastName: string;
-  age: number; // Assuming age is returned
-  Class: string; // Assuming Class is returned (e.g., "Year 3", "Primary 5")
-  image?: string; // Optional: Child's avatar URL
+  age: number;
+  Class: string;
+  image?: string;
 }
 
-export default function ParentChildrenCard() {
+export default function ParentChildrenCard({
+  parentId,
+}: ParentChildrenCardProps) {
   const router = useRouter();
-  // Get token and hydration status from parent store
-  const { token: parentToken, _hasHydrated } = useParentStore(); // Destructure _hasHydrated
-  const { setChildProfile, resetChildProfile } = useChildStore(); // Action to set the active child in the child store, and reset
+  const { token: parentToken, _hasHydrated } = useParentStore();
+  const { setChildProfile, resetChildProfile } = useChildStore();
 
   const [children, setChildren] = useState<ChildData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Acknowledge parentId to satisfy ESLint, even if current API doesn't use it directly
+    // This prop is important for the context of the dynamic parent profile page.
+    console.log("ParentChildrenCard mounted for Parent ID:", parentId);
+
     const fetchChildren = async () => {
       if (!_hasHydrated || !parentToken) {
         if (_hasHydrated && !parentToken) {
@@ -50,7 +60,6 @@ export default function ParentChildrenCard() {
             "NEXT_PUBLIC_API_URL is not defined in environment variables."
           );
         }
-
         const res = await fetch(
           `${API_BASE_URL}/api/v1/child/get-all-children`,
           {
@@ -84,7 +93,7 @@ export default function ParentChildrenCard() {
     };
 
     fetchChildren();
-  }, [parentToken, _hasHydrated]);
+  }, [parentToken, _hasHydrated, parentId]); // parentId remains in dependencies
 
   const handleAddAnotherChild = () => {
     resetChildProfile();

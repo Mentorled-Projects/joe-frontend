@@ -324,7 +324,7 @@ export default function AddChildProfilePage() {
           setCreating(false);
           setCreated(true);
           setTimeout(() => {
-            router.push("/child/child-profile");
+            router.push("/child/child-profile/[id]");
           }, 2000);
         }, 2000);
       } else {

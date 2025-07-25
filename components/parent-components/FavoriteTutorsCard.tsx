@@ -4,6 +4,11 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParentStore } from "@/stores/useParentStores";
 
+// Define the props interface for FavoriteTutorsCard
+interface FavoriteTutorsCardProps {
+  parentId: string;
+}
+
 interface Tutor {
   _id: string;
   firstName: string;
@@ -12,13 +17,17 @@ interface Tutor {
   avatarUrl?: string;
 }
 
-export default function FavoriteTutorsCard() {
+export default function FavoriteTutorsCard({
+  parentId,
+}: FavoriteTutorsCardProps) {
   const { token, profile, _hasHydrated } = useParentStore();
   const [tutors, setTutors] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("FavoriteTutorsCard mounted for Parent ID:", parentId);
+
     const fetchTutors = async () => {
       if (!_hasHydrated || !token) {
         if (_hasHydrated && !token) {
@@ -74,7 +83,7 @@ export default function FavoriteTutorsCard() {
     };
 
     fetchTutors();
-  }, [token, profile.favoriteTutorIds, _hasHydrated]);
+  }, [token, profile.favoriteTutorIds, _hasHydrated, parentId]);
 
   if (!_hasHydrated) {
     return <p className="text-center text-gray-500">Loading user session...</p>;

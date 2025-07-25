@@ -10,7 +10,23 @@ import { useParentStore } from "@/stores/useParentStores";
 const AVATAR_KEY = "parentAvatar";
 const BANNER_KEY = "parentBanner";
 
-export default function ParentProfileHeader() {
+// Define the props interface for ParentProfileHeader
+interface ParentProfileHeaderProps {
+  parentId: string;
+}
+
+// Define the expected structure of the parent data from  API
+interface FetchedParentData {
+  id: string;
+  name: string;
+  email: string;
+  city?: string;
+  country?: string;
+}
+
+export default function ParentProfileHeader({
+  parentId,
+}: ParentProfileHeaderProps) {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
 
@@ -20,11 +36,52 @@ export default function ParentProfileHeader() {
   );
   const [file, setFile] = useState<File | null>(null);
 
+  // State to store fetched parent details
+  const [fetchedParentDetails, setFetchedParentDetails] =
+    useState<FetchedParentData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const { profile, isProfileCompleted } = useParentStore();
-  const name = profile?.firstName || "Parent";
+
+  // Effect to fetch parent details from  API
+  useEffect(() => {
+    const fetchParentDetails = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/get-by-id/${parentId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch parent data: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const data: FetchedParentData = await response.json();
+        setFetchedParentDetails(data);
+      } catch (err) {
+        console.error("Error fetching parent details:", err);
+        setError("Failed to load parent data.");
+        setFetchedParentDetails(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (parentId) {
+      fetchParentDetails();
+    }
+  }, [parentId]);
+
+  const name = fetchedParentDetails?.name || profile?.firstName || "Parent";
   const accountType = "Parent Account";
   const location =
-    profile?.city && profile?.country
+    fetchedParentDetails?.city && fetchedParentDetails?.country
+      ? `${fetchedParentDetails.city}, ${fetchedParentDetails.country}`
+      : profile?.city && profile?.country
       ? `${profile.city}, ${profile.country}`
       : "Location not set";
   const verified = false;
@@ -39,7 +96,9 @@ export default function ParentProfileHeader() {
     if (f && f.size < 5 * 1024 * 1024) {
       setFile(f);
     } else if (f) {
-      alert("File size exceeds 5 MB limit. Please choose a smaller image.");
+      console.error(
+        "File size exceeds 5 MB limit. Please choose a smaller image."
+      );
       setFile(null);
     }
   };
@@ -61,6 +120,22 @@ export default function ParentProfileHeader() {
     };
     reader.readAsDataURL(file);
   };
+
+  if (isLoading) {
+    return (
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
+        Loading parent profile...
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center text-red-600">
+        Error: {error}
+      </section>
+    );
+  }
 
   return (
     <>

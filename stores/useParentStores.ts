@@ -20,6 +20,7 @@ interface ParentProfile {
   childId?: string; 
   _id?: string; 
   favoriteTutorIds?: string[];
+  isAccountVerified?: boolean; // <--- ADDED THIS LINE
 }
 
 interface ParentState {
@@ -51,7 +52,7 @@ export const useParentStore = create<ParentStore>()(
         _id: undefined, // Initialize _id
         firstName: undefined, // Initialize firstName
         lastName: undefined, // Initialize lastName
-        email: undefined, // Initialize email
+        email: undefined,
         
         country: undefined,
         city: undefined,
@@ -61,6 +62,7 @@ export const useParentStore = create<ParentStore>()(
         language: undefined,
         dateOfBirth: undefined,
         favoriteTutorIds: [],
+        isAccountVerified: false, // Initialize with a default value
       },
       _hasHydrated: false,
 
@@ -89,6 +91,7 @@ export const useParentStore = create<ParentStore>()(
             gender: undefined,
             language: undefined,
             dateOfBirth: undefined,
+            isAccountVerified: false, // Reset with default
           },
           _hasHydrated: false,
         }),

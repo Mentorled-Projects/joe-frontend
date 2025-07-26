@@ -11,21 +11,22 @@ const AVATAR_KEY = "tutorAvatar";
 const BANNER_KEY = "tutorBanner";
 
 interface TutorProfileHeaderProps {
-  tutorId: string;
+  tutorId: string; // Still receive tutorId, though its direct use for API is commented out
 }
 
-interface FetchedTutorData {
-  id: string;
-  name: string;
-  email: string;
-  location?: string;
-  isAccountVerified?: boolean;
-}
+// interface FetchedTutorData { // No longer needed as API fetch is commented out
+//   id: string;
+//   name: string;
+//   email: string;
+//   location?: string;
+//   isAccountVerified?: boolean;
+// }
 
 export default function TutorProfileHeader({
   tutorId,
 }: TutorProfileHeaderProps) {
   const router = useRouter();
+  // We will rely entirely on loggedInTutorProfile for data
   const { profile: loggedInTutorProfile, setProfile } = useTutorStore();
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -37,81 +38,77 @@ export default function TutorProfileHeader({
   );
   const [file, setFile] = useState<File | null>(null);
 
-  const [displayedTutorDetails, setDisplayedTutorDetails] =
-    useState<FetchedTutorData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Commenting out states related to API fetching
+  // const [displayedTutorDetails, setDisplayedTutorDetails] =
+  //   useState<FetchedTutorData | null>(null);
+  // const [isLoading, setIsLoading] = useState(true); // No longer loading from API
+  // const [error, setError] = useState<string | null>(null); // No longer API errors
 
-  useEffect(() => {
-    const fetchTutorDetails = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-        if (!API_BASE_URL) {
-          throw new Error(
-            "NEXT_PUBLIC_API_URL is not defined in environment variables."
-          );
-        }
+  // Commenting out the useEffect that fetches data from the API
+  // useEffect(() => {
+  //   const fetchTutorDetails = async () => {
+  //     setIsLoading(true);
+  //     setError(null);
+  //     try {
+  //       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  //       if (!API_BASE_URL) {
+  //         throw new Error(
+  //           "NEXT_PUBLIC_API_URL is not defined in environment variables."
+  //         );
+  //       }
 
-        // Retrieve token from localStorage
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("No authentication token found. Please sign in.");
-          setIsLoading(false);
-          return;
-        }
+  //       const token = localStorage.getItem("token");
+  //       if (!token) {
+  //         setError("No authentication token found. Please sign in.");
+  //         setIsLoading(false);
+  //         return;
+  //       }
 
-        const response = await fetch(
-          `${API_BASE_URL}/api/v1/tutor/get-by-id/${tutorId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the token in the Authorization header
-            },
-          }
-        );
+  //       const response = await fetch(
+  //         `${API_BASE_URL}/api/v1/tutor/get-by-id/${tutorId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message ||
-              `Failed to fetch tutor data: ${response.status} ${response.statusText}`
-          );
-        }
+  //       if (!response.ok) {
+  //         const errorData = await response.json();
+  //         throw new Error(
+  //           errorData.message ||
+  //             `Failed to fetch tutor data: ${response.status} ${response.statusText}`
+  //         );
+  //       }
 
-        const data: FetchedTutorData = await response.json();
-        setDisplayedTutorDetails(data);
-      } catch (err: unknown) {
-        console.error("Error fetching tutor details:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load tutor data."
-        );
-        setDisplayedTutorDetails(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  //       const data: FetchedTutorData = await response.json();
+  //       setDisplayedTutorDetails(data);
+  //     } catch (err: unknown) {
+  //       console.error("Error fetching tutor details:", err);
+  //       setError(
+  //         err instanceof Error ? err.message : "Failed to load tutor data."
+  //       );
+  //       setDisplayedTutorDetails(null);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    if (tutorId) {
-      fetchTutorDetails();
-    }
-  }, [tutorId]);
+  //   if (tutorId) {
+  //     fetchTutorDetails();
+  //   }
+  // }, [tutorId]);
 
-  const tutorName =
-    displayedTutorDetails?.name || loggedInTutorProfile?.firstName || "Tutor";
-  const tutorLocation =
-    displayedTutorDetails?.location ||
-    loggedInTutorProfile?.location ||
-    "Location Not Set";
-  const isAccountVerified =
-    displayedTutorDetails?.isAccountVerified ??
-    loggedInTutorProfile?.isAccountVerified ??
-    false;
+  // Data will now always come from loggedInTutorProfile or hardcoded defaults
+  const tutorName = loggedInTutorProfile?.firstName || "Tutor";
+  const tutorLocation = loggedInTutorProfile?.location || "Location Not Set";
+  const isAccountVerified = loggedInTutorProfile?.isAccountVerified ?? false;
   const isProfileCompleted = loggedInTutorProfile?.isProfileCompleted ?? false;
 
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
+    // These still load from localStorage, which is fine
     setAvatarPreview(localStorage.getItem(AVATAR_KEY));
     setBannerPreview(localStorage.getItem(BANNER_KEY));
   }, []);
@@ -133,7 +130,8 @@ export default function TutorProfileHeader({
       if (uploadTarget === "avatar") {
         setAvatarPreview(dataUrl);
         localStorage.setItem(AVATAR_KEY, dataUrl);
-        setProfile({ image: dataUrl });
+        // Ensure setProfile updates the image in the Zustand store
+        setProfile({ ...loggedInTutorProfile, image: dataUrl });
       } else {
         setBannerPreview(dataUrl);
         localStorage.setItem(BANNER_KEY, dataUrl);
@@ -152,22 +150,24 @@ export default function TutorProfileHeader({
     actionButtonPath = "/tutor/verify-tutor-account";
   }
 
-  if (isLoading) {
-    return (
-      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
-        Loading tutor profile...
-      </section>
-    );
-  }
+  // Removed isLoading and error checks for rendering as API calls are commented out
+  // if (isLoading) {
+  //   return (
+  //     <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
+  //       Loading tutor profile...
+  //     </section>
+  //   );
+  // }
 
-  if (error) {
-    return (
-      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center text-red-600">
-        Error: {error}
-      </section>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center text-red-600">
+  //       Error: {error}
+  //     </section>
+  //   );
+  // }
 
+  // isOwnProfile logic remains the same, comparing tutorId from props to loggedInTutorProfile._id
   const isOwnProfile = loggedInTutorProfile?._id === tutorId;
 
   return (
@@ -324,7 +324,8 @@ export default function TutorProfileHeader({
                   if (uploadTarget === "avatar") {
                     setAvatarPreview(null);
                     localStorage.removeItem(AVATAR_KEY);
-                    setProfile({ image: undefined });
+                    // Ensure setProfile updates the image in the Zustand store
+                    setProfile({ ...loggedInTutorProfile, image: undefined });
                   } else {
                     setBannerPreview(null);
                     localStorage.removeItem(BANNER_KEY);

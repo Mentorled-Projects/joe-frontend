@@ -34,13 +34,19 @@ export default function ParentChildrenCard({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Acknowledge parentId to satisfy ESLint, even if current API doesn't use it directly
-    // This prop is important for the context of the dynamic parent profile page.
     console.log("ParentChildrenCard mounted for Parent ID:", parentId);
+    console.log("Token from store:", parentToken);
+    console.log("Token from localStorage:", localStorage.getItem("token"));
+    console.log("Has hydrated:", _hasHydrated);
 
     const fetchChildren = async () => {
-      if (!_hasHydrated || !parentToken) {
-        if (_hasHydrated && !parentToken) {
+      // Get token from localStorage as fallback
+      const tokenFromStorage = localStorage.getItem("token");
+      const activeToken = parentToken || tokenFromStorage;
+
+      if (!_hasHydrated || !activeToken) {
+        if (_hasHydrated && !activeToken) {
+          console.error("No token found in store or localStorage");
           setError("Authentication token not found. Please log in again.");
         } else if (!_hasHydrated) {
           setLoading(true);
@@ -66,7 +72,7 @@ export default function ParentChildrenCard({
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${parentToken}`,
+              Authorization: `Bearer ${activeToken}`,
             },
           }
         );

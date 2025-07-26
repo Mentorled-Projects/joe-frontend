@@ -109,7 +109,7 @@ export default function FavoriteTutorsCard({
             <div key={tutor._id} className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                 <Image
-                  src={tutor.avatarUrl || "/assets/images/avatar.png"} // Fallback avatar
+                  src={tutor.avatarUrl || "/assets/images/avatar.png"}
                   alt={`${tutor.firstName} ${tutor.lastName}`}
                   width={40}
                   height={40}

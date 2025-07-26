@@ -1,6 +1,16 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+// Define the ChildData interface here, as it's used in ParentProfile
+interface ChildData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  Class: string;
+  image?: string;
+}
+
 interface ParentProfile {
   firstName?: string;
   lastName?: string;
@@ -20,7 +30,9 @@ interface ParentProfile {
   childId?: string; 
   _id?: string; 
   favoriteTutorIds?: string[];
-  isAccountVerified?: boolean; // <--- ADDED THIS LINE
+  isAccountVerified?: boolean;
+  isProfileCompleted?: boolean; // Ensure this is present if used
+  children?: ChildData[]; // <--- ADD THIS LINE: To store children directly in the parent's profile
 }
 
 interface ParentState {
@@ -47,11 +59,11 @@ export const useParentStore = create<ParentStore>()(
         avatar: null,
         banner: null,
         verificationDocumentType: null,
-        phoneNumber: undefined, // Initialize phoneNumber
-        childId: undefined, // Initialize childId
-        _id: undefined, // Initialize _id
-        firstName: undefined, // Initialize firstName
-        lastName: undefined, // Initialize lastName
+        phoneNumber: undefined,
+        childId: undefined,
+        _id: undefined,
+        firstName: undefined,
+        lastName: undefined,
         email: undefined,
         
         country: undefined,
@@ -62,7 +74,8 @@ export const useParentStore = create<ParentStore>()(
         language: undefined,
         dateOfBirth: undefined,
         favoriteTutorIds: [],
-        isAccountVerified: false, // Initialize with a default value
+        isAccountVerified: false,
+        children: [], // Initialize children as an empty array
       },
       _hasHydrated: false,
 
@@ -91,7 +104,8 @@ export const useParentStore = create<ParentStore>()(
             gender: undefined,
             language: undefined,
             dateOfBirth: undefined,
-            isAccountVerified: false, // Reset with default
+            isAccountVerified: false,
+            children: [], // Reset children to empty array
           },
           _hasHydrated: false,
         }),

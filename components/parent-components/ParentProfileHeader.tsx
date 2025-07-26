@@ -12,16 +12,17 @@ const BANNER_KEY = "parentBanner";
 
 // Define the props interface for ParentProfileHeader
 interface ParentProfileHeaderProps {
-  parentId: string; // parentId is still received but API fetch using it is commented out
+  parentId: string;
 }
 
-// interface FetchedParentData { // Commented out as API fetch is removed
-//   id: string;
-//   name: string;
-//   email: string;
-//   city?: string;
-//   country?: string;
-// }
+// Define the expected structure of the parent data from  API
+interface FetchedParentData {
+  id: string;
+  name: string;
+  email: string;
+  city?: string;
+  country?: string;
+}
 
 export default function ParentProfileHeader({
   parentId,
@@ -35,64 +36,70 @@ export default function ParentProfileHeader({
   );
   const [file, setFile] = useState<File | null>(null);
 
-  // Commented out states related to API fetching
-  // const [fetchedParentDetails, setFetchedParentDetails] =
-  //   useState<FetchedParentData | null>(null);
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [error, setError] = useState<string | null>(null);
+  // State to store fetched parent details
+  const [fetchedParentDetails, setFetchedParentDetails] =
+    useState<FetchedParentData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Rely directly on useParentStore for profile data
-  const { profile, isProfileCompleted, setProfile } = useParentStore();
+  const { profile, isProfileCompleted } = useParentStore();
 
-  // Commented out the useEffect that fetches data from the API
-  // useEffect(() => {
-  //   const fetchParentDetails = async () => {
-  //     setIsLoading(true);
-  //     setError(null);
-  //     try {
-  //       const response = await fetch(
-  //         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/get-by-id/${parentId}`
-  //       );
+  console.log("PArentId in parentProfileHeader", parentId);
 
-  //       if (!response.ok) {
-  //         throw new Error(
-  //           `Failed to fetch parent data: ${response.status} ${response.statusText}`
-  //         );
-  //       }
+  // Effect to fetch parent details from  API
+  useEffect(() => {
+    const fetchParentDetails = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  //       const data: FetchedParentData = await response.json();
-  //       setFetchedParentDetails(data);
-  //     } catch (err) {
-  //       console.error("Error fetching parent details:", err);
-  //       setError("Failed to load parent data.");
-  //       setFetchedParentDetails(null);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/get-by-id/${parentId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token ? `Bearer ${token}` : "", // Add token if available
+            },
+          }
+        );
 
-  //   if (parentId) {
-  //     fetchParentDetails();
-  //   }
-  // }, [parentId]);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch parent data: ${response.status} ${response.statusText}`
+          );
+        }
 
-  // Data will now always come from loggedInParentProfile or hardcoded defaults
-  // console.log("Current profile in ParentHeader:", profile); // For debugging
-  const name = profile?.firstName || "Parent";
+        const data: FetchedParentData = await response.json();
+        setFetchedParentDetails(data);
+      } catch (err) {
+        console.error("Error fetching parent details:", err);
+        setError("Failed to load parent data.");
+        setFetchedParentDetails(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (parentId) {
+      fetchParentDetails();
+    }
+  }, [parentId]);
+
+  const name = fetchedParentDetails?.name || profile?.firstName || "Parent";
   const accountType = "Parent Account";
   const location =
-    profile?.city && profile?.country
+    fetchedParentDetails?.city && fetchedParentDetails?.country
+      ? `${fetchedParentDetails.city}, ${fetchedParentDetails.country}`
+      : profile?.city && profile?.country
       ? `${profile.city}, ${profile.country}`
       : "Location not set";
-  const verified = profile?.isAccountVerified ?? false; // Use profile's verification status
+  const verified = false;
 
-  // Load avatar and banner previews from localStorage on component mount
   useEffect(() => {
     setAvatar(localStorage.getItem(AVATAR_KEY));
     setBanner(localStorage.getItem(BANNER_KEY));
-    // Acknowledge parentId to satisfy ESLint, as it's a prop
-    console.log("ParentProfileHeader mounted for Parent ID:", parentId);
-  }, [parentId]); // Add parentId to dependencies for this effect too
+  }, []);
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -114,13 +121,9 @@ export default function ParentProfileHeader({
       if (uploadTarget === "avatar") {
         setAvatar(dataUrl);
         localStorage.setItem(AVATAR_KEY, dataUrl);
-        // Update the profile image in the Zustand store
-        setProfile({ ...profile, image: dataUrl });
       } else {
         setBanner(dataUrl);
         localStorage.setItem(BANNER_KEY, dataUrl);
-        // If you have a banner field in your profile, update it too
-        // setProfile({ ...profile, bannerImage: dataUrl });
       }
       setFile(null);
       setShowModal(false);
@@ -128,35 +131,28 @@ export default function ParentProfileHeader({
     reader.readAsDataURL(file);
   };
 
-  // Removed isLoading and error checks for rendering as API calls are commented out
-  // if (isLoading) {
-  //   return (
-  //     <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
-  //       Loading parent profile...
-  //     </section>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
+        Loading parent profile...
+      </section>
+    );
+  }
 
-  // if (error) {
-  //   return (
-  //     <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center text-red-600">
-  //       Error: {error}
-  //     </section>
-  //   );
-  // }
+  if (error) {
+    return (
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center text-red-600">
+        Error: {error}
+      </section>
+    );
+  }
 
   return (
     <>
       <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8">
         <div className="relative h-48 rounded-t-lg">
           {banner ? (
-            <Image
-              src={banner}
-              alt="banner"
-              fill
-              className="object-cover"
-              unoptimized
-            />
+            <Image src={banner} alt="banner" fill className="object-cover" />
           ) : (
             <div className="h-full w-full bg-[#c7d4ff]" />
           )}
@@ -181,7 +177,6 @@ export default function ParentProfileHeader({
                   width={140}
                   height={140}
                   className="object-cover w-full h-full object-center"
-                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center text-4xl text-gray-600">
@@ -304,8 +299,6 @@ export default function ParentProfileHeader({
                   if (uploadTarget === "avatar") {
                     setAvatar(null);
                     localStorage.removeItem(AVATAR_KEY);
-                    // Update the profile image in the Zustand store
-                    setProfile({ ...profile, image: undefined });
                   } else {
                     setBanner(null);
                     localStorage.removeItem(BANNER_KEY);

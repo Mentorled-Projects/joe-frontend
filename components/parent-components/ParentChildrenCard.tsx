@@ -12,7 +12,7 @@ interface ParentChildrenCardProps {
   parentId: string; // The dynamic 'id' of the parent whose profile is being viewed
 }
 
-// Define the structure of child data expected from the API
+// Define the structure of child data (mock or from store)
 interface ChildData {
   _id: string;
   firstName: string;
@@ -22,84 +22,115 @@ interface ChildData {
   image?: string;
 }
 
+// Mock data for children for demo purposes
+const mockChildrenData: ChildData[] = [
+  {
+    _id: "child123",
+    firstName: "Alice",
+    lastName: "Smith",
+    age: 8,
+    Class: "3",
+    image: "https://placehold.co/48x48/aabbcc/ffffff?text=A", // Placeholder image
+  },
+  {
+    _id: "child456",
+    firstName: "Bob",
+    lastName: "Johnson",
+    age: 10,
+    Class: "5",
+    image: "https://placehold.co/48x48/ccbbaa/ffffff?text=B", // Placeholder image
+  },
+  {
+    _id: "child789",
+    firstName: "Charlie",
+    lastName: "Brown",
+    age: 6,
+    Class: "1",
+    image: "https://placehold.co/48x48/bbaacc/ffffff?text=C", // Placeholder image
+  },
+];
+
 export default function ParentChildrenCard({
   parentId,
 }: ParentChildrenCardProps) {
   const router = useRouter();
-  const { token: parentToken, _hasHydrated } = useParentStore();
+  // We're commenting out API-related usage of parentToken and _hasHydrated for this demo
+  // const { token: parentToken, _hasHydrated } = useParentStore();
   const { setChildProfile, resetChildProfile } = useChildStore();
 
   const [children, setChildren] = useState<ChildData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [loading, setLoading] = useState(true); // Commented out
+  // const [error, setError] = useState<string | null>(null); // Commented out
 
   useEffect(() => {
     console.log("ParentChildrenCard mounted for Parent ID:", parentId);
-    console.log("Token from store:", parentToken);
-    console.log("Token from localStorage:", localStorage.getItem("token"));
-    console.log("Has hydrated:", _hasHydrated);
+    // console.log("Token from store:", parentToken); // Commented out
+    // console.log("Token from localStorage:", localStorage.getItem("token")); // Commented out
+    // console.log("Has hydrated:", _hasHydrated); // Commented out
 
-    const fetchChildren = async () => {
-      // Get token from localStorage as fallback
-      const tokenFromStorage = localStorage.getItem("token");
-      const activeToken = parentToken || tokenFromStorage;
+    // For demo purposes, load children directly from mock data
+    setChildren(mockChildrenData);
+    // setLoading(false); // Set loading to false as data is immediately available
+    // setError(null); // Clear any errors
 
-      if (!_hasHydrated || !activeToken) {
-        if (_hasHydrated && !activeToken) {
-          console.error("No token found in store or localStorage");
-          setError("Authentication token not found. Please log in again.");
-        } else if (!_hasHydrated) {
-          setLoading(true);
-          return;
-        }
-        setLoading(false);
-        return;
-      }
+    // Commenting out the API fetch logic for the demo
+    // const fetchChildren = async () => {
+    //   if (!_hasHydrated || !parentToken) {
+    //     if (_hasHydrated && !parentToken) {
+    //       setError("Authentication token not found. Please log in again.");
+    //     } else if (!_hasHydrated) {
+    //       setLoading(true);
+    //       return;
+    //     }
+    //     setLoading(false);
+    //     return;
+    //   }
 
-      setLoading(true);
-      setError(null);
+    //   setLoading(true);
+    //   setError(null);
 
-      try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-        if (!API_BASE_URL) {
-          throw new Error(
-            "NEXT_PUBLIC_API_URL is not defined in environment variables."
-          );
-        }
-        const res = await fetch(
-          `${API_BASE_URL}/api/v1/child/get-all-children`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${activeToken}`,
-            },
-          }
-        );
+    //   try {
+    //     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+    //     if (!API_BASE_URL) {
+    //       throw new Error(
+    //         "NEXT_PUBLIC_API_URL is not defined in environment variables."
+    //       );
+    //     }
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data && Array.isArray(data.children)) {
-            setChildren(data.children);
-          } else {
-            setChildren([]);
-          }
-        } else {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Failed to fetch children.");
-        }
-      } catch (err: unknown) {
-        console.error("Error fetching children:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load children."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    //     const res = await fetch(
+    //       `${API_BASE_URL}/api/v1/child/get-all-children`,
+    //       {
+    //         method: "GET",
+    //         headers: {
+    //           "Content-Type": "application/json",
+    //           Authorization: `Bearer ${parentToken}`,
+    //         },
+    //       }
+    //     );
 
-    fetchChildren();
-  }, [parentToken, _hasHydrated, parentId]); // parentId remains in dependencies
+    //     if (res.ok) {
+    //       const data = await res.json();
+    //       if (data && Array.isArray(data.children)) {
+    //         setChildren(data.children);
+    //       } else {
+    //         setChildren([]);
+    //       }
+    //     } else {
+    //       const errorData = await res.json();
+    //       throw new Error(errorData.message || "Failed to fetch children.");
+    //     }
+    //   } catch (err: unknown) {
+    //     console.error("Error fetching children:", err);
+    //     setError(
+    //       err instanceof Error ? err.message : "Failed to load children."
+    //     );
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+
+    // fetchChildren(); // Commented out
+  }, [parentId]); // parentId remains in dependencies
 
   const handleAddAnotherChild = () => {
     resetChildProfile();
@@ -119,9 +150,10 @@ export default function ParentChildrenCard({
     router.push(`/child/${child._id}/home`);
   };
 
-  if (!_hasHydrated) {
-    return <p className="text-center text-gray-500">Loading user session...</p>;
-  }
+  // Removed conditional rendering based on _hasHydrated, loading, and error for demo simplicity
+  // if (!_hasHydrated) {
+  //   return <p className="text-center text-gray-500">Loading user session...</p>;
+  // }
 
   return (
     <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6 -mt-6">
@@ -135,19 +167,18 @@ export default function ParentChildrenCard({
         </button>
       </div>
 
-      {loading && (
+      {/* Removed loading and error messages */}
+      {/* {loading && (
         <p className="text-center text-gray-500">Loading children...</p>
       )}
-      {error && <p className="text-center text-red-500">{error}</p>}
+      {error && <p className="text-center text-red-500">{error}</p>} */}
 
-      {!loading && !error && children.length === 0 && (
+      {children.length === 0 ? ( // Display message if no children (even mock)
         <p className="text-center text-gray-500">
           No children added yet. Click &quot;Add Another Child&quot; to get
           started!
         </p>
-      )}
-
-      {!loading && !error && children.length > 0 && (
+      ) : (
         <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide">
           {children.map((child) => (
             <div

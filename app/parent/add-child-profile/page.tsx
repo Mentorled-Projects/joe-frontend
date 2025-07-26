@@ -214,7 +214,7 @@ function Line() {
 export default function AddChildProfilePage() {
   const router = useRouter();
   const { childProfile, setChildProfile } = useChildStore();
-  const { token, setProfile } = useParentStore();
+  const { token, profile, setProfile } = useParentStore(); // Get current profile from useParentStore
 
   const [step, setStep] = useState(1);
   const [creating, setCreating] = useState(false);
@@ -274,7 +274,7 @@ export default function AddChildProfilePage() {
   };
 
   const submitProfile = async () => {
-    // Update childProfile store with current form data
+    // Update childProfile store with current form data (for the current child being added)
     setChildProfile({
       firstName: form.firstName,
       lastName: form.lastName,
@@ -283,9 +283,9 @@ export default function AddChildProfilePage() {
       dateOfBirth: form.dob,
       schoolName: form.schoolName,
       Class: form.schoolClass,
-      favoriteSubjects: form.favoriteSubjects, // Sent as array
-      interests: form.interests, // Sent as array
-      sports: form.sports, // Sent as array
+      favoriteSubjects: form.favoriteSubjects,
+      interests: form.interests,
+      sports: form.sports,
     });
 
     setCreating(true);
@@ -313,26 +313,44 @@ export default function AddChildProfilePage() {
           dateOfBirth: form.dob,
           schoolName: form.schoolName,
           Class: form.schoolClass,
-          favoriteSubjects: form.favoriteSubjects, // Sent as array
-          interests: form.interests, // Sent as array
-          sports: form.sports, // Sent as array
+          favoriteSubjects: form.favoriteSubjects,
+          interests: form.interests,
+          sports: form.sports,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        const childId = data.child?._id;
+        const newChildData = data.child; // Assuming API returns the full child object under 'child' key
 
-        if (childId) {
-          setProfile({ childId });
-          setChildProfile({ childId });
+        if (newChildData && newChildData._id) {
+          // Update the parent store with the new child added to the children array
+          const currentChildren = profile.children || []; // Get existing children from parent profile
+          const updatedChildren = [...currentChildren, newChildData];
+          setProfile({ children: updatedChildren }); // Update parent's profile in Zustand
+
+          // Set the newly created child as the active child in useChildStore
+          setChildProfile({
+            firstName: newChildData.firstName,
+            lastName: newChildData.lastName,
+            image: newChildData.image,
+            Class: newChildData.Class,
+            age: newChildData.age,
+            _id: newChildData._id,
+          });
+
           setTimeout(() => {
             setCreating(false);
             setCreated(true);
             setTimeout(() => {
-              router.push(`/child/${childId}`);
+              router.push(`/child/${newChildData._id}/home`);
             }, 2000);
           }, 2000);
+        } else {
+          setErrors({
+            apiError:
+              "Child data or ID not found in API response after creation.",
+          });
         }
       } else {
         const errorData = await res.json();

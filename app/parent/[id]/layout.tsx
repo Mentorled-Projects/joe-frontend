@@ -3,12 +3,6 @@
 import type { Metadata } from "next";
 import React from "react";
 
-interface GenerateMetadataProps {
-  params: {
-    id: string;
-  };
-}
-
 interface ParentData {
   id: string;
   name: string;
@@ -17,7 +11,9 @@ interface ParentData {
 
 export async function generateMetadata({
   params,
-}: GenerateMetadataProps): Promise<Metadata> {
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
   const { id } = params;
 
   let parentName = `Parent ${id}`;
@@ -52,7 +48,7 @@ export async function generateMetadata({
       title: `${parentName}'s Profile`,
       description: `View the comprehensive profile of ${parentName} (ID: ${id}).`,
       url: `/parent/${id}`,
-      siteName: "Your App Name",
+      siteName: "Peenly",
       images: [
         "https://placehold.co/1200x630/cccccc/333333?text=Parent+Profile",
       ],

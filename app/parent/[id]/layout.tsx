@@ -1,14 +1,24 @@
+// app/parent/[id]/layout.tsx
+
 import type { Metadata } from "next";
 import React from "react";
 
-type LayoutProps = {
+export default async function Layout({
+  params,
+  children,
+}: {
+  params: Promise<{ id: string }>;
   children: React.ReactNode;
-};
+}) {
+  const resolvedParams = await params; // Await the params Promise
+  const id = resolvedParams.id;
 
-export default function ParentIdLayout({ children }: LayoutProps) {
+  console.log("Layout loaded for Parent ID:", id);
+
   return <>{children}</>;
 }
 
+// generateMetadata function using normal (non-promise) params
 export async function generateMetadata({
   params,
 }: {

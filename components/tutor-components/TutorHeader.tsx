@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation"; // Import useRouter
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useTutorStore } from "@/stores/useTutorStores";
 import { FiMenu } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
@@ -12,164 +12,160 @@ import { IoMdClose } from "react-icons/io";
 const nav = [
   { href: "/tutor/profile", label: "Profile", icon: UserIcon },
   { href: "/tutor/messages", label: "Messages", icon: MessageIcon },
-  { href: "/tutor/notifications", label: "Notification", icon: BellIcon },
+  // { href: "/tutor/notifications", label: "Notification", icon: BellIcon }, // Commented out notification link
 ];
 
-interface Notification {
-  _id: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-}
+// interface Notification { // Commented out Notification interface
+//   _id: string;
+//   message: string;
+//   timestamp: string;
+//   read: boolean;
+// }
 
 export default function TutorHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, setProfile, token, setToken, _hasHydrated } =
-    useTutorStore(); // Get profile and token from tutor store
-  const tutorProfilePic = profile?.image || "/assets/images/avatar.png"; // Default avatar
+  const { profile, setProfile, setToken, _hasHydrated } = useTutorStore(); // Get profile and token from tutor store
+  const tutorProfilePic = profile?.image || "/assets/images/Avatar4.svg"; // Default avatar
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [showNotificationsDropdown, setShowNotificationsDropdown] =
-    useState(false);
-  const [loadingNotifications, setLoadingNotifications] = useState(true);
-  const [errorNotifications, setErrorNotifications] = useState<string | null>(
-    null
-  );
+  // const [notifications, setNotifications] = useState<Notification[]>([]); // Commented out notification state
+  // const [showNotificationsDropdown, setShowNotificationsDropdown] = // Commented out notification state
+  //   useState(false);
+  // const [loadingNotifications, setLoadingNotifications] = useState(true); // Commented out notification state
+  // const [errorNotifications, setErrorNotifications] = useState<string | null>( // Commented out notification state
+  //   null
+  // );
 
-  // Function to fetch notifications from the backend
-  const fetchNotifications = useCallback(async () => {
-    if (!token) {
-      setLoadingNotifications(false);
-      return [];
-    }
+  // Function to fetch notifications from the backend - Commented out
+  // const fetchNotifications = useCallback(async () => {
+  //   if (!token) {
+  //     setLoadingNotifications(false);
+  //     return [];
+  //   }
 
-    setLoadingNotifications(true);
-    setErrorNotifications(null);
-    try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-      if (!API_BASE_URL) {
-        throw new Error(
-          "NEXT_PUBLIC_API_URL is not defined in environment variables."
-        );
-      }
-      const res = await fetch(`${API_BASE_URL}/api/v1/tutor/notifications`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  //   setLoadingNotifications(true);
+  //   setErrorNotifications(null);
+  //   try {
+  //     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  //     if (!API_BASE_URL) {
+  //       throw new Error(
+  //         "NEXT_PUBLIC_API_URL is not defined in environment variables."
+  //       );
+  //     }
+  //     const res = await fetch(`${API_BASE_URL}/api/v1/tutor/notifications`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data && Array.isArray(data.notifications)) {
-          const fetched = data.notifications.map((notif: Notification) => ({
-            _id: notif._id,
-            message: notif.message,
-            timestamp: notif.timestamp,
-            read: notif.read,
-          }));
-          setNotifications(fetched);
-          return fetched;
-        } else {
-          console.warn(
-            "API response for tutor notifications is not an array or is missing 'notifications' property:",
-            data
-          );
-          setNotifications([]);
-          return [];
-        }
-      } else {
-        const errorData = await res.json();
-        throw new Error(
-          errorData.message || "Failed to fetch tutor notifications."
-        );
-      }
-    } catch (err: unknown) {
-      console.error("Error fetching tutor notifications:", err);
-      let message = "Failed to load notifications.";
-      if (err instanceof Error) {
-        message = err.message;
-      }
-      setErrorNotifications(message);
-      return [];
-    } finally {
-      setLoadingNotifications(false);
-    }
-  }, [token]);
+  //     if (res.ok) {
+  //       const data = await res.json();
+  //       if (data && Array.isArray(data.notifications)) {
+  //         const fetched = data.notifications.map((notif: Notification) => ({
+  //           _id: notif._id,
+  //           message: notif.message,
+  //           timestamp: notif.timestamp,
+  //           read: notif.read,
+  //         }));
+  //         setNotifications(fetched);
+  //         return fetched;
+  //       } else {
+  //         console.warn(
+  //           "API response for tutor notifications is not an array or is missing 'notifications' property:",
+  //           data
+  //         );
+  //         setNotifications([]);
+  //         return [];
+  //       }
+  //     } else {
+  //       const errorData = await res.json();
+  //       throw new Error(
+  //         errorData.message || "Failed to fetch tutor notifications."
+  //       );
+  //     }
+  //   } catch (err: unknown) {
+  //     console.error("Error fetching tutor notifications:", err);
+  //     let message = "Failed to load notifications.";
+  //     if (err instanceof Error) {
+  //       message = err.message;
+  //     }
+  //     setErrorNotifications(message);
+  //     return [];
+  //   } finally {
+  //     setLoadingNotifications(false);
+  //   }
+  // }, [token]);
 
-  // Function to mark a notification as read on the backend
-  const markNotificationAsRead = async (id: string) => {
-    if (!token) {
-      alert(
-        "Authentication token not found. Cannot mark notification as read."
-      );
-      return false;
-    }
-    try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-      if (!API_BASE_URL) {
-        throw new Error(
-          "NEXT_PUBLIC_API_URL is not defined in environment variables."
-        );
-      }
-      const res = await fetch(
-        `${API_BASE_URL}/api/v1/tutor/notification/${id}/read`,
-        {
-          // Assuming this endpoint for tutors
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  // Function to mark a notification as read on the backend - Commented out
+  // const markNotificationAsRead = async (id: string) => {
+  //   if (!token) {
+  //     alert(
+  //       "Authentication token not found. Cannot mark notification as read."
+  //     );
+  //     return false;
+  //   }
+  //   try {
+  //     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  //     if (!API_BASE_URL) {
+  //       throw new Error(
+  //         "NEXT_PUBLIC_API_URL is not defined in environment variables."
+  //       );
+  //     }
+  //     const res = await fetch(
+  //       `${API_BASE_URL}/api/v1/tutor/notification/${id}/read`,
+  //       {
+  //         method: "PATCH",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (res.ok) {
-        return true;
-      } else {
-        const errorData = await res.json();
-        throw new Error(
-          errorData.message || "Failed to mark notification as read."
-        );
-      }
-    } catch (err: unknown) {
-      console.error("Error marking notification as read:", err);
-      let message = "Please try again.";
-      if (err instanceof Error) {
-        message = err.message;
-      }
-      alert(`Failed to mark notification as read: ${message}`);
-      return false;
-    }
-  };
+  //     if (res.ok) {
+  //       return true;
+  //     } else {
+  //       const errorData = await res.json();
+  //       throw new Error(
+  //         errorData.message || "Failed to mark notification as read."
+  //       );
+  //     }
+  //   } catch (err: unknown) {
+  //     console.error("Error marking notification as read:", err);
+  //     let message = "Please try again.";
+  //     if (err instanceof Error) {
+  //       message = err.message;
+  //     }
+  //     alert(`Failed to mark notification as read: ${message}`);
+  //     return false;
+  //   }
+  // };
 
-  // Fetch notifications on component mount and periodically
-  useEffect(() => {
-    fetchNotifications(); // Initial fetch
+  // Fetch notifications on component mount and periodically - Commented out
+  // useEffect(() => {
+  //   fetchNotifications(); // Initial fetch
 
-    const interval = setInterval(() => {
-      fetchNotifications(); // Fetch every 30 seconds
-    }, 30000);
+  //   const interval = setInterval(() => {
+  //     fetchNotifications(); // Fetch every 30 seconds
+  //   }, 30000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [token, fetchNotifications]); // Re-run effect if token or fetchNotifications changes
+  //   return () => clearInterval(interval); // Cleanup on unmount
+  // }, [token, fetchNotifications]); // Re-run effect if token or fetchNotifications changes
 
-  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+  // const unreadNotificationsCount = notifications.filter((n) => !n.read).length; // Commented out
 
-  const handleNotificationClick = async (notificationId: string) => {
-    const success = await markNotificationAsRead(notificationId);
-    if (success) {
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
-      );
-      // Optionally, navigate to a specific page based on notification type
-      // router.push('/tutor/messages');
-    }
-  };
+  // const handleNotificationClick = async (notificationId: string) => { // Commented out
+  //   const success = await markNotificationAsRead(notificationId);
+  //   if (success) {
+  //     setNotifications((prev) =>
+  //       prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
+  //     );
+  //   }
+  // };
 
   const handleLogout = () => {
     localStorage.removeItem("tutorToken"); // Assuming tutor token is stored differently
@@ -181,6 +177,7 @@ export default function TutorHeader() {
   };
 
   // Wait for the Zustand store to hydrate before rendering content that depends on it
+  // This is kept as it's a good practice for client-side state hydration
   if (!_hasHydrated) {
     return (
       <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
@@ -245,8 +242,8 @@ export default function TutorHeader() {
 
         {/* Desktop Profile & Notifications - Right Aligned */}
         <div className="hidden md:flex relative items-center space-x-4">
-          {/* Notification Bell Icon */}
-          <div className="relative">
+          {/* Notification Bell Icon - Commented out */}
+          {/* <div className="relative">
             <button
               onClick={() => setShowNotificationsDropdown((prev) => !prev)}
               className="relative p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#2F5FFF]"
@@ -302,7 +299,7 @@ export default function TutorHeader() {
                 )}
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="relative">
             <button
@@ -383,7 +380,7 @@ export default function TutorHeader() {
             </p>
             <button
               onClick={() => {
-                router.push("/tutor/profile");
+                router.push("/tutor/profile"); // This can be updated to dynamic if needed later
                 setIsMobileMenuOpen(false);
               }}
               className="text-sm text-[#2F5FFF] hover:underline mt-1"
@@ -463,19 +460,19 @@ function MessageIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-function BellIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" {...props}>
-      <path
-        d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M13.73 21a2 2 0 0 1-3.46 0"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
+// function BellIcon(props: React.SVGProps<SVGSVGElement>) {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="none" {...props}>
+//       <path
+//         d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"
+//         stroke="currentColor"
+//         strokeWidth="2"
+//       />
+//       <path
+//         d="M13.73 21a2 2 0 0 1-3.46 0"
+//         stroke="currentColor"
+//         strokeWidth="2"
+//       />
+//     </svg>
+//   );
+// }

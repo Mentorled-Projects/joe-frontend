@@ -64,15 +64,19 @@ const SignInPage = () => {
       setToken(token); // Set the token in Zustand
 
       const profileResponse = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/by-phone`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          params: { phoneNumber: formattedPhone },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      const userProfile = profileResponse?.data?.profile;
+      const userProfile = profileResponse.data;
+      const parentId = userProfile.data._id;
+
+      console.log("userPordile", userProfile);
+
+      console.log("parentID", parentId);
 
       if (userProfile) {
         setProfile(userProfile);
@@ -82,7 +86,7 @@ const SignInPage = () => {
         );
       }
 
-      router.push("/parent/parent-profile");
+      router.push(`/parent/${parentId}`);
     } catch (err: unknown) {
       console.error("Login failed:", err);
 

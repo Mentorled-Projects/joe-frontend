@@ -2,31 +2,19 @@ import type { Metadata } from "next";
 import React from "react";
 
 type LayoutProps = {
-  params: Promise<{ id: string }>;
   children: React.ReactNode;
 };
 
-export default async function ParentIdLayout({
-  params,
-  children,
-}: LayoutProps) {
-  // Await the params to get the actual object
-  const resolvedParams = await params;
-  const { id } = resolvedParams;
-
-  // You can use the id here for any layout-specific logic if needed
-  console.log("Parent ID:", id);
-
+export default function ParentIdLayout({ children }: LayoutProps) {
   return <>{children}</>;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }): Promise<Metadata> {
-  const resolvedParams = await params;
-  const { id } = resolvedParams;
+  const { id } = params;
 
   let parentName = `Parent ${id}`;
 
@@ -40,6 +28,7 @@ export async function generateMetadata({
     const response = await fetch(
       `${API_BASE_URL}/api/v1/guardian/get-by-id/${id}`
     );
+
     if (response.ok) {
       const data = await response.json();
       parentName = data.name || `Parent ${id}`;

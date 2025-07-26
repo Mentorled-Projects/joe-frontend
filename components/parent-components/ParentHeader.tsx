@@ -37,7 +37,7 @@ export default function ParentHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { profile, setProfile, token, setToken } = useParentStore(); // Get token from store
-  const profilePic = profile?.image || "/assets/images/avatar.png";
+  const profilePic = profile?.image || "/assets/images/avatar4.svg";
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu

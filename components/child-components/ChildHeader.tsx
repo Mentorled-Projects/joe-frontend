@@ -157,7 +157,7 @@ export default function ChildHeader() {
   } = useParentStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State for mobile menu
-  const childProfilePic = childProfile?.image || "/assets/images/avatar.png";
+  const childProfilePic = childProfile?.image || "/assets/images/kiddp.svg";
 
   // Navigation links for the child profile
   const navLinks = [
@@ -260,7 +260,7 @@ export default function ChildHeader() {
                 onClick={handleLogout}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors duration-200"
               >
-                Logout
+                Parent Profile
               </button>
             </div>
           )}

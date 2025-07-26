@@ -4,9 +4,9 @@ import React from "react";
 
 export default function WeeklyActivitySummaryCard() {
   const summaryData = {
-    achievements: 10,
-    booksRead: 23,
-    newSkills: 8,
+    achievements: 0,
+    booksRead: 0,
+    newSkills: 0,
   };
 
   return (

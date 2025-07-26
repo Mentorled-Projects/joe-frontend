@@ -121,7 +121,7 @@ export default function RegisterParentData() {
       if (!res.ok) {
         setErrors((prev) => ({
           ...prev,
-          apiError: data.message || "Something went wrong. Try again.", // Use apiError for general API messages
+          apiError: data.message || "Something went wrong. Try again.",
         }));
         return;
       }

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useParentStore } from "@/stores/useParentStores";
 
 export default function VerifyParentEmailOtpPage() {
   const [otp, setOtp] = useState("");
@@ -13,6 +14,7 @@ export default function VerifyParentEmailOtpPage() {
   const [email, setEmail] = useState("");
 
   const router = useRouter();
+  const { profile, setProfile } = useParentStore();
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("parentProfile") || "{}");
@@ -37,11 +39,10 @@ export default function VerifyParentEmailOtpPage() {
       const token = localStorage.getItem("token");
       console.log("Completing profile with token:", token);
 
-      await fetch(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verify-email`,
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -50,7 +51,28 @@ export default function VerifyParentEmailOtpPage() {
         }
       );
 
-      router.push("/parent/parent-profile");
+      const data = await response.json();
+
+      // If the API returns a parent ID, use it
+      if (data?.parent?._id) {
+        setProfile({ _id: data.parent._id });
+        router.push(`/parent/${data.parent._id}`);
+      }
+      // If the profile already has an ID stored, use that
+      else if (profile?._id) {
+        router.push(`/parent/${profile._id}`);
+      } else {
+        const storedProfile = JSON.parse(
+          localStorage.getItem("parentProfile") || "{}"
+        );
+        if (storedProfile._id) {
+          setProfile({ _id: storedProfile._id });
+          router.push(`/parent/${storedProfile._id}`);
+        } else {
+          console.warn("No parent ID found, redirecting to profile setup");
+          router.push("/parent/register-parent-data");
+        }
+      }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || "Invalid OTP or email");

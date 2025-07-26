@@ -19,7 +19,7 @@ const SignInPage = () => {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const { setToken } = useParentStore();
+  const { setToken, setProfile, profile } = useParentStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,25 +63,60 @@ const SignInPage = () => {
       localStorage.setItem("phoneNumber", formattedPhone);
       setToken(token); // Set the token in Zustand
 
-      // const profileResponse = await axios.get(
-      //   `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/profile`,
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //   }
-      // );
+      // Try to get the user profile to obtain the parent ID
+      try {
+        const profileResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      // const userProfile = profileResponse?.data?.profile;
+        const userProfile = profileResponse?.data?.profile;
 
-      // if (userProfile) {
-      //   setProfile(userProfile);
-      // } else {
-      //   console.warn("Profile data not found after login. Please check the /api/v1/guardian/profile response structure.");
-
-      // }
-
-      router.push("/parent/parent-profile");
+        if (userProfile?._id) {
+          // Store the profile with the ID
+          setProfile(userProfile);
+          // Route to the dynamic parent profile page
+          router.push(`/parent/${userProfile._id}`);
+        } else {
+          console.warn(
+            "Profile data found but no ID. Checking localStorage..."
+          );
+          // Fallback: check if we have an ID in localStorage
+          const storedProfile = JSON.parse(
+            localStorage.getItem("parentProfile") || "{}"
+          );
+          if (storedProfile._id) {
+            setProfile({ _id: storedProfile._id });
+            router.push(`/parent/${storedProfile._id}`);
+          } else if (profile?._id) {
+            // Use existing profile ID from store
+            router.push(`/parent/${profile._id}`);
+          } else {
+            // If no ID is available anywhere, redirect to profile setup
+            console.warn("No parent ID found, redirecting to profile setup");
+            router.push("/parent/register-parent-data");
+          }
+        }
+      } catch (profileErr) {
+        console.warn("Could not fetch profile after login:", profileErr);
+        // Fallback routing logic if profile fetch fails
+        const storedProfile = JSON.parse(
+          localStorage.getItem("parentProfile") || "{}"
+        );
+        if (storedProfile._id) {
+          setProfile({ _id: storedProfile._id });
+          router.push(`/parent/${storedProfile._id}`);
+        } else if (profile?._id) {
+          router.push(`/parent/${profile._id}`);
+        } else {
+          // If all else fails, redirect to profile setup
+          router.push("/parent/register-parent-data");
+        }
+      }
     } catch (err: unknown) {
       console.error("Login failed:", err);
 

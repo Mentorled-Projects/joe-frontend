@@ -18,6 +18,7 @@ export default function ParentSignUpPage() {
     number: false,
     special: false,
   });
+  const [isLoading, setIsLoading] = useState(false); // New loading state
 
   const router = useRouter();
 
@@ -43,6 +44,7 @@ export default function ParentSignUpPage() {
     }
 
     setError("");
+    setIsLoading(true); // Set loading to true
     const fullPhone = "+234" + phone.replace(/^0/, "");
 
     try {
@@ -66,6 +68,8 @@ export default function ParentSignUpPage() {
       } else {
         setError("Something went wrong. Please try again.");
       }
+    } finally {
+      setIsLoading(false); // Set loading to false
     }
   };
 
@@ -186,9 +190,11 @@ export default function ParentSignUpPage() {
 
             <button
               type="submit"
-              className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4]"
+              className="w-full bg-[#2F5FFF] text-white py-2 rounded font-medium hover:bg-[#204fd4] disabled:opacity-70 disabled:cursor-not-allowed" // Added disabled styles
+              disabled={isLoading} // Disable button when loading
             >
-              SIGN UP
+              {isLoading ? "SIGNING UP..." : "SIGN UP"}{" "}
+              {/* Dynamic button text */}
             </button>
 
             <div className="space-y-2 text-sm text-gray-700">

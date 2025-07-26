@@ -1,13 +1,13 @@
-"use client"
-import Image from "next/image"
-import Link from "next/link"
-import React, { useState } from "react"
-import { HiOutlineMenu, HiX } from "react-icons/hi"
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import React, { useState } from "react";
+import { HiOutlineMenu, HiX } from "react-icons/hi";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen)
+  const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
     <header className="relative bg-[#F4EEE5] z-10">
@@ -21,7 +21,7 @@ const Navbar = () => {
         />
       </div>
 
-      <div className="relative z-30 max-w-7xl mx-auto px-4 pt-6 flex items-center justify-between">
+      <div className="relative z-30 max-w-7xl mx-auto px-4 pt-15 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <Image
@@ -34,7 +34,9 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-6 text-md font-medium text-[#7d8a9a]">
-          <a href="#" className="text-black font-semibold">Home</a>
+          <a href="#" className="text-black font-semibold">
+            Home
+          </a>
           <a href="#">Marketplace</a>
           <a href="#">Tutor</a>
           <a href="#">Recommendation</a>
@@ -61,7 +63,9 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden px-4 pb-4">
           <nav className="flex flex-col space-y-4 text-[#0B2C49] font-medium mt-4 bg-[#fff5e9] p-4 rounded-lg shadow">
-            <a href="#" className="text-black">Home</a>
+            <a href="#" className="text-black">
+              Home
+            </a>
             <a href="#">Marketplace</a>
             <a href="#">Tutor</a>
             <a href="#">Recommendation</a>
@@ -74,7 +78,7 @@ const Navbar = () => {
         </div>
       )}
     </header>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

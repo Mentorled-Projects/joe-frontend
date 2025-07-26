@@ -10,7 +10,6 @@ import { useParentStore } from "@/stores/useParentStores";
 
 import { uploadFile } from "@/stores/uploadService";
 import Image from "next/image";
-import { useParams } from "next/navigation";
 
 interface Milestone {
   title: string;
@@ -22,8 +21,6 @@ interface Milestone {
 export default function ChildMilestones() {
   const { childProfile, setChildProfile } = useChildStore();
   const { profile, token } = useParentStore();
-  const params = useParams();
-  console.log(params);
 
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
@@ -123,7 +120,6 @@ export default function ChildMilestones() {
   };
 
   const handleAddMilestone = async () => {
-    console.log({ token, childProfile, title, description, date, file });
     if (!title.trim() || !description.trim() || !date) {
       alert("Please fill in all required fields (Title, Description, Date).");
       return;

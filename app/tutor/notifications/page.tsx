@@ -16,22 +16,37 @@ interface NotificationItem {
 }
 
 export default function NotificationsPage() {
-  const { messages, conversations, currentUserId } = useMessageStore();
-  // Correct way to check hydration status for a persisted Zustand store
-  const messageStoreHydrated = useMessageStore.persist.hasHydrated();
-  const { _hasHydrated: tutorStoreHydrated, profile: loggedInTutorProfile } =
-    useTutorStore();
-
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Get store data with safe defaults
+  const messageStoreData = useMessageStore();
+  const tutorStoreData = useTutorStore();
 
   useEffect(() => {
-    // Ensure both stores are hydrated before processing notifications
-    if (
-      messageStoreHydrated &&
-      tutorStoreHydrated &&
-      loggedInTutorProfile?._id
-    ) {
+    // Wait for hydration
+    const checkHydration = async () => {
+      // Check if stores are hydrated
+      const messageHydrated = useMessageStore.persist?.hasHydrated?.() ?? true;
+      const tutorHydrated = tutorStoreData._hasHydrated ?? true;
+
+      if (messageHydrated && tutorHydrated) {
+        setIsHydrated(true);
+      }
+    };
+
+    checkHydration();
+  }, [tutorStoreData._hasHydrated]);
+
+  useEffect(() => {
+    // Only process notifications after hydration
+    if (!isHydrated) return;
+
+    const { messages, conversations } = messageStoreData;
+    const { profile: loggedInTutorProfile } = tutorStoreData;
+
+    if (loggedInTutorProfile?._id) {
       const tutorId = loggedInTutorProfile._id;
       const generatedNotifications: NotificationItem[] = [];
 
@@ -60,23 +75,12 @@ export default function NotificationsPage() {
 
       setNotifications(generatedNotifications);
       setIsLoading(false);
-    } else if (
-      messageStoreHydrated &&
-      tutorStoreHydrated &&
-      !loggedInTutorProfile?._id
-    ) {
-      // If stores are hydrated but no logged in tutor profile, means user is not logged in
+    } else {
+      // If no logged in tutor profile, means user is not logged in
       setIsLoading(false);
       setNotifications([]); // No notifications if not logged in
     }
-  }, [
-    messages,
-    conversations,
-    currentUserId,
-    messageStoreHydrated,
-    tutorStoreHydrated,
-    loggedInTutorProfile,
-  ]);
+  }, [isHydrated, messageStoreData, tutorStoreData]);
 
   if (isLoading) {
     return (

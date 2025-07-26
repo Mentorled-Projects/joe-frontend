@@ -146,31 +146,34 @@ function LogoutIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-// Navigation links for the child profile
-const navLinks = [
-  { href: "/child/home", label: "Home", icon: HomeIcon },
-  {
-    href: "/child/recommendations/movies",
-    label: "Movie Recommendations",
-    icon: FilmIcon,
-  },
-  {
-    href: "/child/recommendations/books",
-    label: "Book Recommendations",
-    icon: BookOpenIcon,
-  },
-  { href: "/child/child-profile", label: "Profile", icon: UserIcon },
-];
-
 export default function ChildHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { childProfile, setChildProfile } = useChildStore();
-  const { setToken: setParentToken, setProfile: setParentProfile } =
-    useParentStore();
+  const {
+    setToken: setParentToken,
+    setProfile: setParentProfile,
+    profile,
+  } = useParentStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State for mobile menu
   const childProfilePic = childProfile?.image || "/assets/images/avatar.png";
+
+  // Navigation links for the child profile
+  const navLinks = [
+    { href: "/child/home", label: "Home", icon: HomeIcon },
+    {
+      href: "/child/recommendations/movies",
+      label: "Movie Recommendations",
+      icon: FilmIcon,
+    },
+    {
+      href: "/child/recommendations/books",
+      label: "Book Recommendations",
+      icon: BookOpenIcon,
+    },
+    { href: `/child/${profile?.childId}`, label: "Profile", icon: UserIcon },
+  ];
 
   const handleLogout = () => {
     localStorage.removeItem("token");

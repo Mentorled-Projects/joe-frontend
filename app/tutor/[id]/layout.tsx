@@ -6,9 +6,16 @@ import React from "react";
 // Define the props interface for this layout
 interface TutorIdLayoutProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     id: string; // The dynamic 'id' from the URL (e.g., /tutor/123 -> id is '123')
-  };
+  }>;
+}
+
+// Define the props interface for generateMetadata
+interface GenerateMetadataProps {
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 interface FetchedTutorData {
@@ -22,8 +29,9 @@ interface FetchedTutorData {
 // generateMetadata is a Server Component function that runs on the server
 export async function generateMetadata({
   params,
-}: TutorIdLayoutProps): Promise<Metadata> {
-  const { id } = params;
+}: GenerateMetadataProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
 
   let tutorName = `Tutor ${id}`;
 
@@ -62,6 +70,16 @@ export async function generateMetadata({
   };
 }
 
-export default function TutorIdLayout({ children }: TutorIdLayoutProps) {
+export default async function TutorIdLayout({
+  children,
+  params,
+}: TutorIdLayoutProps) {
+  // Await params to get the actual object
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+
+  // You can use the id here for any layout-specific logic if needed
+  console.log("TutorIdLayout rendered for ID:", id);
+
   return <>{children}</>;
 }

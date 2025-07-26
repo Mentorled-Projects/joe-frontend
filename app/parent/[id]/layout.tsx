@@ -1,37 +1,39 @@
-// app/parent/[id]/layout.tsx
-
 import type { Metadata } from "next";
 import React from "react";
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: Promise<{ id: string }>;
+interface ParentIdLayoutProps {
   children: React.ReactNode;
-}) {
-  const resolvedParams = await params; // Await the params Promise
-  const id = resolvedParams.id;
-
-  console.log("Layout loaded for Parent ID:", id);
-
-  return <>{children}</>;
+  params: Promise<{
+    id: string;
+  }>;
 }
 
-// generateMetadata function using normal (non-promise) params
+interface GenerateMetadataProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+interface ParentData {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export async function generateMetadata({
   params,
-}: {
-  params: { id: string };
-}): Promise<Metadata> {
-  const { id } = params;
+}: GenerateMetadataProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
 
   let parentName = `Parent ${id}`;
 
   try {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
     if (!API_BASE_URL) {
-      console.error("NEXT_PUBLIC_API_URL is not defined.");
+      console.error(
+        "NEXT_PUBLIC_API_URL is not defined in environment variables for generateMetadata."
+      );
       return { title: `Parent Profile: ${id}` };
     }
 
@@ -40,17 +42,51 @@ export async function generateMetadata({
     );
 
     if (response.ok) {
-      const data = await response.json();
-      parentName = data.name || `Parent ${id}`;
+      const parentData: ParentData = await response.json();
+      parentName = parentData.name || `Parent ${id}`;
     } else {
-      console.error(`Failed to fetch data for ID ${id}: ${response.status}`);
+      console.error(
+        `Failed to fetch parent data for ID ${id} in generateMetadata: ${response.status} ${response.statusText}`
+      );
     }
   } catch (error) {
-    console.error("Error in generateMetadata:", error);
+    console.error(
+      `Error fetching parent data for ID ${id} in generateMetadata:`,
+      error
+    );
   }
 
   return {
     title: `${parentName}'s Profile`,
-    description: `View ${parentName}'s full profile.`,
+    description: `Detailed profile and activities for ${parentName} (ID: ${id}).`,
+    openGraph: {
+      title: `${parentName}'s Profile`,
+      description: `View the comprehensive profile of ${parentName} (ID: ${id}).`,
+      url: `/parent/${id}`,
+      siteName: "Your App Name",
+      images: [
+        "https://placehold.co/1200x630/cccccc/333333?text=Parent+Profile",
+      ],
+      type: "profile",
+    },
+    keywords: [
+      `${parentName}`,
+      `parent ${id}`,
+      "tutor app",
+      "education",
+      "profile",
+    ],
   };
+}
+
+export default async function ParentIdLayout({
+  children,
+  params,
+}: ParentIdLayoutProps) {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+
+  console.log("ParentIdLayout rendered for ID:", id);
+
+  return <>{children}</>;
 }

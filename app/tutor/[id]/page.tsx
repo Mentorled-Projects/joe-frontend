@@ -1,23 +1,46 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import TutorProfileHeader from "@/components/tutor-components/TutorProfileHeader";
 import StudentAcceptanceStatus from "@/components/tutor-components/StudentAcceptanceStatus";
 import AboutSection from "@/components/tutor-components/AboutSection";
-import SubjectsAvailabilityCard from "@/components/tutor-components/SubjectsAvailabilityCard"; // New import
-import ProfileAnalyticsCard from "@/components/tutor-components/ProfileAnalyticsCard"; // New import
+import SubjectsAvailabilityCard from "@/components/tutor-components/SubjectsAvailabilityCard";
+import ProfileAnalyticsCard from "@/components/tutor-components/ProfileAnalyticsCard";
 
-// Define the props interface for the ProfilePage component
 interface TutorProfilePageProps {
-  params: {
-    id: string; // The dynamic 'id' from the URL (e.g., /tutor/123 -> id is '123')
-  };
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 export default function ProfilePage({ params }: TutorProfilePageProps) {
-  const { id } = params;
+  const [id, setId] = useState<string>("");
 
-  console.log("Currently viewing tutor profile for ID:", id);
+  useEffect(() => {
+    // Resolve the params promise
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setId(resolvedParams.id);
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (id) {
+      console.log("Currently viewing tutor profile for ID:", id);
+    }
+  }, [id]);
+
+  // Show loading while params are being resolved
+  if (!id) {
+    return (
+      <div className="bg-[#F5F5F5] min-h-screen pt-15 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading tutor profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   const subjectsOffered = ["Mathematics", "Statistics", "Calculus", "Algebra"];
   const availability = [

@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
-import Image from "next/image"
-import { FaPlay } from "react-icons/fa"
+import React from "react";
+import Image from "next/image";
+import { FaPlay } from "react-icons/fa";
 
 const HeroSection = () => {
   return (
@@ -11,13 +11,15 @@ const HeroSection = () => {
         {/* Left Section */}
         <div className="w-full md:w-1/2 text-center md:text-left -mt-10 md:mt-0">
           <p className="text-[#F39F5F] font-medium mb-2 text-sm sm:text-base">
-            Every Child’s Journey, Celebrated 
+            Every Child&apos;s Journey, Celebrated
           </p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0B2C49] mb-4 leading-tight">
-            Track Your Child’s <br /> Achievements, Growth <br /> & Memories
+            Track Your Child&apos;s <br /> Achievements, Growth <br /> &
+            Memories
           </h1>
           <p className="text-[#4B5563] text-base sm:text-lg mb-6">
-            Peenly is a joyful, all-in-one platform that helps parents and tutors celebrate every milestone in a child’s life.
+            Peenly is a joyful, all-in-one platform that helps parents and
+            tutors celebrate every milestone in a child&apos;s life.
           </p>
 
           {/* Buttons */}
@@ -31,20 +33,21 @@ const HeroSection = () => {
             </button>
           </div>
 
-       
-          <div className="flex items-center justify-center md:justify-start flex-wrap gap-2">
+          {/* <div className="flex items-center justify-center md:justify-start flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map((i) => (
               <Image
                 key={i}
-                src={`/assets/images/avatar${i}.svg`} 
+                src={`/assets/images/avatar${i}.svg`}
                 alt={`Avatar ${i}`}
                 width={40}
                 height={40}
                 className="rounded-full border-2 border-white"
               />
             ))}
-            <span className="text-sm text-[#4B5563] ml-2">Loved by 10K+ families</span>
-          </div>
+            <span className="text-sm text-[#4B5563] ml-2">
+              Loved by 10K+ families
+            </span>
+          </div> */}
         </div>
 
         {/* Right Section */}
@@ -59,7 +62,7 @@ const HeroSection = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;

@@ -8,26 +8,45 @@ import ParentActivityOverview from "@/components/parent-components/ParentActivit
 import { useParentStore } from "@/stores/useParentStores";
 
 interface ParentProfilePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ParentProfilePage({ params }: ParentProfilePageProps) {
-  const { id } = params;
-
   const { profile, isProfileCompleted } = useParentStore();
   const [profileReady, setProfileReady] = useState(false);
+  const [id, setId] = useState<string>("");
 
   useEffect(() => {
-    console.log("Currently viewing profile for Parent ID:", id);
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setId(resolvedParams.id);
+    };
+    resolveParams();
+  }, [params]);
 
-    if (isProfileCompleted()) {
-      setProfileReady(true);
-    } else {
-      setProfileReady(false);
+  useEffect(() => {
+    if (id) {
+      console.log("Currently viewing profile for Parent ID:", id);
+
+      if (isProfileCompleted()) {
+        setProfileReady(true);
+      } else {
+        setProfileReady(false);
+      }
     }
   }, [profile, isProfileCompleted, id]);
+
+  if (!id) {
+    return (
+      <div className="bg-[#F5F5F5] min-h-screen pt-15 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen pt-15">

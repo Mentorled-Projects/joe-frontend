@@ -214,7 +214,7 @@ function Line() {
 export default function AddChildProfilePage() {
   const router = useRouter();
   const { childProfile, setChildProfile } = useChildStore();
-  const { token } = useParentStore();
+  const { token, setProfile } = useParentStore();
 
   const [step, setStep] = useState(1);
   const [creating, setCreating] = useState(false);
@@ -320,13 +320,20 @@ export default function AddChildProfilePage() {
       });
 
       if (res.ok) {
-        setTimeout(() => {
-          setCreating(false);
-          setCreated(true);
+        const data = await res.json();
+        const childId = data.child?._id;
+
+        if (childId) {
+          setProfile({ childId });
+          setChildProfile({ childId });
           setTimeout(() => {
-            router.push("/child/child-profile/[id]");
+            setCreating(false);
+            setCreated(true);
+            setTimeout(() => {
+              router.push(`/child/${childId}`);
+            }, 2000);
           }, 2000);
-        }, 2000);
+        }
       } else {
         const errorData = await res.json();
         setErrors({

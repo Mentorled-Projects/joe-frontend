@@ -25,7 +25,6 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  // Await the params to get the actual object
   const resolvedParams = await params;
   const { id } = resolvedParams;
 

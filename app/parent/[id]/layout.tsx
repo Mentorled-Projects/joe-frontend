@@ -1,21 +1,33 @@
 import type { Metadata } from "next";
 import React from "react";
 
-// 1. ✅ This is your layout — no `params` here
-export default function ParentIdLayout({
-  children,
-}: {
+type LayoutProps = {
+  params: Promise<{ id: string }>;
   children: React.ReactNode;
-}) {
+};
+
+export default async function ParentIdLayout({
+  params,
+  children,
+}: LayoutProps) {
+  // Await the params to get the actual object
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+
+  // You can use the id here for any layout-specific logic if needed
+  console.log("Parent ID:", id);
+
   return <>{children}</>;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const { id } = params;
+  // Await the params to get the actual object
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
 
   let parentName = `Parent ${id}`;
 

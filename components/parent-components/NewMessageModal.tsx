@@ -34,27 +34,27 @@ NewMessageModalProps) {
       {
         id: "tutor1",
         name: "John Doe (Tutor)",
-        avatar: "/assets/images/avatar.png",
+        avatar: "/assets/images/avatar1.svg",
       },
       {
         id: "parentA",
         name: "Alice Smith (Parent)",
-        avatar: "/assets/images/avatar.png",
+        avatar: "/assets/images/avatar2.svg",
       },
       {
         id: "tutor2",
         name: "Jane Foster (Tutor)",
-        avatar: "/assets/images/avatar.png",
+        avatar: "/assets/images/avatar3.svg",
       },
       {
         id: "parentB",
         name: "Bob Johnson (Parent)",
-        avatar: "/assets/images/avatar.png",
+        avatar: "/assets/images/avatar4.svg",
       },
       {
         id: "user123",
         name: "Emily Carter (Parent)",
-        avatar: "/assets/images/avatar.png",
+        avatar: "/assets/images/avatar5.svg",
       },
     ],
     []

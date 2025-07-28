@@ -158,7 +158,7 @@ MessageChatWindowProps) {
       <div className="p-4 border-b border-gray-200 flex items-center">
         <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-gray-200 mr-3">
           <Image
-            src="/assets/images/avatar.png" // Placeholder for other user's avatar
+            src="/assets/images/avatar2.png" // Placeholder for other user's avatar
             alt={otherUserName}
             width={40}
             height={40}

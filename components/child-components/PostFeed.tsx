@@ -94,7 +94,7 @@ export default function PostFeed() {
         }
 
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/posts/get-all-post/${childId}`,
+          `${API_BASE_URL}/api/v1/post/get-all-post/${childId}`,
 
           {
             method: "GET",

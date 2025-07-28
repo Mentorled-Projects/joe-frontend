@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-// Define the ChildData interface here, as it's used in ParentProfile
 interface ChildData {
   _id: string;
   firstName: string;
@@ -9,6 +8,29 @@ interface ChildData {
   age: number;
   Class: string;
   image?: string;
+}
+
+interface ParentData {
+  _id: string;
+  phoneNumber: string;
+  isVerified: boolean;
+  emailVerified: boolean;
+  role: string;
+  child: ChildData[];
+  files: File[];
+  createdAt: string;
+  __v: number;
+  city?: string;
+  dateOfBirth?: string;
+  email?: string;
+  firstName?: string;
+  gender?: string;
+  language?: string;
+  lastName?: string;
+  relationship?: string;
+  religion?: string;
+  emailVerificationExpires?: string | null;
+  emailVerificationOtp?: string | null;
 }
 
 interface ParentProfile {
@@ -20,6 +42,7 @@ interface ParentProfile {
   city?: string;
   relationship?: string;
   religion?: string;
+  data?: ParentData;
   gender?: string;
   language?: string;
   dateOfBirth?: string;
@@ -31,8 +54,8 @@ interface ParentProfile {
   _id?: string; 
   favoriteTutorIds?: string[];
   isAccountVerified?: boolean;
-  isProfileCompleted?: boolean; // Ensure this is present if used
-  children?: ChildData[]; // <--- ADD THIS LINE: To store children directly in the parent's profile
+  isProfileCompleted?: boolean; 
+  children?: ChildData[]; 
 }
 
 interface ParentState {

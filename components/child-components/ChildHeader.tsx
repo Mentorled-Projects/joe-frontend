@@ -150,18 +150,16 @@ export default function ChildHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { childProfile, setChildProfile } = useChildStore();
-  const {
-    setToken: setParentToken,
-    setProfile: setParentProfile,
-    profile,
-  } = useParentStore();
+  const { profile } = useParentStore();
+
+  console.log("Child Header Rendered", profile);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State for mobile menu
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const childProfilePic = childProfile?.image || "/assets/images/kiddp.svg";
 
   // Navigation links for the child profile
   const navLinks = [
-    { href: "/child/home", label: "Home", icon: HomeIcon },
+    { href: `/child/home/${profile?.childId}`, label: "Home", icon: HomeIcon },
     {
       href: "/child/recommendations/movies",
       label: "Movie Recommendations",
@@ -178,10 +176,11 @@ export default function ChildHeader() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("phoneNumber");
-    setParentProfile({});
-    setParentToken("");
     setChildProfile({});
-    router.push("/parent/parent-profile");
+
+    // Use the parent's _id, or "default" as fallback
+    const parentId = profile?.data?._id;
+    router.push(`/parent/${parentId}`);
   };
 
   return (

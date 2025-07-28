@@ -95,6 +95,7 @@ export default function PostFeed() {
 
         const res = await fetch(
           `${API_BASE_URL}/api/v1/posts/get-all-post/${childId}`,
+
           {
             method: "GET",
             headers: {
@@ -119,7 +120,8 @@ export default function PostFeed() {
                 authorName: `${childProfile.firstName || "Child"} ${
                   childProfile.lastName || "User"
                 }`,
-                authorAvatar: childProfile.image || "/assets/images/avatar.png",
+                authorAvatar:
+                  childProfile.image || "/assets/images/avatar1.png",
                 timeAgo: "Just now",
                 content: post.content,
                 image: post.image,

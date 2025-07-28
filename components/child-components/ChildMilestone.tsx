@@ -20,7 +20,7 @@ interface Milestone {
 
 export default function ChildMilestones() {
   const { childProfile, setChildProfile } = useChildStore();
-  const { profile, token } = useParentStore();
+  const { token } = useParentStore();
 
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
@@ -61,7 +61,7 @@ export default function ChildMilestones() {
         }
 
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/milestones/get-milestones/${childProfile.childId}`,
+          `${API_BASE_URL}/api/v1/child/get-milestones/${childProfile.childId}`,
           {
             method: "GET",
             headers: {
@@ -138,16 +138,31 @@ export default function ChildMilestones() {
     setUploading(false);
 
     let uploadedImageUrl: string | undefined;
+    const phoneNumber = localStorage.getItem("phoneNumber");
 
     if (file) {
       setUploading(true);
       try {
         const response = await uploadFile(
           file,
-          profile.phoneNumber || "default"
+          phoneNumber || "default",
+          token
         );
-        uploadedImageUrl =
-          (response as { url: string })?.url || (response as string);
+
+        // Handle the nested response structure
+        if (
+          response &&
+          response.success &&
+          response.file &&
+          response.file.url
+        ) {
+          uploadedImageUrl = response.file.url;
+        } else if (response && response.url) {
+          uploadedImageUrl = response.url;
+        } else if (typeof response === "string") {
+          uploadedImageUrl = response;
+        }
+
         if (!uploadedImageUrl) {
           throw new Error("File upload returned no URL.");
         }
@@ -163,11 +178,13 @@ export default function ChildMilestones() {
     }
 
     try {
+      // Let's try both with and without imageUrl to see what the API expects
       const payload = {
         child: childProfile.childId,
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         date,
+        ...(uploadedImageUrl && { images: [uploadedImageUrl] }),
       };
 
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -186,6 +203,27 @@ export default function ChildMilestones() {
         body: JSON.stringify(payload),
       });
 
+      console.log("Response status:", res.status);
+      console.log(
+        "Response headers:",
+        Object.fromEntries(res.headers.entries())
+      );
+
+      const responseText = await res.text();
+      console.log("Raw response:", responseText);
+
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse response:", parseError);
+        throw new Error(
+          `Server returned non-JSON response: ${responseText.substring(0, 200)}`
+        );
+      }
+
+      console.log("Parsed API Response:", responseData); // Debug log
+
       if (res.ok) {
         const newMilestone: Milestone = {
           title,
@@ -203,8 +241,9 @@ export default function ChildMilestones() {
         setDate("");
         setFile(null);
       } else {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to add milestone.");
+        throw new Error(
+          responseData.message || `Failed to add milestone (HTTP ${res.status})`
+        );
       }
     } catch (err: unknown) {
       console.error("Failed to add milestone:", err);

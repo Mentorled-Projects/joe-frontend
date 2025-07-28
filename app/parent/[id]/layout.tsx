@@ -1,90 +1,109 @@
+// app/parent/[id]/layout.tsx
+
 import type { Metadata } from "next";
 import React from "react";
 
 interface ParentIdLayoutProps {
   children: React.ReactNode;
   params: Promise<{
-    id: string;
+    id: string; // The dynamic 'id' from the URL (e.g., /parent/123 -> id is '123')
   }>;
 }
 
+// Define the props interface SPECIFICALLY for generateMetadata
 interface GenerateMetadataProps {
   params: Promise<{
     id: string;
   }>;
 }
 
+// Define the expected structure of the API response for parent data
 interface ParentData {
   id: string;
   name: string;
   email: string;
+  city?: string;
+  country?: string;
 }
 
+// generateMetadata is a Server Component function that runs on the server
 export async function generateMetadata({
   params,
 }: GenerateMetadataProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  const { id } = resolvedParams;
+  const { id } = await params; // Await params before destructuring
 
-  let parentName = `Parent ${id}`;
+  const defaultTitle = `Parent Profile`;
+  const defaultDescription = `View parent profile and activities.`;
+
+  let parentName = `Parent Profile`;
 
   try {
+    const token = localStorage.getItem("token");
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-    if (!API_BASE_URL) {
-      console.error(
-        "NEXT_PUBLIC_API_URL is not defined in environment variables for generateMetadata."
-      );
-      return { title: `Parent Profile: ${id}` };
-    }
+    if (API_BASE_URL) {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/guardian/get-by-id/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
 
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/guardian/get-by-id/${id}`
-    );
-
-    if (response.ok) {
-      const parentData: ParentData = await response.json();
-      parentName = parentData.name || `Parent ${id}`;
-    } else {
-      console.error(
-        `Failed to fetch parent data for ID ${id} in generateMetadata: ${response.status} ${response.statusText}`
+          cache: "no-store",
+        }
       );
+
+      console.log("response from layout:", response);
+
+      if (response.ok) {
+        const parentData: ParentData = await response.json();
+        parentName = parentData.name
+          ? `${parentData.name}'s Profile`
+          : defaultTitle;
+      } else {
+        // Log for debugging but don't throw
+        console.log(
+          `API returned ${response.status} for parent ${id} in generateMetadata. Using default metadata.`
+        );
+      }
     }
   } catch (error) {
-    console.error(
-      `Error fetching parent data for ID ${id} in generateMetadata:`,
-      error
+    // Log for debugging but don't throw - this is expected for authenticated endpoints
+    console.log(
+      `Could not fetch parent data for metadata (expected for authenticated endpoints):`,
+      error instanceof Error ? error.message : "Unknown error"
     );
   }
 
   return {
-    title: `${parentName}'s Profile`,
-    description: `Detailed profile and activities for ${parentName} (ID: ${id}).`,
+    title: parentName,
+    description: defaultDescription,
     openGraph: {
-      title: `${parentName}'s Profile`,
-      description: `View the comprehensive profile of ${parentName} (ID: ${id}).`,
+      title: parentName,
+      description: defaultDescription,
       url: `/parent/${id}`,
       siteName: "Your App Name",
       images: [
-        "https://placehold.co/1200x630/cccccc/333333?text=Parent+Profile",
+        {
+          url: "https://placehold.co/1200x630/cccccc/333333?text=Parent+Profile",
+          width: 1200,
+          height: 630,
+          alt: "Parent Profile",
+        },
       ],
       type: "profile",
     },
-    keywords: [
-      `${parentName}`,
-      `parent ${id}`,
-      "tutor app",
-      "education",
-      "profile",
-    ],
+    keywords: ["parent profile", "tutor app", "education", "profile"],
   };
 }
 
+// This layout component will wrap your app/parent/[id]/page.tsx
 export default async function ParentIdLayout({
   children,
   params,
 }: ParentIdLayoutProps) {
-  const resolvedParams = await params;
-  const { id } = resolvedParams;
+  // Await params before accessing its properties
+  const { id } = await params;
 
   console.log("ParentIdLayout rendered for ID:", id);
 

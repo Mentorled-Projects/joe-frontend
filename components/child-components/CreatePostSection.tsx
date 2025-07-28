@@ -15,7 +15,7 @@ export default function CreatePostSection() {
   const { addPost } = usePostStore();
   const { profile: parentProfile, token: parentToken } = useParentStore();
 
-  const childAvatar = childProfile?.image || "/assets/images/avatar.png";
+  const childAvatar = childProfile?.image || "/assets/images/kiddp.svg";
 
   const [showPostModal, setShowPostModal] = useState(false);
   const [postContent, setPostContent] = useState("");

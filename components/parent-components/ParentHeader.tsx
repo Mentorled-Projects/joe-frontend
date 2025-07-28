@@ -4,27 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useParentStore } from "@/stores/useParentStores";
-import { useState, useEffect, useCallback } from "react"; // Import useCallback
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { FiMenu } from "react-icons/fi"; // Import FiMenu for hamburger
-import { IoMdClose } from "react-icons/io"; // Import IoMdClose for close button
-
-// Navigation links data
-const nav = [
-  { href: "/parent/parent-profile", label: "Profile", icon: UserIcon },
-  { href: "/parent/messages", label: "Messages", icon: MessageIcon },
-  {
-    href: "/parent/recommendations/movies",
-    label: "Movie Recommendations",
-    icon: FilmIcon,
-  },
-  { href: "/parent/HireTutor", label: "Hire a Tutor", icon: BookIcon },
-  {
-    href: "/parent/recommendations/books",
-    label: "Book Recommendations",
-    icon: BookOpenIcon,
-  },
-];
+import { FiMenu } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 
 interface Notification {
   _id: string;
@@ -36,11 +19,38 @@ interface Notification {
 export default function ParentHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, setProfile, token, setToken } = useParentStore(); // Get token from store
-  const profilePic = profile?.image || "/assets/images/avatar4.svg";
+  const { profile, setProfile, token, setToken } = useParentStore();
+  const profilePic = profile?.image || "/assets/images/avatar.png";
+
+  // Get the parent ID from the profile data
+  const parentId = profile?.data?._id || profile?._id;
+
+  // Create navigation links with dynamic parent ID
+  const nav = useMemo(
+    () => [
+      {
+        href: parentId ? `/parent/${parentId}` : `/parent/profile`,
+        label: "Profile",
+        icon: UserIcon,
+      },
+      { href: "/parent/messages", label: "Messages", icon: MessageIcon },
+      {
+        href: "/parent/recommendations/movies",
+        label: "Movie Recommendations",
+        icon: FilmIcon,
+      },
+      { href: "/parent/HireTutor", label: "Hire a Tutor", icon: BookIcon },
+      {
+        href: "/parent/recommendations/books",
+        label: "Book Recommendations",
+        icon: BookOpenIcon,
+      },
+    ],
+    [parentId]
+  );
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotificationsDropdown, setShowNotificationsDropdown] =
     useState(false);
@@ -52,7 +62,6 @@ export default function ParentHeader() {
   // Function to fetch notifications from the backend
   const fetchNotifications = useCallback(async () => {
     if (!token) {
-      // console.warn("No token available to fetch notifications."); //
       setLoadingNotifications(false);
       return [];
     }
@@ -76,10 +85,8 @@ export default function ParentHeader() {
 
       if (res.ok) {
         const data = await res.json();
-        // Ensure data.notifications is an array before mapping
         if (data && Array.isArray(data.notifications)) {
           const fetched = data.notifications.map((notif: Notification) => ({
-            // Changed 'any' to 'Notification'
             _id: notif._id,
             message: notif.message,
             timestamp: notif.timestamp,
@@ -146,7 +153,6 @@ export default function ParentHeader() {
         );
       }
     } catch (err: unknown) {
-      // Changed 'any' to 'unknown'
       console.error("Error marking notification as read:", err);
       let message = "Please try again.";
       if (err instanceof Error) {
@@ -159,14 +165,12 @@ export default function ParentHeader() {
 
   // Fetch notifications on component mount and periodically
   useEffect(() => {
-    fetchNotifications(); // Initial fetch
-
+    fetchNotifications();
     const interval = setInterval(() => {
-      fetchNotifications(); // Fetch every 30 seconds
+      fetchNotifications();
     }, 30000);
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [token, fetchNotifications]); // Add fetchNotifications to dependency array
+    return () => clearInterval(interval);
+  }, [token, fetchNotifications]);
 
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
 
@@ -176,8 +180,6 @@ export default function ParentHeader() {
       setNotifications((prev) =>
         prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
       );
-      // Optionally, navigate to a specific page based on notification type
-      // router.push('/parent/messages');
     }
   };
 
@@ -187,7 +189,17 @@ export default function ParentHeader() {
     setProfile({});
     setToken("");
     router.push("/parent/signin");
-    setIsMobileMenuOpen(false); // Close mobile menu on logout
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleProfileNavigation = () => {
+    if (parentId) {
+      router.push(`/parent/${parentId}`);
+    } else {
+      // Fallback if parentId is not available
+      router.push("/parent/profile");
+    }
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -307,7 +319,7 @@ export default function ParentHeader() {
                   width={32}
                   height={32}
                   className="rounded-full object-cover"
-                  unoptimized // Add unoptimized for external image or if not configured in next.config.js
+                  unoptimized
                 />
               </div>
               <svg
@@ -373,11 +385,7 @@ export default function ParentHeader() {
               {profile?.firstName || "Parent"}
             </p>
             <button
-              onClick={() => {
-                // Optionally navigate to profile page on click
-                router.push("/parent/parent-profile");
-                setIsMobileMenuOpen(false); // Close mobile menu on navigation
-              }}
+              onClick={handleProfileNavigation}
               className="text-sm text-[#2F5FFF] hover:underline mt-1"
             >
               View Profile
@@ -392,7 +400,7 @@ export default function ParentHeader() {
                 <Link
                   key={href}
                   href={href}
-                  onClick={() => setIsMobileMenuOpen(false)} // Close menu on link click
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center space-x-3 w-full px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
                 >
                   <Icon
@@ -444,6 +452,7 @@ function BookIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
 function BookOpenIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" {...props}>

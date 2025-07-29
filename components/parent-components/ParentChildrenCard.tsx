@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { IoMdAdd } from "react-icons/io";
-import { useParentStore } from "@/stores/useParentStores"; // Now actively used
+import { useParentStore } from "@/stores/useParentStores";
 import { useChildStore } from "@/stores/useChildStores";
 
 // Define the props interface for ParentChildrenCard
@@ -26,29 +26,23 @@ export default function ParentChildrenCard({
   parentId,
 }: ParentChildrenCardProps) {
   const router = useRouter();
-  // Now actively using profile and _hasHydrated from useParentStore
+
   const { profile, _hasHydrated } = useParentStore();
   const { setChildProfile, resetChildProfile } = useChildStore();
 
   const [children, setChildren] = useState<ChildData[]>([]);
-  // No longer need loading/error states for API fetch, but keep _hasHydrated check
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("ParentChildrenCard mounted for Parent ID:", parentId);
     console.log("Profile from store:", profile);
     console.log("Has hydrated:", _hasHydrated);
 
-    // Only set children if the store has hydrated and profile.children exists
     if (_hasHydrated && profile?.children) {
       setChildren(profile.children);
     } else if (_hasHydrated && !profile?.children) {
-      // If hydrated but no children in profile, set to empty array
       setChildren([]);
     }
-    // If not hydrated, the initial render will show "Loading user session..."
-  }, [parentId, profile, _hasHydrated]); // Depend on profile and _hasHydrated
+  }, [parentId, profile, _hasHydrated]);
 
   const handleAddAnotherChild = () => {
     resetChildProfile();
@@ -65,10 +59,9 @@ export default function ParentChildrenCard({
       _id: child._id,
     });
 
-    router.push(`/child/${child._id}/home`);
+    router.push(`/child/home/${child._id}`);
   };
 
-  // Re-enabled conditional rendering based on _hasHydrated for initial load
   if (!_hasHydrated) {
     return <p className="text-center text-gray-500">Loading user session...</p>;
   }

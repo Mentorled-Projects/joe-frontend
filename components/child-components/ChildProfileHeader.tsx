@@ -18,6 +18,8 @@ export default function ChildProfileHeader() {
   const [uploadTarget, setUploadTarget] = useState<"avatar" | "banner">(
     "avatar"
   );
+  console.log("Avatar:", avatar, "Banner:", banner);
+
   const [file, setFile] = useState<File | null>(null);
 
   const { childProfile } = useChildStore();
@@ -56,6 +58,7 @@ export default function ChildProfileHeader() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const dataUrl = reader.result as string;
+      console.log("Image data URL:", dataUrl);
       if (uploadTarget === "avatar") {
         setAvatar(dataUrl);
         localStorage.setItem(AVATAR_KEY, dataUrl);

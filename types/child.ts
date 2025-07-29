@@ -7,7 +7,8 @@ export interface ChildPost {
   timeAgo: string;
   edited?: boolean; 
   content: string;
-  image?: string | null; 
+  image?: string; 
+  video?: string;
   tags?: string[]; 
 }
 

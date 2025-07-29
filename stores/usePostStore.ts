@@ -7,7 +7,7 @@ const initialMockPosts: ChildPost[] = [
   {
     id: "1",
     authorName: "Alex Thompson",
-    authorAvatar: "/assets/images/kiddp.svg", 
+    authorAvatar: localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg", 
     timeAgo: "4h",
     edited: true,
     content: "Just finished my volcano science project! It actually erupted! 🌋 #ScienceExperiments #Volcano",
@@ -17,7 +17,7 @@ const initialMockPosts: ChildPost[] = [
   {
     id: "2",
     authorName: "Emma Thompson",
-    authorAvatar: "/assets/images/kiddp.svg",
+    authorAvatar: localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg",
     timeAgo: "1h",
     content: "I finished reading 'The Magical Treehouse' series! It was so exciting. What should I read next? #books #reading 📚",
     image: "/assets/images/kidsRabbit.svg", 

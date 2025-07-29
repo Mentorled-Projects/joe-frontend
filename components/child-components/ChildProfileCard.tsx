@@ -6,8 +6,10 @@ import { useChildStore } from "@/stores/useChildStores";
 export default function ChildProfileCard() {
   const { childProfile } = useChildStore();
 
-  const childAvatar = childProfile?.image || "/assets/images/kiddp-profile.svg";
-  const childBanner = childProfile?.banner || "/assets/images/kid-banner.svg";
+  const childAvatar =
+    localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg";
+  const childBanner =
+    localStorage.getItem("childBanner") || "/assets/images/child-banner.jpg";
 
   const childName = `${childProfile.firstName || "Child"} ${
     childProfile.lastName || "Name"

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { RecommendationItem } from "@/types/child";
+import Link from "next/link";
 
 const mockMovies: RecommendationItem[] = [
   {
@@ -27,7 +28,7 @@ export default function MovieRecommendationCard() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-md font-semibold text-gray-800">
           Movie Recommendation
         </h2>
         <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
@@ -56,6 +57,15 @@ export default function MovieRecommendationCard() {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-4 text-center">
+        <Link
+          href="/child/recommendations/movies"
+          className="text-sm text-[#2F5FFF] hover:underline font-medium"
+        >
+          See All
+        </Link>
       </div>
     </div>
   );

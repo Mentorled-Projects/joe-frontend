@@ -15,7 +15,8 @@ export default function CreatePostSection() {
   const { addPost } = usePostStore();
   const { profile: parentProfile, token: parentToken } = useParentStore();
 
-  const childAvatar = childProfile?.image || "/assets/images/kiddp.svg";
+  const childAvatar =
+    localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg";
 
   const [showPostModal, setShowPostModal] = useState(false);
   const [postContent, setPostContent] = useState("");
@@ -118,7 +119,8 @@ export default function CreatePostSection() {
       const payload = {
         child: childId,
         content: postContent,
-        image: uploadedMediaUrl,
+        image: postImageFile ? uploadedMediaUrl : undefined,
+        video: postVideoFile ? uploadedMediaUrl : undefined,
       };
 
       const res = await fetch(`${API_BASE_URL}/api/v1/post/add-post`, {

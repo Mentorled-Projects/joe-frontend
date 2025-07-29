@@ -155,7 +155,8 @@ export default function ChildHeader() {
   console.log("Child Header Rendered", profile);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const childProfilePic = childProfile?.image || "/assets/images/kiddp.svg";
+  const childProfilePic =
+    localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg";
 
   // Navigation links for the child profile
   const navLinks = [
@@ -294,7 +295,6 @@ export default function ChildHeader() {
               <CloseIcon />
             </button>
 
-            {/* Child Profile Avatar at the top of the mobile menu */}
             <div className="flex items-center space-x-3 mb-8">
               <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#2F5FFF]">
                 <Image

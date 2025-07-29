@@ -2,14 +2,23 @@
 
 import Image from "next/image";
 import { useChildStore } from "@/stores/useChildStores";
+import { useState, useEffect } from "react";
 
 export default function ChildProfileCard() {
   const { childProfile } = useChildStore();
 
-  const childAvatar =
-    localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg";
-  const childBanner =
-    localStorage.getItem("childBanner") || "/assets/images/child-banner.jpg";
+  const [childAvatar, setChildAvatar] = useState("/assets/images/kiddp.svg");
+  const [childBanner, setChildBanner] = useState(
+    "/assets/images/child-banner.jpg"
+  );
+
+  useEffect(() => {
+    const storedAvatar = localStorage.getItem("childAvatar");
+    const storedBanner = localStorage.getItem("childBanner");
+
+    if (storedAvatar) setChildAvatar(storedAvatar);
+    if (storedBanner) setChildBanner(storedBanner);
+  }, []);
 
   const childName = `${childProfile.firstName || "Child"} ${
     childProfile.lastName || "Name"

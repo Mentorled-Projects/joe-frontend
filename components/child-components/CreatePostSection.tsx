@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiVideo, FiImage, FiEdit3 } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { useChildStore } from "@/stores/useChildStores";
@@ -15,8 +15,12 @@ export default function CreatePostSection() {
   const { addPost } = usePostStore();
   const { profile: parentProfile, token: parentToken } = useParentStore();
 
-  const childAvatar =
-    localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg";
+  const [childAvatar, setChildAvatar] = useState("/assets/images/kiddp.svg");
+
+  useEffect(() => {
+    const storedAvatar = localStorage.getItem("childAvatar");
+    if (storedAvatar) setChildAvatar(storedAvatar);
+  }, []);
 
   const [showPostModal, setShowPostModal] = useState(false);
   const [postContent, setPostContent] = useState("");
@@ -74,7 +78,7 @@ export default function CreatePostSection() {
     }
 
     const phoneNumber = parentProfile?.phoneNumber;
-    const childId = childProfile?.childId;
+    const childId = childProfile?.childId || childProfile?._id;
     const token = parentToken;
 
     if (!childId) {

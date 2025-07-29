@@ -15,11 +15,14 @@ interface ParentProfileHeaderProps {
   parentId: string;
 }
 
-// Define the expected structure of the parent data from  API
+// Define the expected structure of the parent data from API
 interface FetchedParentData {
-  id: string;
-  name: string;
-  email: string;
+  _id?: string;
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  email?: string;
   city?: string;
   country?: string;
 }
@@ -27,6 +30,7 @@ interface FetchedParentData {
 export default function ParentProfileHeader({
   parentId,
 }: ParentProfileHeaderProps) {
+  const token = useParentStore((state) => state.token);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
 
@@ -44,22 +48,20 @@ export default function ParentProfileHeader({
 
   const { profile, isProfileCompleted } = useParentStore();
 
-  console.log("PArentId in parentProfileHeader", parentId);
-
-  // Effect to fetch parent details from  API
+  // Effect to fetch parent details from API
   useEffect(() => {
     const fetchParentDetails = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const token = localStorage.getItem("token");
+        console.log("token", token);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/guardian/get-by-id/${parentId}`,
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: token ? `Bearer ${token}` : "", // Add token if available
+              Authorization: token ? `Bearer ${token}` : "",
             },
           }
         );
@@ -84,17 +86,64 @@ export default function ParentProfileHeader({
     if (parentId) {
       fetchParentDetails();
     }
-  }, [parentId]);
+  }, [parentId, token, setIsLoading, setError, setFetchedParentDetails]);
 
-  const name = fetchedParentDetails?.name || profile?.firstName || "Parent";
+  // Improved name logic - handle different possible field names
+  const getName = () => {
+    // First try fetched data
+    if (fetchedParentDetails) {
+      if (fetchedParentDetails.name) {
+        return fetchedParentDetails.name;
+      }
+      if (fetchedParentDetails.firstName || fetchedParentDetails.lastName) {
+        return `${fetchedParentDetails.firstName || ""}`.trim();
+      }
+    }
+
+    // Then try profile data
+    if (profile?.data) {
+      if (profile.data.firstName || profile.data.lastName) {
+        return `${profile.data.firstName || ""}`.trim();
+      }
+    }
+
+    // Fallback to profile.firstName if it exists
+    if (profile?.firstName) {
+      return profile.firstName;
+    }
+
+    return "Parent";
+  };
+
+  const name = getName();
   const accountType = "Parent Account";
-  const location =
-    fetchedParentDetails?.city && fetchedParentDetails?.country
-      ? `${fetchedParentDetails.city}, ${fetchedParentDetails.country}`
-      : profile?.city && profile?.country
-      ? `${profile.city}, ${profile.country}`
-      : "Location not set";
-  const verified = false;
+
+  // Improved location logic
+  const getLocation = () => {
+    // First try fetched data
+    if (fetchedParentDetails?.city && fetchedParentDetails?.country) {
+      return `${fetchedParentDetails.city}, ${fetchedParentDetails.country}`;
+    }
+
+    // Then try profile data
+    if (profile?.data?.city) {
+      return profile.data.city;
+    }
+
+    // Then try profile city/country
+    if (profile?.city && profile?.country) {
+      return `${profile.city}, ${profile.country}`;
+    }
+
+    if (profile?.city) {
+      return profile.city;
+    }
+
+    return "Location not set";
+  };
+
+  const location = getLocation();
+  const verified = profile?.isAccountVerified || false;
 
   useEffect(() => {
     setAvatar(localStorage.getItem(AVATAR_KEY));
@@ -134,15 +183,25 @@ export default function ParentProfileHeader({
   if (isLoading) {
     return (
       <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
-        Loading parent profile...
+        <div className="animate-pulse">
+          <div className="h-48 bg-gray-200 rounded-t-lg mb-4"></div>
+          <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+        </div>
       </section>
     );
   }
 
   if (error) {
     return (
-      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center text-red-600">
-        Error: {error}
+      <section className="max-w-5xl mx-auto bg-white rounded-lg shadow mb-8 p-8 text-center">
+        <div className="text-red-600">
+          <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
+          <p>{error}</p>
+          <p className="text-sm text-gray-600 mt-2">
+            Using local data instead...
+          </p>
+        </div>
       </section>
     );
   }
@@ -232,7 +291,7 @@ export default function ParentProfileHeader({
               </span>
               <span
                 className={`flex items-center gap-1 ${
-                  verified ? "text-black" : "text-red-600"
+                  verified ? "text-green-600" : "text-red-600"
                 }`}
               >
                 <svg
@@ -242,6 +301,14 @@ export default function ParentProfileHeader({
                   viewBox="0 0 24 24"
                 >
                   <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                  {verified && (
+                    <path
+                      d="M9 12l2 2 4-4"
+                      stroke="#22c55e"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  )}
                 </svg>
                 {verified ? "Verified" : "Unverified"}
               </span>

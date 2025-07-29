@@ -8,10 +8,12 @@ import { useParentStore } from "@/stores/useParentStores"; // Import useParentSt
 
 export default function ChildAbout() {
   const { childProfile, setChildProfile } = useChildStore();
-  const { profile, token } = useParentStore(); // Get parent profile and token
+  const { token } = useParentStore(); // Get parent profile and token
   const [showModal, setShowModal] = useState(false);
   const [about, setAbout] = useState("");
   const [saving, setSaving] = useState(false); // State for saving/loading status
+
+  const childId = childProfile?.childId || childProfile?._id;
 
   useEffect(() => {
     // Initialize 'about' state with the value from childProfile when component mounts or childProfile changes
@@ -28,7 +30,7 @@ export default function ChildAbout() {
       return;
     }
 
-    if (!profile.childId) {
+    if (!childId) {
       alert("Child ID not found. Cannot update about section.");
       return;
     }
@@ -46,17 +48,14 @@ export default function ChildAbout() {
         );
       }
 
-      const res = await fetch(
-        `${API_BASE_URL}/api/v1/child/${profile.childId}/about`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ about }),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/v1/child/${childId}/about`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ about }),
+      });
 
       if (res.ok) {
         setChildProfile({ about });

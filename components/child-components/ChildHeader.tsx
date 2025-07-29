@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useParentStore } from "@/stores/useParentStores";
 import { useChildStore } from "@/stores/useChildStores";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // SVG Icons
 function HomeIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -151,16 +151,25 @@ export default function ChildHeader() {
   const router = useRouter();
   const { childProfile, setChildProfile } = useChildStore();
   const { profile } = useParentStore();
+  const childId = childProfile?.childId || childProfile?._id;
 
   console.log("Child Header Rendered", profile);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const childProfilePic =
-    localStorage.getItem("childAvatar") || "/assets/images/kiddp.svg";
+  const [childProfilePic, setChildProfilePic] = useState(
+    "/assets/images/kiddp.svg"
+  );
+
+  useEffect(() => {
+    const storedPic = localStorage.getItem("childAvatar");
+    if (storedPic) {
+      setChildProfilePic(storedPic);
+    }
+  }, []);
 
   // Navigation links for the child profile
   const navLinks = [
-    { href: `/child/home/${profile?.childId}`, label: "Home", icon: HomeIcon },
+    { href: `/child/home/${childId}`, label: "Home", icon: HomeIcon },
     {
       href: "/child/recommendations/movies",
       label: "Movie Recommendations",
@@ -171,7 +180,7 @@ export default function ChildHeader() {
       label: "Book Recommendations",
       icon: BookOpenIcon,
     },
-    { href: `/child/${profile?.childId}`, label: "Profile", icon: UserIcon },
+    { href: `/child/${childId}`, label: "Profile", icon: UserIcon },
   ];
 
   const handleLogout = () => {

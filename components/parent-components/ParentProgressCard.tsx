@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 interface Props {
   progressStep: number;
 }
@@ -24,16 +26,13 @@ export default function ParentProgressCard({ progressStep }: Props) {
             const isActive = index === progressStep;
 
             return (
-              <>
-                <div
-                  key={label}
-                  className="flex flex-col items-center flex-1 z-10"
-                >
+              <React.Fragment key={label}>
+                <div className="flex flex-col items-center flex-1 z-10">
                   <Circle active={isActive} done={isDone} />
                   <p className="text-xs mt-2 text-center">{label}</p>
                 </div>
                 {index < steps.length - 1 && <Line done={isDone} />}
-              </>
+              </React.Fragment>
             );
           })}
         </div>

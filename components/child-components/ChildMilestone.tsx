@@ -37,10 +37,11 @@ export default function ChildMilestones() {
 
   const currentMilestones: Milestone[] = (childProfile.milestones ||
     []) as Milestone[];
+  const childId = childProfile?.childId || childProfile?._id;
 
   useEffect(() => {
     const fetchMilestones = async () => {
-      if (!childProfile.childId || !token) {
+      if (childId) {
         setLoadingMilestones(false);
 
         console.warn(
@@ -61,7 +62,7 @@ export default function ChildMilestones() {
         }
 
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/child/get-milestones/${childProfile.childId}`,
+          `${API_BASE_URL}/api/v1/child/get-milestones/${childId}`,
           {
             method: "GET",
             headers: {
@@ -111,7 +112,7 @@ export default function ChildMilestones() {
     };
 
     fetchMilestones();
-  }, [childProfile.childId, token, setChildProfile]);
+  }, [childId, token, setChildProfile]);
 
   const deleteMilestone = async (idx: number) => {
     const filtered = currentMilestones.filter((_, i) => i !== idx);
@@ -125,7 +126,7 @@ export default function ChildMilestones() {
       return;
     }
 
-    if (!childProfile.childId) {
+    if (!childId) {
       alert("Child ID not found. Cannot add milestone.");
       return;
     }
@@ -180,7 +181,7 @@ export default function ChildMilestones() {
     try {
       // Let's try both with and without imageUrl to see what the API expects
       const payload = {
-        child: childProfile.childId,
+        child: childId,
         title: title.trim(),
         description: description.trim(),
         date,

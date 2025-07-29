@@ -37,8 +37,8 @@ export default function ParentChildrenCard({
     console.log("Profile from store:", profile);
     console.log("Has hydrated:", _hasHydrated);
 
-    if (_hasHydrated && profile?.children) {
-      setChildren(profile.children);
+    if (_hasHydrated && profile?.data?.child) {
+      setChildren(profile.data?.child);
     } else if (_hasHydrated && !profile?.children) {
       setChildren([]);
     }

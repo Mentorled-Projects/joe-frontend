@@ -72,7 +72,8 @@ export default function PostFeed() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const childId = parentProfile?.childId;
+      const childId =
+        childProfile?.childId || childProfile?._id || parentProfile?.childId;
       const token = parentToken;
 
       if (!childId || !token) {
@@ -106,6 +107,7 @@ export default function PostFeed() {
             },
           }
         );
+        console.log("Response from fetch posts:", res);
 
         if (res.ok) {
           const data = await res.json();
@@ -159,9 +161,11 @@ export default function PostFeed() {
     parentProfile?.childId,
     parentToken,
     setPosts,
-    childProfile.firstName,
-    childProfile.lastName,
-    childProfile.image,
+    childProfile?.childId,
+    childProfile?._id,
+    childProfile,
+    setLoadingPosts,
+    setErrorLoadingPosts,
   ]);
 
   const displayedPosts = posts.length > 0 ? posts : initialMockPosts;
@@ -199,7 +203,7 @@ export default function PostFeed() {
         );
       }
 
-      const res = await fetch(`${API_BASE_URL}/api/v1/posts/delete/${postId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/post/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

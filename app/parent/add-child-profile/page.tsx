@@ -77,8 +77,8 @@ function SelectGroup({
 // Custom MultiSelectGroup component for dropdown with checkboxes
 function MultiSelectGroup({
   label,
-  value, // This will be an array of selected strings
-  setValue, // This will update the array of selected strings
+  value,
+  setValue,
   options,
   error,
   placeholder = "Select",
@@ -140,7 +140,7 @@ function MultiSelectGroup({
               <input
                 type="checkbox"
                 checked={value.includes(option)}
-                readOnly // Make it read-only as clicks are handled by the div
+                readOnly
                 className="mr-2 h-4 w-4 text-[#2F5FFF] rounded focus:ring-[#2F5FFF]"
               />
               {option}
@@ -228,9 +228,9 @@ export default function AddChildProfilePage() {
     dob: childProfile.dateOfBirth || "",
     schoolName: childProfile.schoolName || "",
     schoolClass: childProfile.Class || "",
-    favoriteSubjects: childProfile.favoriteSubjects || [], // Initialize as array
-    interests: childProfile.interests || [], // Initialize as array
-    sports: childProfile.sports || [], // Initialize as array
+    favoriteSubjects: childProfile.favoriteSubjects || [],
+    interests: childProfile.interests || [],
+    sports: childProfile.sports || [],
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -250,7 +250,6 @@ export default function AddChildProfilePage() {
     } else if (currentStep === 2) {
       if (!form.schoolName) newErrors.schoolName = "School name is required";
       if (!form.schoolClass) newErrors.schoolClass = "Class is required";
-      // Favorite subjects are optional, no validation needed here.
     } else if (currentStep === 3) {
       if (form.interests.length === 0)
         newErrors.interests = "At least one interest is required";

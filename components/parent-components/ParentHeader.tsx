@@ -20,7 +20,8 @@ export default function ParentHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { profile, setProfile, token, setToken } = useParentStore();
-  const profilePic = profile?.image || "/assets/images/avatar5.svg";
+  const profilePic =
+    localStorage.getItem("parentAvatar") || "/assets/images/avatar5.svg";
 
   // Get the parent ID from the profile data
   const parentId = profile?.data?._id || profile?._id;

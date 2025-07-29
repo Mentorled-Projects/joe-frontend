@@ -20,8 +20,14 @@ export default function ParentHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { profile, setProfile, token, setToken } = useParentStore();
-  const profilePic =
-    localStorage.getItem("parentAvatar") || "/assets/images/avatar5.svg";
+  const [profilePic, setProfilePic] = useState("/assets/images/avatar5.svg");
+
+  useEffect(() => {
+    const storedPic = localStorage.getItem("parentAvatar");
+    if (storedPic) {
+      setProfilePic(storedPic);
+    }
+  }, []);
 
   // Get the parent ID from the profile data
   const parentId = profile?.data?._id || profile?._id;

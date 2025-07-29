@@ -10,11 +10,6 @@ import { useParentStore } from "@/stores/useParentStores";
 const AVATAR_KEY = "parentAvatar";
 const BANNER_KEY = "parentBanner";
 
-// Define the props interface for ParentProfileHeader
-interface ParentProfileHeaderProps {
-  parentId: string;
-}
-
 // Define the expected structure of the parent data from API
 interface FetchedParentData {
   _id?: string;
@@ -27,10 +22,9 @@ interface FetchedParentData {
   country?: string;
 }
 
-export default function ParentProfileHeader({
-  parentId,
-}: ParentProfileHeaderProps) {
+export default function ParentProfileHeader() {
   const token = useParentStore((state) => state.token);
+  console.log(token);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
 
@@ -47,6 +41,8 @@ export default function ParentProfileHeader({
   const [error, setError] = useState<string | null>(null);
 
   const { profile, isProfileCompleted } = useParentStore();
+
+  const parentId = profile?.data?._id;
 
   // Effect to fetch parent details from API
   useEffect(() => {
@@ -86,7 +82,7 @@ export default function ParentProfileHeader({
     if (parentId) {
       fetchParentDetails();
     }
-  }, [parentId, token, setIsLoading, setError, setFetchedParentDetails]);
+  }, [parentId, token]);
 
   // Improved name logic - handle different possible field names
   const getName = () => {

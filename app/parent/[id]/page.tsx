@@ -46,7 +46,7 @@ export default function ParentProfilePage() {
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen pt-15">
-      <ParentProfileHeader parentId={parentId} />
+      <ParentProfileHeader />
       <div className="container mx-auto px-4 py-6">
         {profileReady ? (
           <>
